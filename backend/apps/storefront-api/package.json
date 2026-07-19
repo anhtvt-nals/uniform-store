@@ -1,0 +1,10 @@
+{
+  "name": "storefront-api",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@app/common": "*",
+    "@app/database": "*",
+    "@app/shared": "*"
+  }
+}

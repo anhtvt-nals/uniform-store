@@ -1,0 +1,116 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: uniform-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: uniform_store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: uniform-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - miniodata:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: uniform-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb local/uniform-store --ignore-existing &&
+      mc anonymous set public local/uniform-store &&
+      echo 'Bucket uniform-store created and set to public'
+      "
+
+  storefront-api:
+    build:
+      context: ./backend
+      dockerfile: apps/storefront-api/Dockerfile
+    container_name: uniform-storefront-api
+    ports:
+      - "3000:3000"
+    env_file: ./backend/.env
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESS_KEY: minioadmin
+      STORAGE_SECRET_KEY: minioadmin
+      STORAGE_BUCKET: uniform-store
+      STORAGE_PUBLIC_URL: http://localhost:9000/uniform-store
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  admin-api:
+    build:
+      context: ./backend
+      dockerfile: apps/admin-api/Dockerfile
+    container_name: uniform-admin-api
+    ports:
+      - "3002:3002"
+    env_file: ./backend/.env
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      PORT: 3002
+      CORS_ORIGINS: http://localhost:5002
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESS_KEY: minioadmin
+      STORAGE_SECRET_KEY: minioadmin
+      STORAGE_BUCKET: uniform-store
+      STORAGE_PUBLIC_URL: http://localhost:9000/uniform-store
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  admin-frontend:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: uniform-admin-frontend
+    ports:
+      - "5002:5002"
+    environment:
+      NEXT_PUBLIC_ADMIN_API_URL: http://localhost:3002/api/v1/admin
+    depends_on:
+      - admin-api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  miniodata:

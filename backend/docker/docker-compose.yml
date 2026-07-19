@@ -1,0 +1,129 @@
+version: "3.8"
+
+x-env: &env
+  NODE_ENV: production
+  API_PREFIX: api/v1
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: uniform_store
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_SYNCHRONIZE: "false"
+  DB_LOGGING: "false"
+  SUPABASE_URL: http://localhost:54321
+  SUPABASE_ANON_KEY: your-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: your-service-role-key
+  ADMIN_JWT_SECRET: change-me-in-production
+  ADMIN_JWT_EXPIRES_IN: 8h
+  STORAGE_ENDPOINT: http://minio:9000
+  STORAGE_REGION: auto
+  STORAGE_ACCESS_KEY: minioadmin
+  STORAGE_SECRET_KEY: minioadmin
+  STORAGE_BUCKET: uniform-store
+  STORAGE_PUBLIC_URL: http://localhost:9000/uniform-store
+  CORS_ORIGINS: http://localhost:3001
+  THROTTLE_TTL: 1000
+  THROTTLE_LIMIT: 100
+  AUTH_THROTTLE_LIMIT: 10
+  CACHE_TTL_PRODUCT: 300
+  CACHE_TTL_SEARCH: 60
+  CACHE_TTL_COLLECTION: 600
+  CACHE_TTL_ARTICLE: 900
+  LOG_LEVEL: debug
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: uniform_store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    entrypoint: >
+      sh -c '
+        minio server /data --console-address ":9001" &
+        sleep 3 &&
+        mc alias set local http://localhost:9000 minioadmin minioadmin &&
+        mc mb local/uniform-store --ignore-existing &&
+        mc policy set public local/uniform-store &&
+        wait
+      '
+
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+
+  storefront-api:
+    build:
+      context: ..
+      dockerfile: apps/storefront-api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *env
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  admin-api:
+    build:
+      context: ..
+      dockerfile: apps/admin-api/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      <<: *env
+      PORT: 3002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - storefront-api
+      - admin-api
+
+volumes:
+  postgres_data:
+  minio_data:

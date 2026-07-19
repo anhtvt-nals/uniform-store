@@ -1,0 +1,28 @@
+{
+  "name": "uniform-store",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "storefront",
+    "admin"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,storefront,admin -c blue,magenta,green \"npm run dev -w backend\" \"npm run dev -w storefront\" \"npm run dev -w admin\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:storefront": "npm run dev -w storefront",
+    "dev:admin": "npm run dev -w admin",
+    "build": "npm run build -w backend && npm run build -w storefront && npm run build -w admin",
+    "build:backend": "npm run build -w backend",
+    "build:storefront": "npm run build -w storefront",
+    "build:admin": "npm run build -w admin",
+    "start": "concurrently -n backend,storefront,admin -c blue,magenta,green \"npm run start -w backend\" \"npm run start -w storefront\" \"npm run start -w admin\"",
+    "start:backend": "npm run start -w backend",
+    "start:storefront": "npm run start -w storefront",
+    "start:admin": "npm run start -w admin"
+  },
+  "devDependencies": {
+    "@types/multer": "^2.2.0",
+    "concurrently": "^9.2.3"
+  }
+}

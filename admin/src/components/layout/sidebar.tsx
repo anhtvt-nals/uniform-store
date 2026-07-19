@@ -1,0 +1,95 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  Tags,
+  Building2,
+  FileText,
+  Percent,
+  Truck,
+  CreditCard,
+  Image,
+  Activity,
+  Settings,
+  Shield,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
+import { useState } from "react"
+
+const navItems = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/products", label: "Products", icon: Package },
+  { href: "/categories", label: "Categories", icon: Tags },
+  { href: "/brands", label: "Brands", icon: Building2 },
+  { href: "/customers", label: "Customers", icon: Users },
+  { href: "/inventory", label: "Inventory", icon: BarChart3 },
+  { href: "/articles", label: "Articles", icon: FileText },
+  { href: "/promotions", label: "Promotions", icon: Percent },
+  { href: "/shipping", label: "Shipping", icon: Truck },
+  { href: "/payment-methods", label: "Payment", icon: CreditCard },
+  { href: "/uploads", label: "Uploads", icon: Image },
+  { href: "/activity-logs", label: "Activity Logs", icon: Activity },
+  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/permissions", label: "Permissions", icon: Shield },
+]
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-sidebar-background transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
+      )}
+    >
+      <div className="flex h-14 items-center border-b px-4">
+        <Link href="/" className={cn("flex items-center gap-2 font-semibold", collapsed && "justify-center")}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
+            MA
+          </div>
+          {!collapsed && <span className="text-sm">Minh An Admin</span>}
+        </Link>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn("ml-auto rounded-md p-1 hover:bg-sidebar-accent", collapsed && "ml-0")}
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
+      </div>
+      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground",
+                collapsed && "justify-center px-2"
+              )}
+              title={collapsed ? item.label : undefined}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}
