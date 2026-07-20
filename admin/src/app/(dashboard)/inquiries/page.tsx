@@ -7,13 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select } from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -22,16 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-import { Search, Eye, Trash2, Mail, Phone, Building2 } from "lucide-react"
+import { Search, Eye, Trash2 } from "lucide-react"
 
 type Inquiry = {
   id: string
@@ -47,18 +35,18 @@ type Inquiry = {
   product?: { id: string; name: Record<string, string>; slug: string }
 }
 
-const STATUS_LABELS: Record<string, { label: string; variant: string }> = {
-  pending: { label: "Pending", variant: "bg-yellow-100 text-yellow-800" },
-  contacted: { label: "Contacted", variant: "bg-blue-100 text-blue-800" },
-  completed: { label: "Completed", variant: "bg-green-100 text-green-800" },
-  cancelled: { label: "Cancelled", variant: "bg-gray-100 text-gray-800" },
+const STATUS_MAP: Record<string, { label: string; className: string }> = {
+  pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800" },
+  contacted: { label: "Contacted", className: "bg-blue-100 text-blue-800" },
+  completed: { label: "Completed", className: "bg-green-100 text-green-800" },
+  cancelled: { label: "Cancelled", className: "bg-gray-100 text-gray-800" },
 }
 
 export default function InquiriesPage() {
   const token = getToken()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState("")
-  const [status, setStatus] = useState<string>("")
+  const [status, setStatus] = useState("")
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Inquiry | null>(null)
 
@@ -117,18 +105,19 @@ export default function InquiriesPage() {
                 className="pl-9"
               />
             </div>
-            <Select value={status || "all"} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+            <Select
+              className="w-[150px]"
+              placeholder="All statuses"
+              value={status}
+              onChange={(e) => { setStatus(e.target.value); setPage(1) }}
+              options={[
+                { value: "", label: "All statuses" },
+                { value: "pending", label: "Pending" },
+                { value: "contacted", label: "Contacted" },
+                { value: "completed", label: "Completed" },
+                { value: "cancelled", label: "Cancelled" },
+              ]}
+            />
           </div>
 
           {isLoading ? (
@@ -162,8 +151,8 @@ export default function InquiriesPage() {
                       <TableCell>{inquiry.product?.name?.vi || inquiry.product?.name?.en || "-"}</TableCell>
                       <TableCell>{inquiry.quantity}</TableCell>
                       <TableCell>
-                        <Badge className={STATUS_LABELS[inquiry.status]?.variant || ""}>
-                          {STATUS_LABELS[inquiry.status]?.label || inquiry.status}
+                        <Badge className={STATUS_MAP[inquiry.status]?.className || ""}>
+                          {STATUS_MAP[inquiry.status]?.label || inquiry.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
@@ -200,43 +189,66 @@ export default function InquiriesPage() {
         </CardContent>
       </Card>
 
-      {/* Detail Dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-          <DialogHeader>
-            <DialogTitle>Inquiry from {selected?.fullName}</DialogTitle>
-            <DialogDescription>{selected?.email}</DialogDescription>
-          </DialogHeader>
-          {selected && (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /><span>{selected.email}</span></div>
-                {selected.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /><span>{selected.phone}</span></div>}
-                {selected.company && <div className="flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" /><span>{selected.company}</span></div>}
+        <DialogHeader>
+          <DialogTitle>Inquiry from {selected?.fullName}</DialogTitle>
+          <DialogDescription>{selected?.email}</DialogDescription>
+        </DialogHeader>
+        {selected && (
+          <div className="space-y-4 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Email:</span>
+                <span>{selected.email}</span>
+              </div>
+              {selected.phone && (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span>{selected.phone}</span>
+                </div>
+              )}
+              {selected.company && (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Company:</span>
+                  <span>{selected.company}</span>
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground mb-1">Product</p>
+              <p className="font-medium">{selected.product?.name?.vi || selected.product?.name?.en || "-"}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-muted-foreground">Quantity</p>
+                <p className="font-medium">{selected.quantity}</p>
               </div>
               <div>
-                <p className="text-muted-foreground mb-1">Product</p>
-                <p className="font-medium">{selected.product?.name?.vi || selected.product?.name?.en || "-"}</p>
+                <p className="text-muted-foreground">Status</p>
+                <Select
+                  className="h-8 mt-1"
+                  value={selected.status}
+                  onChange={(e) => statusMutation.mutate({ id: selected.id, status: e.target.value })}
+                  options={[
+                    { value: "pending", label: "Pending" },
+                    { value: "contacted", label: "Contacted" },
+                    { value: "completed", label: "Completed" },
+                    { value: "cancelled", label: "Cancelled" },
+                  ]}
+                />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-muted-foreground">Quantity</p><p className="font-medium">{selected.quantity}</p></div>
-                <div><p className="text-muted-foreground">Status</p>
-                  <Select value={selected.status} onValueChange={(v) => statusMutation.mutate({ id: selected.id, status: v })}>
-                    <SelectTrigger className="h-8 mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="contacted">Contacted</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              {selected.notes && (
-                <div><p className="text-muted-foreground mb-1">Notes</p><p className="bg-muted rounded p-3">{selected.notes}</p></div>
-              )}
-              <p className="text-muted-foreground text-xs">Submitted: {new Date(selected.createdAt).toLocaleString()}</p>
             </div>
-          )}
+            {selected.notes && (
+              <div>
+                <p className="text-muted-foreground mb-1">Notes</p>
+                <p className="bg-muted rounded p-3">{selected.notes}</p>
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Submitted: {new Date(selected.createdAt).toLocaleString()}
+            </p>
+          </div>
+        )}
       </Dialog>
     </div>
   )
