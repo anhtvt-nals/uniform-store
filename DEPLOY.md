@@ -67,7 +67,8 @@ cd /opt/uniform-store
 ### Bước 3: Chạy setup script
 
 ```bash
-bash .github/scripts/setup-vps.sh yourdomain.com
+docker exec uniform-postgres psql -U postgres -c "CREATE DATABASE uniform_store;"
+bash .github/scripts/setup-vps.sh electroai.shop
 ```
 
 Script sẽ tự động:

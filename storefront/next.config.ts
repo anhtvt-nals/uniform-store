@@ -36,7 +36,8 @@ const nextConfig: NextConfig = {
     },
     experimental: {
         rootParams: true
-    }
+    },
+    allowedDevOrigins: ['102.129.168.20']
 };
 
 export default withNextIntl(nextConfig);
