@@ -106,6 +106,14 @@ fi
 echo "🐳 Starting PostgreSQL + MinIO..."
 docker compose -f docker-compose.infra.yml up -d
 
+# ─── Create admin .env ───
+if [ ! -f admin/.env ]; then
+    cat > admin/.env << EOF
+NEXT_PUBLIC_ADMIN_API_URL=https://admin.${DOMAIN}/api/v1/admin
+EOF
+    echo "Created admin/.env"
+fi
+
 # ─── Install app dependencies ───
 echo "📦 Installing dependencies..."
 npm ci --workspaces

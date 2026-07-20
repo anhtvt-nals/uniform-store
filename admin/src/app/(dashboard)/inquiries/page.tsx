@@ -202,7 +202,6 @@ export default function InquiriesPage() {
 
       {/* Detail Dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Inquiry from {selected?.fullName}</DialogTitle>
             <DialogDescription>{selected?.email}</DialogDescription>
@@ -238,7 +237,6 @@ export default function InquiriesPage() {
               <p className="text-muted-foreground text-xs">Submitted: {new Date(selected.createdAt).toLocaleString()}</p>
             </div>
           )}
-        </DialogContent>
       </Dialog>
     </div>
   )
