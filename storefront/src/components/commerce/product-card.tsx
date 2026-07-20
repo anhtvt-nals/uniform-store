@@ -38,6 +38,11 @@ export function ProductCard({product: productProp}: ProductCardProps) {
                 <h3 className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                     {product.productName}
                 </h3>
+                {'sortDescription' in product && product.sortDescription ? (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                        {product.sortDescription}
+                    </p>
+                ) : null}
                 <Suspense fallback={<div className="h-8 w-36 rounded bg-muted"></div>}>
                     <p className="text-lg font-bold tracking-tight">
                         {product.priceWithTax.__typename === 'PriceRange' ? (

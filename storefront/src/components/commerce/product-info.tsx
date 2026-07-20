@@ -1,14 +1,15 @@
 'use client';
 
 import {useState, useMemo, useTransition} from 'react';
-import {useSearchParams} from 'next/navigation';
-import {usePathname, useRouter} from '@/i18n/navigation';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
+
+
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
+import {Input} from '@/components/ui/input';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Separator} from '@/components/ui/separator';
-import {ShoppingCart, CheckCircle2} from 'lucide-react';
-import {addToCart} from '@/app/[locale]/product/[slug]/actions';
+import {CheckCircle2, Send, Loader2} from 'lucide-react';
 import {toast} from 'sonner';
 import {Price} from '@/components/commerce/price';
 import {useTranslations} from 'next-intl';
@@ -18,6 +19,8 @@ interface ProductInfoProps {
         id: string;
         name: string;
         description: string;
+        sortDescription?: string;
+        detail?: string;
         variants: Array<{
             id: string;
             name: string;
@@ -53,11 +56,17 @@ interface ProductInfoProps {
 
 export function ProductInfo({product, searchParams, currencyCode}: ProductInfoProps) {
     const t = useTranslations('Product');
-    const pathname = usePathname();
-    const router = useRouter();
-    const currentSearchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
-    const [isAdded, setIsAdded] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        company: '',
+        quantity: 1,
+        notes: '',
+    });
 
     // Initialize selected options from URL
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
@@ -97,6 +106,10 @@ export function ProductInfo({product, searchParams, currencyCode}: ProductInfoPr
         });
     }, [selectedOptions, product.variants, product.optionGroups]);
 
+    const pathname = usePathname();
+    const router = useRouter();
+    const currentSearchParams = useSearchParams();
+
     const handleOptionChange = (groupId: string, optionId: string) => {
         setSelectedOptions((prev) => ({
             ...prev,
@@ -109,36 +122,41 @@ export function ProductInfo({product, searchParams, currencyCode}: ProductInfoPr
 
         if (group && option) {
             // Update URL with option code
-            const params = new URLSearchParams(currentSearchParams);
+            const params = new URLSearchParams(currentSearchParams.toString());
             params.set(group.code, option.code);
             router.push(`${pathname}?${params.toString()}`, {scroll: false});
         }
     };
 
-    const handleAddToCart = async () => {
-        if (!selectedVariant) return;
-
-        startTransition(async () => {
-            const result = await addToCart(selectedVariant.id, 1);
-
-            if (result.success) {
-                setIsAdded(true);
-                toast.success(t('addedToCartMessage'), {
-                    description: t('addedToCartDescription', {name: product.name}),
-                });
-
-                // Reset the added state after 2 seconds
-                setTimeout(() => setIsAdded(false), 2000);
+    const handleSubmitInquiry = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/v1/inquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: product.id,
+                    ...formData,
+                }),
+            });
+            if (res.ok) {
+                setIsSubmitted(true);
+                toast.success(t('inquirySubmitted'));
             } else {
-                toast.error(t('errorTitle'), {
-                    description: result.error || t('errorAddToCart'),
-                });
+                toast.error(t('inquiryError'));
             }
-        });
+        } catch {
+            toast.error(t('inquiryError'));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const isInStock = selectedVariant && selectedVariant.stockLevel !== 'OUT_OF_STOCK';
-    const canAddToCart = selectedVariant && isInStock;
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: name === 'quantity' ? Math.max(1, Number(value)) : value }));
+    };
 
     return (
         <div className="space-y-6">
@@ -158,6 +176,7 @@ export function ProductInfo({product, searchParams, currencyCode}: ProductInfoPr
             <div className="prose prose-sm max-w-none text-muted-foreground">
                 <div dangerouslySetInnerHTML={{__html: product.description}}/>
             </div>
+
 
             {/* Option Groups */}
             {product.optionGroups.length > 0 && (
@@ -194,50 +213,112 @@ export function ProductInfo({product, searchParams, currencyCode}: ProductInfoPr
                 </div>
             )}
 
-            {/* Stock Status */}
-            {selectedVariant && (
-                <div className="text-sm">
-                    {isInStock ? (
-                        <span className="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                            <span className="h-2 w-2 rounded-full bg-green-600" />
-                            {t('inStock')}
-                        </span>
-                    ) : (
-                        <span className="inline-flex items-center gap-1.5 text-destructive font-medium">
-                            <span className="h-2 w-2 rounded-full bg-destructive" />
-                            {t('outOfStock')}
-                        </span>
-                    )}
+            {/* Inquiry Form */}
+            {isSubmitted ? (
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center space-y-2">
+                    <CheckCircle2 className="h-10 w-10 text-green-600 mx-auto" />
+                    <h3 className="font-semibold text-green-800 dark:text-green-200">{t('inquirySuccess')}</h3>
+                    <p className="text-sm text-green-600 dark:text-green-400">{t('inquirySuccessDesc')}</p>
                 </div>
-            )}
+            ) : (
+                <form onSubmit={handleSubmitInquiry} className="space-y-4 border rounded-lg p-5 bg-card">
+                    <h3 className="font-semibold text-lg">{t('inquiryTitle')}</h3>
 
-            {/* Add to Cart Button */}
-            <div className="pt-2 space-y-3">
-                <Button
-                    size="lg"
-                    className="w-full h-12 text-base font-semibold rounded-lg"
-                    disabled={!canAddToCart || isPending}
-                    onClick={handleAddToCart}
-                >
-                    {isAdded ? (
-                        <>
-                            <CheckCircle2 className="mr-2 h-5 w-5"/>
-                            {t('addedToCart')}
-                        </>
-                    ) : (
-                        <>
-                            <ShoppingCart className="mr-2 h-5 w-5"/>
-                            {isPending
-                                ? t('adding')
-                                : !selectedVariant && product.optionGroups.length > 0
-                                    ? t('selectOptions')
-                                    : !isInStock
-                                        ? t('outOfStock')
-                                        : t('addToCart')}
-                        </>
-                    )}
-                </Button>
-            </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="fullName">{t('inquiryName')} *</Label>
+                        <Input
+                            id="fullName"
+                            name="fullName"
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            required
+                            placeholder={t('inquiryNamePlaceholder')}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <Label htmlFor="email">{t('inquiryEmail')} *</Label>
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                                placeholder={t('inquiryEmailPlaceholder')}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="phone">{t('inquiryPhone')}</Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                placeholder={t('inquiryPhonePlaceholder')}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <Label htmlFor="company">{t('inquiryCompany')}</Label>
+                            <Input
+                                id="company"
+                                name="company"
+                                value={formData.company}
+                                onChange={handleInputChange}
+                                placeholder={t('inquiryCompanyPlaceholder')}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="quantity">{t('inquiryQuantity')} *</Label>
+                            <Input
+                                id="quantity"
+                                name="quantity"
+                                type="number"
+                                min={1}
+                                value={formData.quantity}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="notes">{t('inquiryNotes')}</Label>
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            value={formData.notes}
+                            onChange={handleInputChange}
+                            rows={3}
+                            className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            placeholder={t('inquiryNotesPlaceholder')}
+                        />
+                    </div>
+
+                    <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full h-12 text-base font-semibold rounded-lg"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                {t('inquirySending')}
+                            </>
+                        ) : (
+                            <>
+                                <Send className="mr-2 h-5 w-5" />
+                                {t('inquirySubmit')}
+                            </>
+                        )}
+                    </Button>
+                </form>
+            )}
 
             {/* SKU */}
             {selectedVariant && (

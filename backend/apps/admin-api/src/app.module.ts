@@ -20,6 +20,7 @@ import { HealthModule } from './health/health.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ActivityLogsModule } from './activity-logs/activity-logs.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { InquiriesModule } from './inquiries/inquiries.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     InventoryModule,
     ActivityLogsModule,
     PermissionsModule,
+    InquiriesModule,
     HealthModule,
   ],
 })

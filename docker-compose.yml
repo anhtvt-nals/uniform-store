@@ -50,67 +50,6 @@ services:
       echo 'Bucket uniform-store created and set to public'
       "
 
-  storefront-api:
-    build:
-      context: ./backend
-      dockerfile: apps/storefront-api/Dockerfile
-    container_name: uniform-storefront-api
-    ports:
-      - "3000:3000"
-    env_file: ./backend/.env
-    environment:
-      NODE_ENV: production
-      DB_HOST: postgres
-      STORAGE_ENDPOINT: http://minio:9000
-      STORAGE_ACCESS_KEY: minioadmin
-      STORAGE_SECRET_KEY: minioadmin
-      STORAGE_BUCKET: uniform-store
-      STORAGE_PUBLIC_URL: http://localhost:9000/uniform-store
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_started
-    restart: unless-stopped
-
-  admin-api:
-    build:
-      context: ./backend
-      dockerfile: apps/admin-api/Dockerfile
-    container_name: uniform-admin-api
-    ports:
-      - "3002:3002"
-    env_file: ./backend/.env
-    environment:
-      NODE_ENV: production
-      DB_HOST: postgres
-      PORT: 3002
-      CORS_ORIGINS: http://localhost:5002
-      STORAGE_ENDPOINT: http://minio:9000
-      STORAGE_ACCESS_KEY: minioadmin
-      STORAGE_SECRET_KEY: minioadmin
-      STORAGE_BUCKET: uniform-store
-      STORAGE_PUBLIC_URL: http://localhost:9000/uniform-store
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_started
-    restart: unless-stopped
-
-  admin-frontend:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-    container_name: uniform-admin-frontend
-    ports:
-      - "5002:5002"
-    environment:
-      NEXT_PUBLIC_ADMIN_API_URL: http://localhost:3002/api/v1/admin
-    depends_on:
-      - admin-api
-    restart: unless-stopped
-
 volumes:
   pgdata:
   miniodata:

@@ -23,7 +23,8 @@
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./jest-e2e.json",
     "typeorm": "npx tsx ../node_modules/typeorm/cli",
-    "migration:run": "npx tsx scripts/run-migrations.ts",
+    "migration:run": "npx tsx scripts/run-migrations.ts run",
+    "migration:status": "npx tsx scripts/run-migrations.ts status",
     "migration:generate": "npm run typeorm -- -d libs/database/src/data-source.ts migration:generate",
     "migration:revert": "npm run typeorm -- -d libs/database/src/data-source.ts migration:revert"
   },

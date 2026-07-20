@@ -5,7 +5,8 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/storefront-api/tsconfig.app.json"
+    "tsConfigPath": "apps/storefront-api/tsconfig.app.json",
+    "webpackConfigPath": "webpack.config.js"
   },
   "monorepo": true,
   "root": "apps/storefront-api",
@@ -16,7 +17,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/storefront-api/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/storefront-api/tsconfig.app.json"
+        "tsConfigPath": "apps/storefront-api/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.js"
       }
     },
     "admin-api": {
@@ -25,7 +27,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/admin-api/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/admin-api/tsconfig.app.json"
+        "tsConfigPath": "apps/admin-api/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.js"
       }
     },
     "common": {

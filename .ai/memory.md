@@ -479,3 +479,67 @@ Added `CountryEntity` at `libs/database/src/entities/country.entity.ts` — maps
 - Admin: Already using custom JWT (bcrypt). Keep as-is — admin credentials stored in `admin_users` table, not managed by Supabase Auth.
 - Both use the same Supabase Postgres database but independent auth systems.
 
+
+## CI/CD (GitHub Actions + VPS)
+
+| Component | File | Purpose |
+|---|---|---|
+| CI Pipeline | `.github/workflows/ci.yml` | Lint + typecheck + test + build Docker images → push to GHCR |
+| CD Pipeline | `.github/workflows/deploy.yml` | SSH to VPS → pull images → docker compose up |
+| Prod Compose | `docker-compose.prod.yml` | Production stack using GHCR images |
+| VPS Setup | `.github/scripts/setup-vps.sh` | One-time VPS init (Docker, firewall, SSL, env) |
+| Nginx | `nginx/nginx.conf` | Reverse proxy with SSL, rate limiting, gzip |
+| Manual Deploy | `deploy.sh` | SSH in and run `./deploy.sh` for manual deploy |
+
+### GitHub Secrets Required
+- `VPS_HOST` — VPS IP address
+- `VPS_USER` — SSH username (usually `root`)
+- `VPS_SSH_KEY` — SSH private key
+- `VPS_PORT` — SSH port (optional, default 22)
+
+### Docker Images (GHCR)
+- `ghcr.io/{repo}/storefront-api:latest`
+- `ghcr.io/{repo}/admin-api:latest`
+- `ghcr.io/{repo}/admin-frontend:latest`
+
+### Migration Management
+- `scripts/seed-migrations.js` — Marks all SQL files as "applied" in `schema_migrations` table (for existing DBs)
+- `scripts/run-migrations.ts` — Smart runner: creates `schema_migrations` table, tracks which files ran, only runs new ones
+- `npm run migration:run` — Run pending migrations
+- `npm run migration:status` — Show applied vs pending
+- Migration 030: `sort_description` column on products + `inquiries` table
+
+## Deployment Model (Updated)
+
+**Manual run on VPS**, Docker chỉ cho DB + Storage:
+
+| Component | Runtime | Port | Start |
+|---|---|---|---|
+| PostgreSQL | Docker | 127.0.0.1:5432 | `docker compose -f docker-compose.infra.yml up -d` |
+| MinIO | Docker | 127.0.0.1:9000 | same |
+| Storefront API | PM2 (Node.js) | 127.0.0.1:3000 | `pm2 start ...` |
+| Admin API | PM2 (Node.js) | 127.0.0.1:3002 | `pm2 start ...` |
+| Storefront UI | PM2 (Next.js) | 127.0.0.1:3001 | `pm2 start npm -- start` |
+| Admin UI | PM2 (Next.js) | 127.0.0.1:5002 | `pm2 start npm -- start` |
+| Nginx | System | 80, 443 | `systemctl start nginx` |
+
+### Deploy Flow
+```
+git push → main
+  → GitHub Actions CI (lint + test)
+  → SSH VPS → deploy.sh
+    → git pull → npm ci → nest build → next build → migration:run → pm2 restart
+```
+
+### Migration Tracking
+- Table `schema_migrations` tracks applied migrations
+- `npm run migration:run` — runs pending only
+- `npm run migration:status` — shows applied vs pending
+- `node scripts/seed-migrations.js` — marks all existing files as applied (for initial setup)
+
+### CI/CD Files
+- `.github/workflows/ci.yml` — lint + test
+- `.github/workflows/deploy.yml` — SSH → deploy.sh
+- `.github/scripts/deploy.sh` — full deploy script
+- `.github/scripts/setup-vps.sh` — one-time VPS setup
+- `docker-compose.infra.yml` — PostgreSQL + MinIO only

@@ -64,6 +64,8 @@ export const GetProductDetailQuery = graphql(`
             id
             name
             description
+            sortDescription
+            detail
             slug
             assets {
                 id

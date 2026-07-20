@@ -18,6 +18,7 @@ import {
   Activity,
   Settings,
   Shield,
+  MessageSquare,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -27,6 +28,7 @@ import { useState } from "react"
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/inquiries", label: "Inquiries", icon: MessageSquare },
   { href: "/products", label: "Products", icon: Package },
   { href: "/categories", label: "Categories", icon: Tags },
   { href: "/brands", label: "Brands", icon: Building2 },

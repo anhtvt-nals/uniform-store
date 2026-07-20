@@ -177,7 +177,7 @@
     "collectionNotFound": "Không tìm thấy bộ sưu tập",
     "browseCollectionAt": "Khám phá bộ sưu tập {name} tại {siteName}",
     "productCount": "{count, plural, one {# sản phẩm} other {# sản phẩm}}",
-    "viewDetail": "Xem Chi Tiết",
+    "viewDetail": "Xem chi tiết sản phẩm",
     "bestSeller": "Bán Chạy",
     "new": "Mới",
     "sold": "Đã bán {count}",
@@ -208,7 +208,26 @@
         "question": "Có nhận sản xuất cho doanh nghiệp ngoài khu vực không?",
         "answer": "Có, chúng tôi nhận sản xuất và giao hàng toàn quốc. Liên hệ hotline 090 123 4567 để được tư vấn chi tiết."
       }
-    }
+    },
+    "inquiryTitle": "Gửi yêu cầu báo giá",
+    "inquiryName": "Họ và tên",
+    "inquiryNamePlaceholder": "Nhập họ tên của bạn",
+    "inquiryEmail": "Email",
+    "inquiryEmailPlaceholder": "ban@congty.com",
+    "inquiryPhone": "Số điện thoại",
+    "inquiryPhonePlaceholder": "+84 ...",
+    "inquiryCompany": "Công ty",
+    "inquiryCompanyPlaceholder": "Tên công ty",
+    "inquiryQuantity": "Số lượng",
+    "inquiryNotes": "Ghi chú",
+    "inquiryNotesPlaceholder": "Kích thước, màu sắc, yêu cầu đặc biệt...",
+    "inquirySubmit": "Gửi yêu cầu",
+    "inquirySending": "Đang gửi...",
+    "inquirySubmitted": "Gửi yêu cầu thành công!",
+    "inquirySuccess": "Cảm ơn bạn!",
+    "inquirySuccessDesc": "Chúng tôi đã nhận được yêu cầu và sẽ liên hệ bạn sớm nhất.",
+    "inquiryError": "Gửi yêu cầu thất bại. Vui lòng thử lại.",
+    "detail": "Chi tiết sản phẩm"
   },
   "Sort": {
     "nameAsc": "Tên: A đến Z",

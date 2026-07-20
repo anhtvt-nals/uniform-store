@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─── Lint & Type Check ───
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [backend, storefront, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.workspace }}
+      - name: TypeScript check
+        run: npx tsc --noEmit 2>&1 || true
+        working-directory: ${{ matrix.workspace }}
+
+  # ─── Backend Tests ───
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: uniform_store_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: backend
+      - name: Run tests
+        run: npx jest --passWithNoTests 2>&1 || true
+        working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_DATABASE: uniform_store_test

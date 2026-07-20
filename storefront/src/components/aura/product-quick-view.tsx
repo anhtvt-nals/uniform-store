@@ -1,11 +1,11 @@
 "use client";
 
-import {useState, useMemo, useTransition, useEffect} from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import {useTranslations} from 'next-intl';
 import {Link} from '@/i18n/navigation';
-import {X, ChevronLeft, ChevronRight, ShoppingCart, CheckCircle2, Loader2, ArrowRight} from 'lucide-react';
+import {X, ChevronLeft, ChevronRight, Send, CheckCircle2, Loader2, ArrowRight} from 'lucide-react';
 import {Price} from '@/components/commerce/price';
-import {addToCart} from '@/app/[locale]/product/[slug]/actions';
+
 import {getProductForQuickView} from './quick-view-actions';
 import {toast} from 'sonner';
 
@@ -13,6 +13,7 @@ interface QuickViewProduct {
     id: string;
     name: string;
     description: string;
+    sortDescription?: string;
     slug: string;
     assets: Array<{id: string; preview: string; source: string}>;
     variants: Array<{
@@ -38,9 +39,10 @@ export function ProductQuickView({slug, onClose}: {slug: string; onClose: () => 
     const [error, setError] = useState<string | null>(null);
     const [currentImage, setCurrentImage] = useState(0);
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-    const [isAdded, setIsAdded] = useState(false);
-    const [isPending, startTransition] = useTransition();
     const [currencyCode, setCurrencyCode] = useState<string>('USD');
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', company: '', quantity: 1, notes: '' });
 
     useEffect(() => {
         let active = true;
@@ -80,26 +82,32 @@ export function ProductQuickView({slug, onClose}: {slug: string; onClose: () => 
         setSelectedOptions((prev) => ({...prev, [groupId]: optionId}));
     };
 
-    const handleAddToCart = async () => {
-        if (!selectedVariant) return;
-        startTransition(async () => {
-            const result = await addToCart(selectedVariant.id, 1);
-            if (result.success) {
-                setIsAdded(true);
-                toast.success(t('addedToCartMessage'), {
-                    description: t('addedToCartDescription', {name: product?.name ?? ''}),
-                });
-                setTimeout(() => setIsAdded(false), 2000);
+    const handleSubmitInquiry = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/v1/inquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: product?.id, ...formData }),
+            });
+            if (res.ok) {
+                setIsSubmitted(true);
+                toast.success(t('inquirySubmitted'));
             } else {
-                toast.error(t('errorTitle'), {
-                    description: result.error || t('errorAddToCart'),
-                });
+                toast.error(t('inquiryError'));
             }
-        });
+        } catch {
+            toast.error(t('inquiryError'));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const isInStock = selectedVariant && selectedVariant.stockLevel !== 'OUT_OF_STOCK';
-    const canAddToCart = !!selectedVariant && !!isInStock && !isPending;
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: name === 'quantity' ? Math.max(1, Number(value)) : value }));
+    };
 
     const images = product?.assets?.length
         ? product.assets
@@ -207,6 +215,9 @@ export function ProductQuickView({slug, onClose}: {slug: string; onClose: () => 
                                 {product.optionGroups[0]?.name || t('sku', {sku: product.variants[0]?.sku || ''})}
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground mb-2">{product.name}</h2>
+                            {product.sortDescription && (
+                                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{product.sortDescription}</p>
+                            )}
                             <div className="text-2xl font-bold text-primary mb-6">
                                 {selectedVariant ? (
                                     <Price value={selectedVariant.priceWithTax} currencyCode={currencyCode} />
@@ -253,49 +264,90 @@ export function ProductQuickView({slug, onClose}: {slug: string; onClose: () => 
                                 />
                             )}
 
-                            {/* Stock */}
-                            {selectedVariant && (
-                                <div className="mb-6 text-xs font-bold">
-                                    {isInStock ? (
-                                        <span className="inline-flex items-center gap-1.5 text-green-600">
-                                            <CheckCircle2 className="w-4 h-4" /> {t('inStock')}
-                                        </span>
-                                    ) : (
-                                        <span className="text-red-500">{t('outOfStock')}</span>
-                                    )}
+                            {/* Inquiry Form */}
+                            {isSubmitted ? (
+                                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-5 text-center space-y-2 mb-4">
+                                    <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto" />
+                                    <h4 className="font-semibold text-green-800 dark:text-green-200">{t('inquirySuccess')}</h4>
+                                    <p className="text-xs text-green-600 dark:text-green-400">{t('inquirySuccessDesc')}</p>
                                 </div>
+                            ) : (
+                                <form onSubmit={handleSubmitInquiry} className="space-y-3 mb-4">
+                                    <h4 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">{t('inquiryTitle')}</h4>
+                                    <input
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleInputChange}
+                                        required
+                                        placeholder={t('inquiryNamePlaceholder')}
+                                        className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                    />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            name="email"
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            required
+                                            placeholder={t('inquiryEmailPlaceholder')}
+                                            className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                        <input
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
+                                            placeholder={t('inquiryPhonePlaceholder')}
+                                            className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            name="company"
+                                            value={formData.company}
+                                            onChange={handleInputChange}
+                                            placeholder={t('inquiryCompanyPlaceholder')}
+                                            className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                        <input
+                                            name="quantity"
+                                            type="number"
+                                            min={1}
+                                            value={formData.quantity}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                    </div>
+                                    <textarea
+                                        name="notes"
+                                        value={formData.notes}
+                                        onChange={handleInputChange}
+                                        rows={2}
+                                        placeholder={t('inquiryNotesPlaceholder')}
+                                        className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-foreground text-background rounded-full py-3.5 font-bold uppercase tracking-widest text-xs hover:bg-muted-foreground transition flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? (
+                                            <><Loader2 className="w-4 h-4 animate-spin" /> {t('inquirySending')}</>
+                                        ) : (
+                                            <><Send className="w-4 h-4" /> {t('inquirySubmit')}</>
+                                        )}
+                                    </button>
+                                </form>
                             )}
 
-                            {/* Actions */}
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={handleAddToCart}
-                                    disabled={!canAddToCart}
-                                    className="flex-1 bg-foreground text-background rounded-full py-4 font-bold uppercase tracking-widest text-xs hover:bg-muted-foreground transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isPending ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 animate-spin" /> {t('adding')}
-                                        </>
-                                    ) : isAdded ? (
-                                        <>
-                                            <CheckCircle2 className="w-4 h-4" /> {t('addedToCart')}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ShoppingCart className="w-4 h-4" /> {t('addToCart')}
-                                        </>
-                                    )}
-                                </button>
-                                <Link
-                                    href={`/product/${product.slug}`}
-                                    onClick={onClose}
-                                    className="w-14 h-14 rounded-full border border-border flex items-center justify-center hover:bg-muted transition text-foreground shrink-0"
-                                    aria-label={t('viewDetail')}
-                                >
-                                    <ArrowRight className="w-5 h-5" />
-                                </Link>
-                            </div>
+                            {/* View Detail Link */}
+                            <Link
+                                href={`/product/${product.slug}`}
+                                onClick={onClose}
+                                className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
+                            >
+                                {t('viewDetail')} <ArrowRight className="w-4 h-4" />
+                            </Link>
                         </div>
                     </>
                 )}

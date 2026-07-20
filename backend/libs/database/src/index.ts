@@ -34,3 +34,4 @@ export * from './entities/country.entity';
 export * from './entities/article.entity';
 export * from './entities/article-category.entity';
 export * from './entities/article-tag.entity';
+export * from './entities/inquiry.entity';

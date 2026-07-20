@@ -30,6 +30,10 @@ export class CreateProductDto {
   description?: Record<string, string>;
 
   @IsOptional()
+  @IsObject()
+  sortDescription?: Record<string, string>;
+
+  @IsOptional()
   @IsString()
   sku?: string;
 

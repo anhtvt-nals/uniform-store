@@ -114,6 +114,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
   const [name, setName] = useState<Record<string, string>>({});
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState<Record<string, string>>({});
+  const [sortDescription, setSortDescription] = useState<Record<string, string>>({});
   const [detail, setDetail] = useState<Record<string, string>>({});
   const [categoryId, setCategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -135,6 +136,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       setName((defaultValues.name as Record<string, string>) || {});
       setSlug((defaultValues.slug as string) || "");
       setDescription((defaultValues.description as Record<string, string>) || {});
+      setSortDescription((defaultValues.sortDescription as Record<string, string>) || {});
       setDetail((defaultValues.detail as Record<string, string>) || {});
       setCategoryId((defaultValues.categoryId as string) || (defaultValues.category as { id: string })?.id || "");
       setBrandId((defaultValues.brandId as string) || (defaultValues.brand as { id: string })?.id || "");
@@ -152,6 +154,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     const setter: Record<string, React.Dispatch<React.SetStateAction<Record<string, string>>>> = {
       name: setName,
       description: setDescription,
+      sortDescription: setSortDescription,
       detail: setDetail,
       metaTitle: setMetaTitle,
       metaDesc: setMetaDesc,
@@ -160,7 +163,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
   }, []);
 
   const getField = useCallback((field: string, locale: string): string => {
-    const source: Record<string, Record<string, string>> = { name, description, detail, metaTitle, metaDesc };
+    const source: Record<string, Record<string, string>> = { name, description, sortDescription, detail, metaTitle, metaDesc };
     return source[field]?.[locale] || "";
   }, [name, description, detail, metaTitle, metaDesc]);
 
@@ -203,6 +206,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     };
     if (brandId) data.brandId = brandId;
     if (Object.keys(description).length > 0) data.description = description;
+    if (Object.keys(sortDescription).length > 0) data.sortDescription = sortDescription;
     if (Object.keys(metaTitle).length > 0) data.metaTitle = metaTitle;
     if (Object.keys(metaDesc).length > 0) data.metaDesc = metaDesc;
 
@@ -295,6 +299,24 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
                     onChange={(e) => setField("description", l, e.target.value)}
                     placeholder={`Short description${showAllLocales ? ` (${l})` : ""}`}
                     rows={3}
+                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <h3 className="text-sm font-medium">Sort Description (shown in product card)</h3>
+              {activeLocales.map((l) => (
+                <div key={`sort-desc-${l}`} className="space-y-1">
+                  {showAllLocales && <Label className="text-xs uppercase text-muted-foreground">{l}</Label>}
+                  <textarea
+                    value={getField("sortDescription", l)}
+                    onChange={(e) => setField("sortDescription", l, e.target.value)}
+                    placeholder={`Brief product summary for listings${showAllLocales ? ` (${l})` : ""}`}
+                    rows={2}
                     className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
                 </div>

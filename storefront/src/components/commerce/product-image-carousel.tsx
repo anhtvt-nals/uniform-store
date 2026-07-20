@@ -35,12 +35,12 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
     return (
         <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-muted rounded-xl overflow-hidden group cursor-crosshair">
+            <div className="relative aspect-square bg-muted rounded-xl overflow-hidden group cursor-crosshair hover:cursor-crosshair">
                 <Image
                     src={images[currentIndex].source}
                     alt={`Product image ${currentIndex + 1}`}
                     fill
-                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority={currentIndex === 0}
                 />
@@ -48,22 +48,20 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
                 {/* Navigation Arrows */}
                 {images.length > 1 && (
                     <>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background shadow-sm opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
-                            onClick={goToPrevious}
+                        <button
+                            type="button"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 hover:bg-background shadow-sm opacity-100 flex items-center justify-center z-10"
+                            onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
                         >
                             <ChevronLeft className="h-5 w-5" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background shadow-sm opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
-                            onClick={goToNext}
+                        </button>
+                        <button
+                            type="button"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 hover:bg-background shadow-sm opacity-100 flex items-center justify-center z-10"
+                            onClick={(e) => { e.stopPropagation(); goToNext(); }}
                         >
                             <ChevronRight className="h-5 w-5" />
-                        </Button>
+                        </button>
                     </>
                 )}
 
@@ -84,7 +82,7 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
                             onClick={() => setCurrentIndex(index)}
                             className={`aspect-square relative rounded-lg overflow-hidden transition-all duration-200 ${
                                 index === currentIndex
-                                    ? 'ring-2 ring-primary ring-offset-2 scale-105'
+                                    ? 'ring-2 ring-primary ring-offset-2'
                                     : 'ring-1 ring-border hover:ring-muted-foreground opacity-70 hover:opacity-100'
                             }`}
                         >

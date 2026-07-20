@@ -8,6 +8,7 @@ import {routing} from "@/i18n/routing";
 import {toOgLocale} from "@/i18n/locale-utils";
 import {getRouteLocale} from "@/i18n/server";
 import {Toaster} from "@/components/ui/sonner";
+import {Suspense} from "react";
 import {Navbar} from "@/components/layout/navbar";
 import {Footer} from "@/components/layout/footer";
 import {ThemeProvider} from "@/components/providers/theme-provider";
@@ -90,7 +91,7 @@ export default async function LocaleLayout({children}: {children: React.ReactNod
             >
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     <ThemeProvider>
-                        <Navbar />
+                        <Suspense><Navbar /></Suspense>
                         {children}
                         <Footer/>
                         <Toaster/>

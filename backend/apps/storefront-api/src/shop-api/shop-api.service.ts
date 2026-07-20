@@ -483,10 +483,12 @@ export class ShopApiService {
       };
 
       // Reuse products service for search within collection
+      const skip = Number(input.skip) || 0;
+      const take = Number(input.take) || 12;
       const products = await this.productsService.findAll({
         categorySlug: slug,
-        page: (input.skip as number ?? 0) / (input.take as number ?? 12) + 1,
-        limit: input.take as number ?? 12,
+        page: Math.floor(skip / take) + 1,
+        limit: take,
         sort: this.normalizeSort(input.sort),
       });
 
@@ -520,14 +522,16 @@ export class ShopApiService {
     const locale = options.languageCode ?? 'en';
 
     try {
+      const skip = Number(input.skip) || 0;
+      const take = Number(input.take) || 12;
       const products = await this.productsService.findAll({
         search: input.search as string,
         categorySlug: (input.collectionSlug ?? input.categorySlug) as string,
         brandSlug: input.brandSlug as string,
         minPrice: input.minPrice as number,
         maxPrice: input.maxPrice as number,
-        page: (input.skip as number ?? 0) / (input.take as number ?? 12) + 1,
-        limit: input.take as number ?? 12,
+        page: Math.floor(skip / take) + 1,
+        limit: take,
         sort: this.normalizeSort(input.sort),
       });
 
@@ -589,6 +593,7 @@ export class ShopApiService {
       productId: p.id,
       productName: p.name?.[locale] ?? p.name?.en ?? '',
       slug: p.slug,
+      sortDescription: p.sortDescription?.[locale] ?? p.sortDescription?.en ?? '',
       productAsset: firstImage ? {
         id: firstImage.id,
         preview: firstImage.url ?? firstImage.preview,
@@ -657,6 +662,8 @@ export class ShopApiService {
       id: product.id,
       name: product.name?.[locale] ?? product.name?.en ?? '',
       description: product.description?.[locale] ?? product.description?.en ?? '',
+      sortDescription: product.sortDescription?.[locale] ?? product.sortDescription?.en ?? '',
+      detail: product.detail?.[locale] ?? product.detail?.en ?? '',
       slug: product.slug,
       assets: images,
       featuredAsset: asset,

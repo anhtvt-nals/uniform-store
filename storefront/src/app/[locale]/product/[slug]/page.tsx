@@ -156,6 +156,19 @@ export default async function ProductDetailPage({params, searchParams}: PageProp
                 </div>
             </div>
 
+            {/* Product Detail — full-width rich content */}
+            {product.detail && (
+                <section className="py-12 mt-8">
+                    <div className="container mx-auto px-4 max-w-4xl">
+                        <h2 className="text-2xl font-bold mb-6">{t('detail')}</h2>
+                        <div
+                            className="prose prose-lg max-w-none text-muted-foreground"
+                            dangerouslySetInnerHTML={{__html: product.detail}}
+                        />
+                    </div>
+                </section>
+            )}
+
             {/* Shipping & Trust Badges */}
             <section className="py-8 mt-8 border-y border-border/50">
                 <div className="container mx-auto px-4">

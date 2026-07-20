@@ -35,6 +35,9 @@ export class ProductEntity {
   @Column({ type: 'jsonb', default: {} })
   description: Record<string, string>;
 
+  @Column({ name: 'sort_description', type: 'jsonb', default: {} })
+  sortDescription: Record<string, string>;
+
   @Column({ type: 'jsonb', default: {} })
   detail: Record<string, string>;
 
