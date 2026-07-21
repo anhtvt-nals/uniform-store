@@ -1,6 +1,5 @@
 import {ProductCarousel} from "@/components/commerce/product-carousel";
 import {getRouteLocale} from "@/i18n/server";
-import {cacheLife, cacheTag} from "next/cache";
 import {getActiveCurrencyCode} from '@/lib/currency-server';
 import {query} from "@/lib/vendure/api";
 import {GetCollectionProductsQuery} from "@/lib/vendure/queries";
@@ -9,12 +8,8 @@ import {ArrowRight} from "lucide-react";
 import {getTranslations} from 'next-intl/server';
 
 async function getFeaturedCollectionProducts(currencyCode: string) {
-    'use cache'
-    cacheLife('days')
 
     const locale = await getRouteLocale();
-    cacheTag(`featured-${locale}-${currencyCode}`);
-    cacheTag('products');
 
     // Fetch featured products from a specific collection
     // Replace 'featured' with your actual collection slug

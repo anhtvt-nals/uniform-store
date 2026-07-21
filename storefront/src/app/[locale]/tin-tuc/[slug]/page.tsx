@@ -12,6 +12,7 @@ import {getAllBlogs, getBlogBySlug, formatBlogDate, getArticleImageUrl} from '@/
 import {calculateReadingTime} from '@/lib/actions/articles';
 import {Suspense} from 'react';
 
+
 type Params = {locale: string; slug: string};
 
 export async function generateMetadata({params}: {params: Promise<Params>}): Promise<Metadata> {
@@ -43,11 +44,6 @@ export async function generateMetadata({params}: {params: Promise<Params>}): Pro
             images: getArticleImageUrl(item) ? [{url: getArticleImageUrl(item)!}] : undefined,
         },
     };
-}
-
-export async function generateStaticParams() {
-    const all = await getAllBlogs('vi');
-    return all.map((item) => ({slug: item.slug}));
 }
 
 async function NewsDetailInner({locale, slug}: {locale: string; slug: string}) {
@@ -122,7 +118,7 @@ async function NewsDetailInner({locale, slug}: {locale: string; slug: string}) {
                                 <Link
                                     key={tag.id}
                                     href={`/tin-tuc?tag=${tag.slug}`}
-                                    className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                                    className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors duration-200"
                                 >
                                     #{tag.name}
                                 </Link>

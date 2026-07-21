@@ -24,29 +24,31 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useState } from "react"
-
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/inquiries", label: "Inquiries", icon: MessageSquare },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/categories", label: "Categories", icon: Tags },
-  { href: "/brands", label: "Brands", icon: Building2 },
-  { href: "/customers", label: "Customers", icon: Users },
-  { href: "/inventory", label: "Inventory", icon: BarChart3 },
-  { href: "/articles", label: "Articles", icon: FileText },
-  { href: "/promotions", label: "Promotions", icon: Percent },
-  { href: "/shipping", label: "Shipping", icon: Truck },
-  { href: "/payment-methods", label: "Payment", icon: CreditCard },
-  { href: "/uploads", label: "Uploads", icon: Image },
-  { href: "/activity-logs", label: "Activity Logs", icon: Activity },
-  { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/permissions", label: "Permissions", icon: Shield },
-]
+import { useT } from "@/i18n"
 
 export function Sidebar() {
-  const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { t } = useT()
+  const pathname = usePathname()
+  const [collapsed, setCollapsed] = useState(false)
+
+  const navItems = [
+    { href: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { href: "/orders", label: t("nav.orders"), icon: ShoppingCart },
+    { href: "/inquiries", label: t("nav.inquiries"), icon: MessageSquare },
+    { href: "/products", label: t("nav.products"), icon: Package },
+    { href: "/categories", label: t("nav.categories"), icon: Tags },
+    { href: "/brands", label: t("nav.brands"), icon: Building2 },
+    { href: "/customers", label: t("nav.customers"), icon: Users },
+    { href: "/inventory", label: t("nav.inventory"), icon: BarChart3 },
+    { href: "/articles", label: t("nav.articles"), icon: FileText },
+    { href: "/promotions", label: t("nav.promotions"), icon: Percent },
+    { href: "/shipping", label: t("nav.shipping"), icon: Truck },
+    { href: "/payment-methods", label: t("nav.payment"), icon: CreditCard },
+    { href: "/uploads", label: t("nav.uploads"), icon: Image },
+    { href: "/activity-logs", label: t("nav.activityLogs"), icon: Activity },
+    { href: "/settings", label: t("nav.settings"), icon: Settings },
+    { href: "/permissions", label: t("nav.permissions"), icon: Shield },
+  ]
 
   return (
     <aside
@@ -71,8 +73,8 @@ export function Sidebar() {
       </div>
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
         {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const Icon = item.icon
+          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
           return (
             <Link
               key={item.href}
@@ -89,9 +91,9 @@ export function Sidebar() {
               <Icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
             </Link>
-          );
+          )
         })}
       </nav>
     </aside>
-  );
+  )
 }

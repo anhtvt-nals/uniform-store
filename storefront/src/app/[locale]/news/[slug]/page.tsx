@@ -27,6 +27,7 @@ import {
     calculateReadingTime,
 } from '@/lib/actions/articles';
 
+
 type Params = { locale: string; slug: string };
 
 export async function generateMetadata({
@@ -81,11 +82,6 @@ export async function generateMetadata({
             images: imageUrl ? [imageUrl] : undefined,
         },
     };
-}
-
-export async function generateStaticParams() {
-    const { items } = await getArticles({ take: 50 }, 'vi');
-    return items.map(item => ({ slug: item.slug }));
 }
 
 export default async function NewsDetailPage({
@@ -167,7 +163,7 @@ export default async function NewsDetailPage({
                                     <Link
                                         key={tag.id}
                                         href={`/news?tag=${tag.slug}`}
-                                        className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                                        className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors duration-200"
                                     >
                                         #{tag.name}
                                     </Link>

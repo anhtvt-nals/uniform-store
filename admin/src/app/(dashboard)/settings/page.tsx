@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/i18n"
+
 import { useQuery } from "@tanstack/react-query"
 import { apiClient, getToken } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +13,7 @@ type Setting = {
 };
 
 export default function SettingsPage() {
+  const { t } = useT();
   const token = getToken();
 
   const { data, isLoading } = useQuery({

@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/i18n"
+
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient, getToken } from "@/lib/api"
@@ -10,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs } from "@/components/ui/tabs"
 
 export default function PromotionsPage() {
+  const { t } = useT();
   const token = getToken();
 
   const { data: discounts, isLoading: dl } = useQuery({

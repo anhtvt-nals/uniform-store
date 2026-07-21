@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Pencil, Trash2, RotateCcw, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 import { format } from "date-fns"
 
 type Brand = {
@@ -29,6 +30,7 @@ type Brand = {
 };
 
 export default function BrandsPage() {
+  const { t } = useT();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [includeDeleted, setIncludeDeleted] = useState(false);
@@ -77,7 +79,7 @@ export default function BrandsPage() {
         <Button asChild>
           <Link href="/brands/new">
             <Plus className="h-4 w-4" />
-            New Brand
+            {t("brands.newBrand")}
           </Link>
         </Button>
       </div>
@@ -172,9 +174,9 @@ export default function BrandsPage() {
         </>
       ) : (
         <EmptyState
-          title="No brands found"
+          title={t("brands.noBrands")}
           description={search ? "Try a different search term." : "Create your first brand."}
-          action={<Button asChild><Link href="/brands/new"><Plus className="h-4 w-4" /> New Brand</Link></Button>}
+          action={<Button asChild><Link href="/brands/new"><Plus className="h-4 w-4" /> {t("brands.newBrand")}</Link></Button>}
         />
       )}
 

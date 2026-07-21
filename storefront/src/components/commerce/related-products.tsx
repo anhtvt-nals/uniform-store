@@ -1,6 +1,5 @@
 import { ProductCarousel } from "@/components/commerce/product-carousel";
 import { getRouteLocale } from "@/i18n/server";
-import { cacheLife, cacheTag } from "next/cache";
 import {getActiveCurrencyCode} from '@/lib/currency-server';
 import { query } from "@/lib/vendure/api";
 import { GetCollectionProductsQuery } from "@/lib/vendure/queries";
@@ -14,12 +13,8 @@ interface RelatedProductsProps {
 }
 
 async function getRelatedProducts(collectionSlug: string, currentProductId: string, currencyCode: string) {
-    'use cache'
-    cacheLife('hours')
 
     const locale = await getRouteLocale();
-    cacheTag(`related-products-${collectionSlug}-${locale}-${currencyCode}`);
-    cacheTag('products');
 
     const result = await query(GetCollectionProductsQuery, {
         slug: collectionSlug,

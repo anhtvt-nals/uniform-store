@@ -15,6 +15,7 @@ import { Select as SelectNative } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, RotateCcw, FolderTree, X } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -40,6 +41,7 @@ type Category = {
 };
 
 export default function ProductsPage() {
+  const { t } = useT();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [isActive, setIsActive] = useState<string>("");
@@ -153,7 +155,7 @@ export default function ProductsPage() {
             <p className="text-muted-foreground text-sm">Manage your product catalog</p>
           </div>
           <Button asChild>
-            <Link href="/products/new"><Plus className="h-4 w-4" /> New Product</Link>
+            <Link href="/products/new"><Plus className="h-4 w-4" /> {t("products.newProduct")}</Link>
           </Button>
         </div>
 
@@ -233,9 +235,9 @@ export default function ProductsPage() {
           </>
         ) : (
           <EmptyState
-            title="No products found"
+            title={t("products.noProducts")}
             description={search ? "Try a different search term." : "Add your first product to the catalog."}
-            action={<Button asChild><Link href="/products/new"><Plus className="h-4 w-4" /> New Product</Link></Button>}
+            action={<Button asChild><Link href="/products/new"><Plus className="h-4 w-4" /> {t("products.newProduct")}</Link></Button>}
           />
         )}
 

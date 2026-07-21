@@ -34,7 +34,7 @@ export async function Navbar() {
                     {/* Left: mobile menu + logo + desktop nav */}
                     <div className="flex items-center gap-6 lg:gap-10 min-w-0">
                         <Suspense>
-                            <MobileNavWrapper />
+                            <MobileNavWrapper locale={locale} />
                         </Suspense>
                         <Link href="/" className="flex items-center gap-2 shrink-0">
                             <Image

@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/i18n"
+
 import { useQuery } from "@tanstack/react-query"
 import { apiClient, getToken } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AlertTriangle } from "lucide-react"
 
 export default function InventoryPage() {
+  const { t } = useT();
   const token = getToken();
 
   const { data: lowStock, isLoading } = useQuery({

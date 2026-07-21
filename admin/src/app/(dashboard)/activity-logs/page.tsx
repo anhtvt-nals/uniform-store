@@ -9,6 +9,7 @@ import { Pagination } from "@/components/shared/pagination"
 import { Select as SelectNative } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
+import { useT } from "@/i18n"
 
 type Log = {
   id: string;
@@ -21,6 +22,7 @@ type Log = {
 };
 
 export default function ActivityLogsPage() {
+  const { t } = useT();
   const [page, setPage] = useState(1);
   const [action, setAction] = useState("");
   const [entityType, setEntityType] = useState("");

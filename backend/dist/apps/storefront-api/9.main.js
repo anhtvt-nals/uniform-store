@@ -1,0 +1,378 @@
+"use strict";
+exports.id = 9;
+exports.ids = [9];
+exports.modules = {
+
+/***/ 2638
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EventStreamSerde: () => (/* binding */ EventStreamSerde)
+/* harmony export */ });
+/* harmony import */ var _smithy_core_serde__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1988);
+/* harmony import */ var _smithy_core_serde__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1990);
+
+class EventStreamSerde {
+    marshaller;
+    serializer;
+    deserializer;
+    serdeContext;
+    defaultContentType;
+    constructor({ marshaller, serializer, deserializer, serdeContext, defaultContentType, }) {
+        this.marshaller = marshaller;
+        this.serializer = serializer;
+        this.deserializer = deserializer;
+        this.serdeContext = serdeContext;
+        this.defaultContentType = defaultContentType;
+    }
+    async serializeEventStream({ eventStream, requestSchema, initialRequest, }) {
+        const marshaller = this.marshaller;
+        const eventStreamMember = requestSchema.getEventStreamMember();
+        const unionSchema = requestSchema.getMemberSchema(eventStreamMember);
+        const serializer = this.serializer;
+        const defaultContentType = this.defaultContentType;
+        const initialRequestMarker = Symbol("initialRequestMarker");
+        const eventStreamIterable = {
+            async *[Symbol.asyncIterator]() {
+                if (initialRequest) {
+                    const headers = {
+                        ":event-type": { type: "string", value: "initial-request" },
+                        ":message-type": { type: "string", value: "event" },
+                        ":content-type": { type: "string", value: defaultContentType },
+                    };
+                    serializer.write(requestSchema, initialRequest);
+                    const body = serializer.flush();
+                    yield {
+                        [initialRequestMarker]: true,
+                        headers,
+                        body,
+                    };
+                }
+                for await (const page of eventStream) {
+                    yield page;
+                }
+            },
+        };
+        return marshaller.serialize(eventStreamIterable, (event) => {
+            if (event[initialRequestMarker]) {
+                return {
+                    headers: event.headers,
+                    body: event.body,
+                };
+            }
+            let unionMember = "";
+            for (const key in event) {
+                if (key !== "__type") {
+                    unionMember = key;
+                    break;
+                }
+            }
+            const { additionalHeaders, body, eventType, explicitPayloadContentType } = this.writeEventBody(unionMember, unionSchema, event);
+            const headers = {
+                ":event-type": { type: "string", value: eventType },
+                ":message-type": { type: "string", value: "event" },
+                ":content-type": { type: "string", value: explicitPayloadContentType ?? defaultContentType },
+                ...additionalHeaders,
+            };
+            return {
+                headers,
+                body,
+            };
+        });
+    }
+    async deserializeEventStream({ response, responseSchema, initialResponseContainer, }) {
+        const marshaller = this.marshaller;
+        const eventStreamMember = responseSchema.getEventStreamMember();
+        const unionSchema = responseSchema.getMemberSchema(eventStreamMember);
+        const memberSchemas = unionSchema.getMemberSchemas();
+        const initialResponseMarker = Symbol("initialResponseMarker");
+        const asyncIterable = marshaller.deserialize(response.body, async (event) => {
+            let unionMember = "";
+            for (const key in event) {
+                if (key !== "__type") {
+                    unionMember = key;
+                    break;
+                }
+            }
+            const body = event[unionMember].body;
+            if (unionMember === "initial-response") {
+                const dataObject = await this.deserializer.read(responseSchema, body);
+                delete dataObject[eventStreamMember];
+                return {
+                    [initialResponseMarker]: true,
+                    ...dataObject,
+                };
+            }
+            else if (unionMember in memberSchemas) {
+                const eventStreamSchema = memberSchemas[unionMember];
+                if (eventStreamSchema.isStructSchema()) {
+                    const out = {};
+                    let hasBindings = false;
+                    for (const [name, member] of eventStreamSchema.structIterator()) {
+                        const { eventHeader, eventPayload } = member.getMergedTraits();
+                        hasBindings = hasBindings || Boolean(eventHeader || eventPayload);
+                        if (eventPayload) {
+                            if (member.isBlobSchema()) {
+                                out[name] = body;
+                            }
+                            else if (member.isStringSchema()) {
+                                out[name] = (this.serdeContext?.utf8Encoder ?? _smithy_core_serde__WEBPACK_IMPORTED_MODULE_1__.toUtf8)(body);
+                            }
+                            else if (member.isStructSchema()) {
+                                out[name] = await this.deserializer.read(member, body);
+                            }
+                        }
+                        else if (eventHeader) {
+                            const value = event[unionMember].headers[name]?.value;
+                            if (value != null) {
+                                if (member.isNumericSchema()) {
+                                    if (value && typeof value === "object" && "bytes" in value) {
+                                        out[name] = BigInt(value.toString());
+                                    }
+                                    else {
+                                        out[name] = Number(value);
+                                    }
+                                }
+                                else {
+                                    out[name] = value;
+                                }
+                            }
+                        }
+                    }
+                    if (hasBindings) {
+                        return {
+                            [unionMember]: out,
+                        };
+                    }
+                    if (body.byteLength === 0) {
+                        return {
+                            [unionMember]: {},
+                        };
+                    }
+                }
+                return {
+                    [unionMember]: await this.deserializer.read(eventStreamSchema, body),
+                };
+            }
+            else {
+                return {
+                    $unknown: event,
+                };
+            }
+        });
+        const asyncIterator = asyncIterable[Symbol.asyncIterator]();
+        const firstEvent = await asyncIterator.next();
+        if (firstEvent.done) {
+            return asyncIterable;
+        }
+        if (firstEvent.value?.[initialResponseMarker]) {
+            if (!responseSchema) {
+                throw new Error("@smithy::core/protocols - initial-response event encountered in event stream but no response schema given.");
+            }
+            for (const key in firstEvent.value) {
+                initialResponseContainer[key] = firstEvent.value[key];
+            }
+        }
+        return {
+            async *[Symbol.asyncIterator]() {
+                if (!firstEvent?.value?.[initialResponseMarker]) {
+                    yield firstEvent.value;
+                }
+                while (true) {
+                    const { done, value } = await asyncIterator.next();
+                    if (done) {
+                        break;
+                    }
+                    yield value;
+                }
+            },
+        };
+    }
+    writeEventBody(unionMember, unionSchema, event) {
+        const serializer = this.serializer;
+        let eventType = unionMember;
+        let explicitPayloadMember = null;
+        let explicitPayloadContentType;
+        const isKnownSchema = (() => {
+            const struct = unionSchema.getSchema();
+            return struct[4].includes(unionMember);
+        })();
+        const additionalHeaders = {};
+        if (!isKnownSchema) {
+            const [type, value] = event[unionMember];
+            eventType = type;
+            serializer.write(15, value);
+        }
+        else {
+            const eventSchema = unionSchema.getMemberSchema(unionMember);
+            if (eventSchema.isStructSchema()) {
+                for (const [memberName, memberSchema] of eventSchema.structIterator()) {
+                    const { eventHeader, eventPayload } = memberSchema.getMergedTraits();
+                    if (eventPayload) {
+                        explicitPayloadMember = memberName;
+                    }
+                    else if (eventHeader) {
+                        const value = event[unionMember][memberName];
+                        let type = "binary";
+                        if (memberSchema.isNumericSchema()) {
+                            if ((-2) ** 31 <= value && value <= 2 ** 31 - 1) {
+                                type = "integer";
+                            }
+                            else {
+                                type = "long";
+                            }
+                        }
+                        else if (memberSchema.isTimestampSchema()) {
+                            type = "timestamp";
+                        }
+                        else if (memberSchema.isStringSchema()) {
+                            type = "string";
+                        }
+                        else if (memberSchema.isBooleanSchema()) {
+                            type = "boolean";
+                        }
+                        if (value != null) {
+                            additionalHeaders[memberName] = {
+                                type,
+                                value,
+                            };
+                            delete event[unionMember][memberName];
+                        }
+                    }
+                }
+                if (explicitPayloadMember !== null) {
+                    const payloadSchema = eventSchema.getMemberSchema(explicitPayloadMember);
+                    if (payloadSchema.isBlobSchema()) {
+                        explicitPayloadContentType = "application/octet-stream";
+                    }
+                    else if (payloadSchema.isStringSchema()) {
+                        explicitPayloadContentType = "text/plain";
+                    }
+                    serializer.write(payloadSchema, event[unionMember][explicitPayloadMember]);
+                }
+                else {
+                    serializer.write(eventSchema, event[unionMember]);
+                }
+            }
+            else if (eventSchema.isUnitSchema()) {
+                serializer.write(eventSchema, {});
+            }
+            else {
+                throw new Error("@smithy/core/event-streams - non-struct member not supported in event stream union.");
+            }
+        }
+        const messageSerialization = serializer.flush() ?? new Uint8Array();
+        const body = typeof messageSerialization === "string"
+            ? (this.serdeContext?.utf8Decoder ?? _smithy_core_serde__WEBPACK_IMPORTED_MODULE_0__.fromUtf8)(messageSerialization)
+            : messageSerialization;
+        return {
+            body,
+            eventType,
+            explicitPayloadContentType,
+            additionalHeaders,
+        };
+    }
+}
+
+
+/***/ },
+
+/***/ 2637
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   iterableToReadableStream: () => (/* binding */ iterableToReadableStream),
+/* harmony export */   readableStreamToIterable: () => (/* binding */ readableStreamToIterable)
+/* harmony export */ });
+const readableStreamToIterable = (readableStream) => ({
+    [Symbol.asyncIterator]: async function* () {
+        const reader = readableStream.getReader();
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done)
+                    return;
+                yield value;
+            }
+        }
+        finally {
+            reader.releaseLock();
+        }
+    },
+});
+const iterableToReadableStream = (asyncIterable) => {
+    const iterator = asyncIterable[Symbol.asyncIterator]();
+    return new ReadableStream({
+        async pull(controller) {
+            const { done, value } = await iterator.next();
+            if (done) {
+                return controller.close();
+            }
+            controller.enqueue(value);
+        },
+    });
+};
+
+
+/***/ },
+
+/***/ 2636
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EventStreamCodec: () => (/* reexport safe */ _eventstream_codec_EventStreamCodec__WEBPACK_IMPORTED_MODULE_0__.EventStreamCodec),
+/* harmony export */   EventStreamMarshaller: () => (/* reexport safe */ _eventstream_serde_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_7__.EventStreamMarshaller),
+/* harmony export */   EventStreamSerde: () => (/* reexport safe */ _EventStreamSerde__WEBPACK_IMPORTED_MODULE_13__.EventStreamSerde),
+/* harmony export */   HeaderMarshaller: () => (/* reexport safe */ _eventstream_codec_HeaderMarshaller__WEBPACK_IMPORTED_MODULE_1__.HeaderMarshaller),
+/* harmony export */   Int64: () => (/* reexport safe */ _eventstream_codec_Int64__WEBPACK_IMPORTED_MODULE_2__.Int64),
+/* harmony export */   MessageDecoderStream: () => (/* reexport safe */ _eventstream_codec_MessageDecoderStream__WEBPACK_IMPORTED_MODULE_3__.MessageDecoderStream),
+/* harmony export */   MessageEncoderStream: () => (/* reexport safe */ _eventstream_codec_MessageEncoderStream__WEBPACK_IMPORTED_MODULE_4__.MessageEncoderStream),
+/* harmony export */   SmithyMessageDecoderStream: () => (/* reexport safe */ _eventstream_codec_SmithyMessageDecoderStream__WEBPACK_IMPORTED_MODULE_5__.SmithyMessageDecoderStream),
+/* harmony export */   SmithyMessageEncoderStream: () => (/* reexport safe */ _eventstream_codec_SmithyMessageEncoderStream__WEBPACK_IMPORTED_MODULE_6__.SmithyMessageEncoderStream),
+/* harmony export */   UniversalEventStreamMarshaller: () => (/* reexport safe */ _eventstream_serde_universal_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_9__.EventStreamMarshaller),
+/* harmony export */   eventStreamSerdeProvider: () => (/* reexport safe */ _eventstream_serde_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_7__.eventStreamSerdeProvider),
+/* harmony export */   getChunkedStream: () => (/* reexport safe */ _eventstream_serde_universal_getChunkedStream__WEBPACK_IMPORTED_MODULE_10__.getChunkedStream),
+/* harmony export */   getMessageUnmarshaller: () => (/* reexport safe */ _eventstream_serde_universal_getUnmarshalledStream__WEBPACK_IMPORTED_MODULE_11__.getMessageUnmarshaller),
+/* harmony export */   getUnmarshalledStream: () => (/* reexport safe */ _eventstream_serde_universal_getUnmarshalledStream__WEBPACK_IMPORTED_MODULE_11__.getUnmarshalledStream),
+/* harmony export */   iterableToReadableStream: () => (/* reexport safe */ _eventstream_serde_utils__WEBPACK_IMPORTED_MODULE_8__.iterableToReadableStream),
+/* harmony export */   readableStreamToIterable: () => (/* reexport safe */ _eventstream_serde_utils__WEBPACK_IMPORTED_MODULE_8__.readableStreamToIterable),
+/* harmony export */   resolveEventStreamSerdeConfig: () => (/* reexport safe */ _eventstream_serde_config_resolver_EventStreamSerdeConfig__WEBPACK_IMPORTED_MODULE_12__.resolveEventStreamSerdeConfig),
+/* harmony export */   universalEventStreamSerdeProvider: () => (/* reexport safe */ _eventstream_serde_universal_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_9__.eventStreamSerdeProvider)
+/* harmony export */ });
+/* harmony import */ var _eventstream_codec_EventStreamCodec__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2157);
+/* harmony import */ var _eventstream_codec_HeaderMarshaller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2158);
+/* harmony import */ var _eventstream_codec_Int64__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2159);
+/* harmony import */ var _eventstream_codec_MessageDecoderStream__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2161);
+/* harmony import */ var _eventstream_codec_MessageEncoderStream__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(2162);
+/* harmony import */ var _eventstream_codec_SmithyMessageDecoderStream__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(2163);
+/* harmony import */ var _eventstream_codec_SmithyMessageEncoderStream__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(2164);
+/* harmony import */ var _eventstream_serde_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(2155);
+/* harmony import */ var _eventstream_serde_utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(2637);
+/* harmony import */ var _eventstream_serde_universal_EventStreamMarshaller__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(2156);
+/* harmony import */ var _eventstream_serde_universal_getChunkedStream__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(2165);
+/* harmony import */ var _eventstream_serde_universal_getUnmarshalledStream__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(2166);
+/* harmony import */ var _eventstream_serde_config_resolver_EventStreamSerdeConfig__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(1976);
+/* harmony import */ var _EventStreamSerde__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(2638);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }
+
+};
+;

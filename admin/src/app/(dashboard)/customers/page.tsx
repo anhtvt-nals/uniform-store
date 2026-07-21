@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Eye, Mail, Phone } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
+import { useT } from "@/i18n"
 
 type Customer = {
   id: string;
@@ -24,6 +25,7 @@ type Customer = {
 };
 
 export default function CustomersPage() {
+  const { t } = useT();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const token = getToken();
@@ -100,7 +102,7 @@ export default function CustomersPage() {
           <Pagination page={data.page} totalPages={data.totalPages} totalItems={data.total} onPageChange={setPage} />
         </>
       ) : (
-        <EmptyState title="No customers found" description={search ? "Try a different search." : "Customers will appear here after they register."} />
+        <EmptyState title={t("customers.noCustomers")} description={search ? "Try a different search." : "Customers will appear here after they register."} />
       )}
     </div>
   );

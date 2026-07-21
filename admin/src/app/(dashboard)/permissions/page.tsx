@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select as SelectNative } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 
 type AdminUser = {
   id: string;
@@ -17,6 +18,7 @@ type AdminUser = {
 };
 
 export default function PermissionsPage() {
+  const { t } = useT();
   const token = getToken();
   const queryClient = useQueryClient();
 

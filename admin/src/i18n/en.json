@@ -1,0 +1,222 @@
+{
+  "common": {
+    "search": "Search...",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "back": "Back",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "total": "Total",
+    "page": "Page",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "noData": "No data",
+    "success": "Success",
+    "error": "Error",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yesNo": {
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "inquiries": "Inquiries",
+    "products": "Products",
+    "categories": "Categories",
+    "brands": "Brands",
+    "customers": "Customers",
+    "inventory": "Inventory",
+    "articles": "Articles",
+    "promotions": "Promotions",
+    "shipping": "Shipping",
+    "payment": "Payment",
+    "uploads": "Uploads",
+    "activityLogs": "Activity Logs",
+    "settings": "Settings",
+    "permissions": "Permissions"
+  },
+  "header": {
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "signOut": "Sign Out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of your store performance",
+    "totalRevenue": "Total Revenue",
+    "totalOrders": "Total Orders",
+    "totalCustomers": "Total Customers",
+    "totalProducts": "Total Products",
+    "avgOrderValue": "Avg Order Value",
+    "pendingOrders": "Pending Orders",
+    "fromLastMonth": "from last month",
+    "revenueChart": "Revenue (Last 30 Days)",
+    "ordersByStatus": "Orders by Status",
+    "topProducts": "Top Selling Products",
+    "sold": "sold",
+    "noRevenue": "No revenue data yet",
+    "noOrders": "No orders yet",
+    "noProducts": "No products sold yet"
+  },
+  "products": {
+    "title": "Products",
+    "description": "Manage your store products",
+    "newProduct": "New Product",
+    "editProduct": "Edit Product",
+    "search": "Search products...",
+    "allCategories": "All Categories",
+    "allBrands": "All Brands",
+    "allStatus": "All Status",
+    "name": "Product Name",
+    "category": "Category",
+    "brand": "Brand",
+    "price": "Price",
+    "stock": "Stock",
+    "featured": "Featured",
+    "active": "Active",
+    "createdAt": "Created At",
+    "noProducts": "No products found"
+  },
+  "orders": {
+    "title": "Orders",
+    "description": "Manage orders",
+    "orderCode": "Order Code",
+    "customer": "Customer",
+    "total": "Total",
+    "status": "Status",
+    "createdAt": "Created At",
+    "noOrders": "No orders found",
+    "pending": "Pending",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "inquiries": {
+    "title": "Inquiries",
+    "description": "Manage customer product inquiries",
+    "search": "Search by name, email, company...",
+    "allStatuses": "All statuses",
+    "name": "Name",
+    "email": "Email",
+    "product": "Product",
+    "qty": "Qty",
+    "status": "Status",
+    "date": "Date",
+    "noInquiries": "No inquiries found",
+    "detail": "Inquiry from",
+    "notes": "Notes",
+    "submitted": "Submitted",
+    "pending": "Pending",
+    "contacted": "Contacted",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Manage product categories",
+    "newCategory": "New Category",
+    "name": "Category Name",
+    "slug": "Slug",
+    "parent": "Parent Category",
+    "active": "Active",
+    "noCategories": "No categories found"
+  },
+  "brands": {
+    "title": "Brands",
+    "description": "Manage product brands",
+    "newBrand": "New Brand",
+    "name": "Brand Name",
+    "noBrands": "No brands found"
+  },
+  "customers": {
+    "title": "Customers",
+    "description": "Manage customers",
+    "search": "Search by name, email, phone...",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "orders": "Orders",
+    "joined": "Joined",
+    "noCustomers": "No customers found"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "description": "Manage product inventory",
+    "product": "Product",
+    "variant": "Variant",
+    "sku": "SKU",
+    "quantity": "Quantity",
+    "reserved": "Reserved",
+    "available": "Available",
+    "lowStock": "Low Stock",
+    "noInventory": "No inventory data"
+  },
+  "articles": {
+    "title": "Articles",
+    "description": "Manage articles & news",
+    "newArticle": "New Article",
+    "title_": "Title",
+    "slug": "Slug",
+    "category": "Category",
+    "published": "Published",
+    "noArticles": "No articles found"
+  },
+  "promotions": {
+    "title": "Promotions",
+    "description": "Manage discounts & promotions",
+    "newPromotion": "New Promotion",
+    "noPromotions": "No promotions"
+  },
+  "uploads": {
+    "title": "Uploads",
+    "description": "Manage images & files",
+    "uploadFile": "Upload File",
+    "browseAssets": "Browse Assets",
+    "noFiles": "No files found"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "System settings"
+  },
+  "permissions": {
+    "title": "Permissions",
+    "description": "Manage admin access",
+    "admin": "Admin",
+    "role": "Role",
+    "noUsers": "No admin users found"
+  },
+  "activityLogs": {
+    "title": "Activity Logs",
+    "description": "Track system activity",
+    "action": "Action",
+    "entity": "Entity",
+    "user": "User",
+    "time": "Time",
+    "noLogs": "No logs"
+  },
+  "shipping": {
+    "title": "Shipping",
+    "description": "Manage shipping methods",
+    "noMethods": "No shipping methods"
+  },
+  "payment": {
+    "title": "Payment",
+    "description": "Manage payment methods",
+    "noMethods": "No payment methods"
+  }
+}

@@ -1,7 +1,6 @@
 import {Suspense} from 'react';
 import {Link} from '@/i18n/navigation';
 import {getTranslations} from 'next-intl/server';
-import {cacheLife, cacheTag} from 'next/cache';
 import {query} from '@/lib/vendure/api';
 import {SearchProductsQuery} from '@/lib/vendure/queries';
 import {getRouteLocale} from '@/i18n/server';
@@ -10,10 +9,6 @@ import {ProductTile} from './product-tile';
 import {ArrowRight} from 'lucide-react';
 
 async function getProducts(locale: string, currencyCode: string, limit: number) {
-    'use cache';
-    cacheLife('hours');
-    cacheTag('products');
-    cacheTag(`featured-${locale}-${currencyCode}`);
 
     const result = await query(
         SearchProductsQuery,

@@ -1,7 +1,7 @@
 import type {Metadata, Viewport} from "next";
 import {locale as rootLocale} from "next/root-params";
 import {hasLocale, NextIntlClientProvider} from "next-intl";
-import {Inter} from "next/font/google";
+import localFont from "next/font/local";
 import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {routing} from "@/i18n/routing";
@@ -15,10 +15,10 @@ import {ThemeProvider} from "@/components/providers/theme-provider";
 import {SITE_NAME, SITE_URL} from "@/lib/metadata";
 import "./globals.css";
 
-const inter = Inter({
+const inter = localFont({
+    src: "../../fonts/Inter-Latin.woff2",
+    weight: "100 900",
     variable: "--font-inter",
-    subsets: ["latin"],
-    weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export function generateStaticParams() {
@@ -90,12 +90,14 @@ export default async function LocaleLayout({children}: {children: React.ReactNod
                 className={`${inter.variable} antialiased flex flex-col min-h-screen bg-background text-foreground`}
             >
                 <NextIntlClientProvider locale={locale} messages={messages}>
-                    <ThemeProvider>
-                        <Suspense><Navbar /></Suspense>
-                        {children}
-                        <Footer/>
-                        <Toaster/>
-                    </ThemeProvider>
+                    <Suspense>
+                        <ThemeProvider>
+                            <Suspense><Navbar /></Suspense>
+                            {children}
+                            <Suspense><Footer /></Suspense>
+                            <Toaster/>
+                        </ThemeProvider>
+                    </Suspense>
                 </NextIntlClientProvider>
             </body>
         </html>

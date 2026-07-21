@@ -1,6 +1,5 @@
 import {Suspense} from 'react';
 import {getTranslations} from 'next-intl/server';
-import {cacheLife, cacheTag} from 'next/cache';
 import {query} from '@/lib/vendure/api';
 import {SearchProductsQuery} from '@/lib/vendure/queries';
 import {getTopCollections} from '@/lib/vendure/cached';
@@ -18,10 +17,6 @@ type CollectionItem = {
 };
 
 async function getCollectionProducts(locale: string, currencyCode: string, collectionSlug: string, take: number) {
-    'use cache';
-    cacheLife('hours');
-    cacheTag('products');
-    cacheTag(`featured-cat-${collectionSlug}-${locale}-${currencyCode}`);
 
     const result = await query(
         SearchProductsQuery,

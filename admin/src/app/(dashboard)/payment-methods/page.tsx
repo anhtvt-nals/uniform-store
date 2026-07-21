@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/i18n"
+
 import { useQuery } from "@tanstack/react-query"
 import { apiClient, getToken } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function PaymentMethodsPage() {
+  const { t } = useT();
   const token = getToken();
 
   const { data, isLoading } = useQuery({

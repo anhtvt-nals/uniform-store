@@ -8,7 +8,6 @@ import { FacetFilters } from '@/components/commerce/facet-filters';
 import { CategorySidebar } from '@/components/commerce/category-sidebar';
 import { ProductGridSkeleton } from '@/components/shared/product-grid-skeleton';
 import { buildSearchInput, getCurrentPage } from '@/lib/search-helpers';
-import { cacheLife, cacheTag } from 'next/cache';
 import {
     Breadcrumb,
     BreadcrumbList,
@@ -30,12 +29,8 @@ import {getRouteLocale} from '@/i18n/server';
 import {getTranslations} from 'next-intl/server';
 
 async function getCollectionProducts(slug: string, searchParams: { [key: string]: string | string[] | undefined }, currencyCode: string) {
-    'use cache';
-    cacheLife('hours');
 
     const locale = await getRouteLocale();
-    cacheTag(`collection-${slug}-${locale}-${currencyCode}`);
-    cacheTag('collection');
 
     return query(SearchProductsQuery, {
         input: buildSearchInput({
@@ -46,11 +41,8 @@ async function getCollectionProducts(slug: string, searchParams: { [key: string]
 }
 
 async function getCollectionMetadata(slug: string) {
-    'use cache';
-    cacheLife('hours');
 
     const locale = await getRouteLocale();
-    cacheTag(`collection-meta-${slug}-${locale}`);
 
     return query(GetCollectionProductsQuery, {
         slug,

@@ -20,6 +20,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { Search, Eye, Trash2 } from "lucide-react"
+import { useT } from "@/i18n"
 
 type Inquiry = {
   id: string
@@ -43,6 +44,7 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
 }
 
 export default function InquiriesPage() {
+  const { t } = useT();
   const token = getToken()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState("")
@@ -89,8 +91,8 @@ export default function InquiriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Inquiries</h1>
-        <p className="text-muted-foreground text-sm">Manage customer product inquiries</p>
+        <h1 className="text-2xl font-bold">{t("inquiries.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("inquiries.description")}</p>
       </div>
 
       <Card>
@@ -99,7 +101,7 @@ export default function InquiriesPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email, company..."
+                placeholder={t("inquiries.search")}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1) }}
                 className="pl-9"
@@ -107,15 +109,15 @@ export default function InquiriesPage() {
             </div>
             <Select
               className="w-[150px]"
-              placeholder="All statuses"
+              placeholder={t("inquiries.allStatuses")}
               value={status}
               onChange={(e) => { setStatus(e.target.value); setPage(1) }}
               options={[
-                { value: "", label: "All statuses" },
-                { value: "pending", label: "Pending" },
-                { value: "contacted", label: "Contacted" },
-                { value: "completed", label: "Completed" },
-                { value: "cancelled", label: "Cancelled" },
+                { value: "", label: t("inquiries.allStatuses") },
+                { value: "pending", label: t("inquiries.pending") },
+                { value: "contacted", label: t("inquiries.contacted") },
+                { value: "completed", label: t("inquiries.completed") },
+                { value: "cancelled", label: t("inquiries.cancelled") },
               ]}
             />
           </div>
@@ -127,12 +129,12 @@ export default function InquiriesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>{t("inquiries.name")}</TableHead>
+                    <TableHead>{t("inquiries.email")}</TableHead>
+                    <TableHead>{t("inquiries.product")}</TableHead>
+                    <TableHead>{t("inquiries.qty")}</TableHead>
+                    <TableHead>{t("inquiries.status")}</TableHead>
+                    <TableHead>{t("inquiries.date")}</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -140,7 +142,7 @@ export default function InquiriesPage() {
                   {data?.items?.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                        No inquiries found
+                        {t("inquiries.noInquiries")}
                       </TableCell>
                     </TableRow>
                   )}
@@ -191,7 +193,7 @@ export default function InquiriesPage() {
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogHeader>
-          <DialogTitle>Inquiry from {selected?.fullName}</DialogTitle>
+          <DialogTitle>{t("inquiries.detail")} {selected?.fullName}</DialogTitle>
           <DialogDescription>{selected?.email}</DialogDescription>
         </DialogHeader>
         {selected && (
@@ -215,16 +217,16 @@ export default function InquiriesPage() {
               )}
             </div>
             <div>
-              <p className="text-muted-foreground mb-1">Product</p>
+              <p className="text-muted-foreground mb-1">{t("inquiries.product")}</p>
               <p className="font-medium">{selected.product?.name?.vi || selected.product?.name?.en || "-"}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-muted-foreground">Quantity</p>
+                <p className="text-muted-foreground">{t("inquiries.qty")}</p>
                 <p className="font-medium">{selected.quantity}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Status</p>
+                <p className="text-muted-foreground">{t("inquiries.status")}</p>
                 <Select
                   className="h-8 mt-1"
                   value={selected.status}
@@ -240,12 +242,12 @@ export default function InquiriesPage() {
             </div>
             {selected.notes && (
               <div>
-                <p className="text-muted-foreground mb-1">Notes</p>
+                <p className="text-muted-foreground mb-1">{t("inquiries.notes")}</p>
                 <p className="bg-muted rounded p-3">{selected.notes}</p>
               </div>
             )}
             <p className="text-muted-foreground text-xs">
-              Submitted: {new Date(selected.createdAt).toLocaleString()}
+              {t("inquiries.submitted")}: {new Date(selected.createdAt).toLocaleString()}
             </p>
           </div>
         )}

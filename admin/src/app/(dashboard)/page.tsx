@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown } from "lucide-react"
 import { format } from "date-fns"
+import { useT } from "@/i18n"
 import { vi } from "date-fns/locale"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
 
@@ -46,6 +47,7 @@ function formatCurrency(amount: number): string {
 }
 
 export default function DashboardPage() {
+  const { t } = useT();
   const token = getToken();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -73,12 +75,12 @@ export default function DashboardPage() {
   });
 
   const statCards = stats ? [
-    { title: "Total Revenue", value: formatCurrency(stats.totalRevenue ?? 0), icon: DollarSign, trend: "+12.5%", trendUp: true },
-    { title: "Total Orders", value: (stats.totalOrders ?? 0).toLocaleString(), icon: ShoppingCart, trend: "+8.2%", trendUp: true },
-    { title: "Total Customers", value: (stats.totalCustomers ?? 0).toLocaleString(), icon: Users, trend: "+5.1%", trendUp: true },
-    { title: "Total Products", value: (stats.totalProducts ?? 0).toLocaleString(), icon: Package, trend: "+3.4%", trendUp: true },
-    { title: "Avg Order Value", value: formatCurrency(stats.averageOrderValue ?? 0), icon: DollarSign, trend: "-2.1%", trendUp: false },
-    { title: "Pending Orders", value: (stats.pendingOrders ?? 0).toString(), icon: ShoppingCart, trend: "", trendUp: true },
+    { title: t("dashboard.totalRevenue"), value: formatCurrency(stats.totalRevenue ?? 0), icon: DollarSign, trend: "+12.5%", trendUp: true },
+    { title: t("dashboard.totalOrders"), value: (stats.totalOrders ?? 0).toLocaleString(), icon: ShoppingCart, trend: "+8.2%", trendUp: true },
+    { title: t("dashboard.totalCustomers"), value: (stats.totalCustomers ?? 0).toLocaleString(), icon: Users, trend: "+5.1%", trendUp: true },
+    { title: t("dashboard.totalProducts"), value: (stats.totalProducts ?? 0).toLocaleString(), icon: Package, trend: "+3.4%", trendUp: true },
+    { title: t("dashboard.avgOrderValue"), value: formatCurrency(stats.averageOrderValue ?? 0), icon: DollarSign, trend: "-2.1%", trendUp: false },
+    { title: t("dashboard.pendingOrders"), value: (stats.pendingOrders ?? 0).toString(), icon: ShoppingCart, trend: "", trendUp: true },
   ] : [];
 
   const orderStatusEntries = orderStats
@@ -88,8 +90,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your store performance</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+        <p className="text-muted-foreground">{t("dashboard.description")}</p>
       </div>
 
       {/* Stats Cards */}
@@ -122,7 +124,7 @@ export default function DashboardPage() {
                     {card.trend && (
                       <p className={cn("text-xs flex items-center gap-1 mt-1", card.trendUp ? "text-emerald-600" : "text-red-600")}>
                         {card.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                        {card.trend} from last month
+                        {card.trend} {t("dashboard.fromLastMonth")}
                       </p>
                     )}
                   </CardContent>
@@ -136,7 +138,7 @@ export default function DashboardPage() {
         {/* Revenue Chart */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Revenue (Last 30 Days)</CardTitle>
+            <CardTitle className="text-base">{t("dashboard.revenueChart")}</CardTitle>
           </CardHeader>
           <CardContent>
             {revenueLoading ? (
@@ -162,7 +164,7 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-[300px] items-center justify-center text-muted-foreground">
-                No revenue data yet
+                {t("dashboard.noRevenue")}
               </div>
             )}
           </CardContent>
@@ -171,7 +173,7 @@ export default function DashboardPage() {
         {/* Order Stats */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Orders by Status</CardTitle>
+            <CardTitle className="text-base">{t("dashboard.ordersByStatus")}</CardTitle>
           </CardHeader>
           <CardContent>
             {orderStatsLoading ? (
@@ -188,7 +190,7 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-[300px] items-center justify-center text-muted-foreground">
-                No orders yet
+                {t("dashboard.noOrders")}
               </div>
             )}
           </CardContent>
@@ -198,7 +200,7 @@ export default function DashboardPage() {
       {/* Top Products */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top Selling Products</CardTitle>
+          <CardTitle className="text-base">{t("dashboard.topProducts")}</CardTitle>
         </CardHeader>
         <CardContent>
           {topLoading ? (
@@ -216,7 +218,7 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium truncate">
                       {product.name?.en || product.name?.vi || product.slug}
                     </p>
-                    <p className="text-xs text-muted-foreground">{product.totalSold} sold</p>
+                    <p className="text-xs text-muted-foreground">{product.totalSold} {t("dashboard.sold")}</p>
                   </div>
                   <p className="text-sm font-medium">{formatCurrency(product.totalRevenue)}</p>
                 </div>
@@ -224,7 +226,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex h-32 items-center justify-center text-muted-foreground">
-              No products sold yet
+              {t("dashboard.noProducts")}
             </div>
           )}
         </CardContent>

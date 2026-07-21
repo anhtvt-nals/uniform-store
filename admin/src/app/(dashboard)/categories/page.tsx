@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 import { format } from "date-fns"
 
 type Category = {
@@ -38,6 +39,7 @@ type PaginatedResponse<T> = {
 };
 
 export default function CategoriesPage() {
+  const { t } = useT();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [includeDeleted, setIncludeDeleted] = useState(false);
@@ -92,7 +94,7 @@ export default function CategoriesPage() {
         <Button asChild>
           <Link href="/categories/new">
             <Plus className="h-4 w-4" />
-            New Category
+            {t("categories.newCategory")}
           </Link>
         </Button>
       </div>
@@ -192,13 +194,13 @@ export default function CategoriesPage() {
         </>
       ) : (
         <EmptyState
-          title="No categories found"
+          title={t("categories.noCategories")}
           description={search ? "Try a different search term." : "Create your first category to organize products."}
           action={
             <Button asChild>
               <Link href="/categories/new">
                 <Plus className="h-4 w-4" />
-                New Category
+                {t("categories.newCategory")}
               </Link>
             </Button>
           }

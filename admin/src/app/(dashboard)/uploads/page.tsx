@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Trash2, ExternalLink, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 import { cn } from "@/lib/utils"
 
 type Asset = {
@@ -32,6 +33,7 @@ type ListResponse = {
 }
 
 export default function UploadsPage() {
+  const { t } = useT();
   const token = getToken()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState("")

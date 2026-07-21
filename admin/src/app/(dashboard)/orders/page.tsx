@@ -14,6 +14,7 @@ import { Select as SelectNative } from "@/components/ui/select"
 import { Eye } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
+import { useT } from "@/i18n"
 
 const statusColors: Record<string, "success" | "secondary" | "destructive" | "warning" | "default"> = {
   delivered: "success",
@@ -35,6 +36,7 @@ type Order = {
 };
 
 export default function OrdersPage() {
+  const { t } = useT();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
@@ -105,7 +107,7 @@ export default function OrdersPage() {
           <Pagination page={data.page} totalPages={data.totalPages} totalItems={data.total} onPageChange={setPage} />
         </>
       ) : (
-        <EmptyState title="No orders found" description={search ? "Try different search terms." : "Orders will appear here when customers place them."} />
+        <EmptyState title={t("orders.noOrders")} description={search ? "Try different search terms." : "Orders will appear here when customers place them."} />
       )}
     </div>
   );

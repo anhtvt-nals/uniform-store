@@ -13,6 +13,7 @@ import { SearchInput } from "@/components/shared/search-input"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useT } from "@/i18n"
 import { format } from "date-fns"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 
@@ -25,6 +26,7 @@ type Article = {
 };
 
 export default function ArticlesPage() {
+  const { t } = useT();
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
