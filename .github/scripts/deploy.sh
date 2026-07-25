@@ -5,8 +5,7 @@
 # ══════════════════════════════════════════════════════════════
 set -e
 
-APP_DIR="/opt/uniform-store"
-cd "$APP_DIR"
+APP_DIR="$(pwd)"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🚀 Deploying uniform-store"
