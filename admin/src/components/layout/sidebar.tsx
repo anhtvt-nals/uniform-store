@@ -20,6 +20,8 @@ import {
   Shield,
   MessageSquare,
   BarChart3,
+  ClipboardList,
+  Handshake,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -35,6 +37,8 @@ export function Sidebar() {
     { href: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
     { href: "/orders", label: t("nav.orders"), icon: ShoppingCart },
     { href: "/inquiries", label: t("nav.inquiries"), icon: MessageSquare },
+    { href: "/quotes", label: t("nav.quotes"), icon: ClipboardList },
+    { href: "/contracts", label: t("nav.contracts"), icon: Handshake },
     { href: "/products", label: t("nav.products"), icon: Package },
     { href: "/categories", label: t("nav.categories"), icon: Tags },
     { href: "/brands", label: t("nav.brands"), icon: Building2 },

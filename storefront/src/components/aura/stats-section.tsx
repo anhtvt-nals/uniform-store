@@ -41,8 +41,8 @@ export async function StatsSection() {
             sub: t('stats.retentionSub'),
             bg: "bg-foreground",
             text: "text-background",
-            subText: "text-muted-foreground",
-            icon: <CircleChart />,
+            subText: "text-background/60",
+            icon: <CircleChart className="text-background/60" />,
         },
     ];
 
@@ -67,15 +67,11 @@ export async function StatsSection() {
     );
 }
 
-function CircleChart() {
+function CircleChart({className}: {className?: string}) {
     return (
-        <svg className="w-10 h-10 text-muted-foreground" viewBox="0 0 36 36">
-            <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-            />
+        <svg className={`w-10 h-10 ${className || 'text-muted-foreground'}`} viewBox="0 0 36 36">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="100" strokeDashoffset="2" strokeLinecap="round" />
         </svg>
     );
 }

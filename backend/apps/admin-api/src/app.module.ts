@@ -21,6 +21,9 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ActivityLogsModule } from './activity-logs/activity-logs.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { InquiriesModule } from './inquiries/inquiries.module';
+import { SettingsModule } from './settings/settings.module';
+import { QuoteRequestsModule } from './quote-requests/quote-requests.module';
+import { CustomerContractsModule } from './customer-contracts/customer-contracts.module';
 
 @Module({
   imports: [
@@ -45,6 +48,9 @@ import { InquiriesModule } from './inquiries/inquiries.module';
     ActivityLogsModule,
     PermissionsModule,
     InquiriesModule,
+    SettingsModule,
+    QuoteRequestsModule,
+    CustomerContractsModule,
     HealthModule,
   ],
 })

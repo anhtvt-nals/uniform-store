@@ -17,6 +17,8 @@ import { PagesModule } from './pages/pages.module';
 import { ShopApiModule } from './shop-api/shop-api.module';
 import { HealthModule } from './health/health.module';
 import { InquiriesModule } from './inquiries/inquiries.module';
+import { QuoteRequestsModule } from './quote-requests/quote-requests.module';
+import { CustomerContractsModule } from './customer-contracts/customer-contracts.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { InquiriesModule } from './inquiries/inquiries.module';
     ShopApiModule,
     HealthModule,
     InquiriesModule,
+    QuoteRequestsModule,
+    CustomerContractsModule,
   ],
 })
 export class AppModule {}

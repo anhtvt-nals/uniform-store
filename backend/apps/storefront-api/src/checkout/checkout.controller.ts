@@ -11,7 +11,7 @@ import { CheckoutService } from './checkout.service';
 import { SetCustomerDto } from './dto/set-customer.dto';
 import { AddressDto } from './dto/address.dto';
 import { PlaceOrderDto } from '../orders/dto/place-order.dto';
-import { OptionalAuthGuard, CurrentUser, SessionId } from '@app/common';
+import { OptionalUserAuthGuard, CurrentUser, SessionId } from '@app/common';
 
 @ApiTags('Checkout')
 @Controller('api/v1/checkout')
@@ -19,7 +19,7 @@ export class CheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}
 
   @Post('customer')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Set customer email and name' })
   setCustomer(
     @Body() dto: SetCustomerDto,
@@ -30,7 +30,7 @@ export class CheckoutController {
   }
 
   @Post('shipping-address')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Set shipping address' })
   setShippingAddress(
     @Body() dto: AddressDto,
@@ -41,7 +41,7 @@ export class CheckoutController {
   }
 
   @Post('billing-address')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Set billing address' })
   setBillingAddress(
     @Body() dto: AddressDto,
@@ -58,7 +58,7 @@ export class CheckoutController {
   }
 
   @Post('shipping-method')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Select shipping method' })
   setShippingMethod(
     @Body('code') code: string,
@@ -75,7 +75,7 @@ export class CheckoutController {
   }
 
   @Post('payment')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Select payment method' })
   setPayment(
     @Body('method') method: string,
@@ -86,7 +86,7 @@ export class CheckoutController {
   }
 
   @Get('summary')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Get checkout summary' })
   getSummary(
     @CurrentUser() user?: any,
@@ -96,7 +96,7 @@ export class CheckoutController {
   }
 
   @Post('confirm')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Place order (from cached session or direct DTO)' })
   confirm(
     @Body() dto: PlaceOrderDto,

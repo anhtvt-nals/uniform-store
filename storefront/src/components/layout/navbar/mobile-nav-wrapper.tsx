@@ -5,7 +5,12 @@ import {MobileNav} from '@/components/layout/navbar/mobile-nav';
 const getCachedTopCollections = cache(getTopCollections);
 
 export async function MobileNavWrapper({locale}: {locale: string}) {
-    const collections = await getCachedTopCollections(locale);
+    let collections: {id: string; name: string; slug: string}[] = [];
+    try {
+        collections = await getCachedTopCollections(locale);
+    } catch {
+        // API not available yet — render mobile menu without collections
+    }
 
     return <MobileNav collections={collections} />;
 }

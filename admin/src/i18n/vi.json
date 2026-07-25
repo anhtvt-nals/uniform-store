@@ -44,7 +44,9 @@
     "uploads": "Tải lên",
     "activityLogs": "Nhật ký hoạt động",
     "settings": "Cài đặt",
-    "permissions": "Phân quyền"
+    "permissions": "Phân quyền",
+    "quotes": "Báo giá",
+    "contracts": "Hợp đồng"
   },
   "header": {
     "myAccount": "Tài khoản của tôi",
@@ -215,5 +217,19 @@
     "title": "Thanh toán",
     "description": "Quản lý phương thức thanh toán",
     "noMethods": "Không có phương thức thanh toán"
+  },
+  "contracts": {
+    "title": "Hợp đồng khách hàng",
+    "description": "Quản lý logo khách hàng đã ký hợp đồng",
+    "add": "Thêm hợp đồng",
+    "edit": "Sửa hợp đồng",
+    "search": "Tìm kiếm...",
+    "name": "Tên khách hàng",
+    "description": "Mô tả",
+    "logoUrl": "URL Logo",
+    "order": "Thứ tự",
+    "active": "Kích hoạt",
+    "empty": "Không có hợp đồng nào",
+    "formDesc": "Điền thông tin hợp đồng bên dưới"
   }
 }

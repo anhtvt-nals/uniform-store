@@ -32,3 +32,6 @@ export * from './setting.entity';
 export * from './stock-history.entity';
 export * from './user-role.entity';
 export * from './user.entity';
+export * from './inquiry.entity';
+export * from './quote-request.entity';
+export * from './customer-contract.entity';

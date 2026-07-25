@@ -35,6 +35,9 @@ import {
   ArticleEntity,
   ArticleCategoryEntity,
   ArticleTagEntity,
+  InquiryEntity,
+  QuoteRequestEntity,
+  CustomerContractEntity,
 } from './entities';
 
 @Module({
@@ -43,8 +46,7 @@ import {
       useFactory: () => {
         const sslEnabled =
           process.env.DB_SSL === 'true' ||
-          process.env.NODE_ENV === 'production' ||
-          (process.env.DATABASE_URL?.includes('supabase.co') ?? false);
+          process.env.NODE_ENV === 'production';
 
         const baseConfig = {
           type: 'postgres' as const,
@@ -83,6 +85,9 @@ import {
             ArticleEntity,
             ArticleCategoryEntity,
             ArticleTagEntity,
+            InquiryEntity,
+            QuoteRequestEntity,
+            CustomerContractEntity,
           ],
           synchronize: false,
           logging: process.env.DB_LOGGING === 'true',

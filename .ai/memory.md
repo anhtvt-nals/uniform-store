@@ -23,7 +23,7 @@ Minh An Uniform — Vietnamese corporate uniform manufacturing ecommerce platfor
 - **ORM**: TypeORM with migrations
 - **Validation**: class-validator + class-transformer
 - **API Docs**: @nestjs/swagger (OpenAPI)
-- **Auth (customers)**: Supabase Auth (JWT)
+- **Auth (customers)**: Custom JWT (bcrypt passwords) — no longer Supabase
 - **Auth (admins)**: Custom JWT (bcrypt passwords)
 - **Storage**: S3-compatible (MinIO dev, AWS S3/R2 prod)
 - **Cache**: In-memory LRU initially → Redis later
@@ -53,7 +53,7 @@ All under `/[locale]` (vi, en, de):
 ```
 User Action → Server Action ('use server')
   → REST API call to /api/v1/*
-    → NestJS Backend → Supabase Postgres
+    → NestJS Backend → Postgres
   → updateTag('cart') / revalidatePath()
   → UI re-renders
 ```
@@ -68,7 +68,7 @@ User Action → Server Action ('use server')
 
 - Token in cookie: `vendure-auth-token`
 - Sent as `Authorization: Bearer <token>`
-- Supabase Auth manages sessions
+- Custom JWT (bcrypt) — verified by `UserAuthGuard`
 - Guest checkout uses `session_id` cookie
 
 ## Key Frontend Files
@@ -117,7 +117,7 @@ backend/
 │   │   ├── src/
 │   │   │   ├── main.ts          # Bootstrap: Swagger, CORS, Helmet, ValidationPipe
 │   │   │   ├── app.module.ts    # Root module (11 feature modules)
-│   │   │   ├── auth/            # Supabase JWT auth (register, login, etc.)
+│   │   │   ├── auth/            # Custom JWT + bcrypt auth (register, login, etc.)
 │   │   │   ├── products/        # Product listing, detail, variants, related, featured
 │   │   │   ├── brands/          # Brand listing, detail, products
 │   │   │   ├── collections/     # Category tree, category products
@@ -181,7 +181,7 @@ backend/
 | Database config | ✅ Supabase | Supports DATABASE_URL env var + SSL (detects supabase.co automatically); graceful fallback to individual DB_* vars |
 | Entities | ✅ Complete | AssetEntity, UserEntity, RoleEntity, UserRoleEntity, AdminUserEntity, CategoryEntity, BrandEntity, ProductEntity, ProductVariantEntity, ProductImageEntity, ProductOptionGroupEntity, ProductOptionEntity, ProductVariantOptionEntity, InventoryEntity, StockHistoryEntity, CartEntity, CartItemEntity, CartCouponEntity, OrderEntity, OrderItemEntity, AddressEntity, DiscountEntity, CouponEntity, CouponUsageEntity, ActivityLogEntity, SettingEntity (26 entities total) |
 | DB Schema Design | ✅ Complete | `.ai/database.md` updated — full schema (32 existing + 11 new tables), ASCII ERD, key decisions, migration summary. 5 new migrations added. |
-| Auth implementation | ✅ Complete | Guards, decorators, storefront auth (Supabase Auth), admin auth (bcrypt + JWT). |
+| Auth implementation | ✅ Complete | Guards, decorators, storefront auth (custom JWT + bcrypt), admin auth (bcrypt + JWT). Supabase Auth removed. |
 | Category implementation | ✅ Complete | Storefront (tree listing, detail, products) + Admin (full CRUD, reorder, restore, product assignment). |
 | Brand implementation | ✅ Complete | Storefront (list, detail, products) + Admin (full CRUD, restore, logo update). |
 | Product implementation | ✅ Complete | Storefront (list with search/filters/sort, detail, variants, related, featured) + Admin (full CRUD with variants, images, option groups, restore). |
@@ -202,6 +202,38 @@ backend/
 | Storefront API (NestJS) | http://localhost:3000/health | ❌ Stopped (start with `npm run dev` in `backend/`) |
 | PostgreSQL 16 | localhost:5432 | ✅ Running (Docker) |
 | MinIO S3 | localhost:9000 (API), localhost:9001 (Console) | ✅ Running (Docker) |
+
+## Recent Changes
+
+### Homepage Redesign — B2B Landing Page (2026-07-25)
+Complete homepage overhaul from catalog layout to high-converting B2B landing page:
+- **Hero Banner** (`hero-banner.tsx`) — Gradient hero with value prop badges, dual CTAs, floating social proof
+- **Trust Bar** (`trust-bar.tsx`) — Client logo placeholder grid (Vingroup, Techcombank, etc.)
+- **Product Categories** (`product-categories.tsx`) — 3-card grid (Office/Industry/Event) linked to `/search?collection=slug`
+- **Manufacturing Capability** (`manufacturing-capability.tsx`) — Factory image + 4-stat grid (area, staff, capacity, QC)
+- **Case Studies** (`case-studies.tsx`) — 3 project cards with company, product, timeline
+- **Material Quality** (`material-quality.tsx`) — 4 color-coded material cards (cotton/poly/coolmax/bamboo)
+- **Pricing Reference** (`pricing-reference.tsx`) — Responsive pricing table (3 products × 3 tiers)
+- **Final CTA** (`final-cta.tsx`) — Gradient closing banner with single CTA
+- **Mobile Sticky CTA** (`mobile-sticky-cta.tsx`) — Fixed bottom bar (Call + Quote) on mobile
+- **Navbar updates** — Added process/projects/contact links, "Nhận báo giá miễn phí" CTA button
+- **Translations** — Added all `Home` + `Navigation` keys to vi/en/de
+- Old sections retained as files but no longer imported
+
+### Supabase Auth Removal (2026-07-25)
+- `SupabaseAuthGuard` → `UserAuthGuard` (custom JWT via jsonwebtoken + `userJwt` config)
+- `OptionalAuthGuard` → `OptionalUserAuthGuard`
+- `AuthService` rewritten: bcrypt password hashing + JWT signing/verification instead of Supabase admin API
+- `UserEntity` gains `passwordHash` column; migration 031 added
+- `app.config.ts`: Removed `supabase` namespace, added `userJwt` with `secret` + `expiresIn`
+- All controllers (auth, cart, checkout, orders) updated to new guards
+- `@supabase/supabase-js` removed from dependencies
+- `supabase.co` SSL auto-detection removed from `database.module.ts` + `data-source.ts`
+
+### Webpack Circular Dependency Fix (2026-07-25)
+- Created `backend/webpack.config.js` — externals `@nestjs/typeorm` + `typeorm` to break bundle loop
+- Re-enabled `webpack: true` in `nest-cli.json`
+- Dockerfiles: compile libs separately, copy to `node_modules/@app/*`, then build app
 
 ## Recent Fixes
 
@@ -260,16 +292,15 @@ Added `CountryEntity` at `libs/database/src/entities/country.entity.ts` — maps
 
 ## Auth Implementation Details
 
-### Storefront Auth (Supabase Auth)
-- `POST /api/v1/auth/register` — Admin creates user (email_confirm: true)
-- `POST /api/v1/auth/verify-email` — OTP verification
-- `POST /api/v1/auth/login` — Email/password sign in
-- `POST /api/v1/auth/logout` — Requires Bearer token (SupabaseAuthGuard)
+### Storefront Auth (Custom JWT + bcrypt)
+- `POST /api/v1/auth/register` — Register new user (password hashed with bcrypt)
+- `POST /api/v1/auth/login` — Email/password sign in, returns JWT
+- `POST /api/v1/auth/logout` — Clears session (no token param required)
 - `POST /api/v1/auth/forgot-password` — Sends reset email
 - `POST /api/v1/auth/reset-password` — Token + new password
 - `POST /api/v1/auth/change-password` — Requires Bearer token, verifies current password
 - `POST /api/v1/auth/change-email` — Requires Bearer token, sends verification
-- `GET /api/v1/auth/me` — Requires Bearer token, returns user profile from Supabase admin API
+- `GET /api/v1/auth/me` — Requires Bearer token, returns user profile from users table
 
 ### Admin Auth (Custom JWT + bcrypt)
 - `POST /api/v1/admin/auth/login` — Email/password, returns JWT
@@ -280,9 +311,9 @@ Added `CountryEntity` at `libs/database/src/entities/country.entity.ts` — maps
 - Roles: super_admin, admin, editor, analyst
 
 ### Common Module
-- `SupabaseAuthGuard` — Verifies Supabase JWT via service role key, attaches `request.user`
+- `UserAuthGuard` — Verifies customer JWT via jsonwebtoken from `userJwt` config, attaches `request.user`
+- `OptionalUserAuthGuard` — Like UserAuthGuard but doesn't block unauthenticated requests
 - `AdminAuthGuard` — Verifies admin JWT via jsonwebtoken, attaches `request.admin`
-- `OptionalAuthGuard` — Like SupabaseAuthGuard but doesn't block unauthenticated requests
 - `RolesGuard` — Checks `request.admin.role` against required roles from `@Roles()` decorator
 - `CurrentUser` decorator — Supports `@CurrentUser()` for `request.user` or `@CurrentUser('admin')` for `request.admin`
 - `HttpExceptionFilter` — Global exception filter, wraps all errors in `{ success: false, error: { code, message, details } }` format
@@ -474,10 +505,10 @@ Added `CountryEntity` at `libs/database/src/entities/country.entity.ts` — maps
 - Activity logs and dashboard are read-only; customers and products support full CRUD.
 - Permissions module exposes role management (super_admin only).
 
-### Auth Recommendation
-- Storefront: Already using Supabase Auth (JWT). Keep as-is.
-- Admin: Already using custom JWT (bcrypt). Keep as-is — admin credentials stored in `admin_users` table, not managed by Supabase Auth.
-- Both use the same Supabase Postgres database but independent auth systems.
+### Auth Recommendation (Applied 2026-07-25)
+- Storefront: Custom JWT (bcrypt) — Supabase Auth removed. Passwords stored in `users` table as `password_hash`.
+- Admin: Custom JWT (bcrypt) — unchanged. Credentials in `admin_users` table.
+- Both share the same Postgres database with independent auth systems and JWT secrets.
 
 
 ## CI/CD (GitHub Actions + VPS)

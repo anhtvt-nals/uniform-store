@@ -3,6 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {getRouteLocale} from '@/i18n/server';
 import {CheckCircle2} from 'lucide-react';
 import {HeroSlider, type HeroSlide, type HeroTrustBadge} from './hero-slider';
+import {QuoteButton} from '@/components/commerce/quote-button';
 
 const slideImages = [
     "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=1000&auto=format&fit=crop",
@@ -88,9 +89,9 @@ async function BulkOrderWidget() {
                 </div>
             </div>
 
-            <Link href="/search" className="mt-6 bg-background text-primary rounded-full py-4 text-xs font-bold uppercase tracking-widest hover:bg-muted transition shadow-sm w-full relative z-10 text-center">
-                {home('bulkOrderCta')}
-            </Link>
+            <div className="mt-6 w-full">
+                <QuoteButton variant="hero" />
+            </div>
         </div>
     );
 }

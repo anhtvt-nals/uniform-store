@@ -17,7 +17,7 @@ import { UpdateInquiryStatusDto } from './dto/update-inquiry-status.dto';
 @ApiTags('Admin - Inquiries')
 @ApiBearerAuth()
 @UseGuards(AdminAuthGuard)
-@Controller('api/v1/admin/inquiries')
+@Controller('inquiries')
 export class InquiriesController {
   constructor(private readonly inquiriesService: InquiriesService) {}
 

@@ -6,8 +6,7 @@ dotenv.config();
 
 const sslEnabled =
   process.env.DB_SSL === 'true' ||
-  process.env.NODE_ENV === 'production' ||
-  (process.env.DATABASE_URL?.includes('supabase.co') ?? false);
+  process.env.NODE_ENV === 'production';
 
 const baseConfig: any = {
   type: 'postgres',

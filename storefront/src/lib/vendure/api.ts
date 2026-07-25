@@ -79,37 +79,67 @@ export async function query<TResult, TVariables>(
         url.searchParams.set('currencyCode', currencyCode);
     }
 
-    const response = await fetch(url.toString(), {
-        ...fetchOptions,
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-            query: print(document),
-            variables: variables || {},
-        }),
-        ...(tags && {next: {tags}}),
-    });
+    const doFetch = (signal?: AbortSignal) =>
+        fetch(url.toString(), {
+            ...fetchOptions,
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                query: print(document),
+                variables: variables || {},
+            }),
+            signal,
+            ...(tags && {next: {tags}}),
+        });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+        const response = await doFetch(controller.signal);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result: VendureResponse<TResult> = await response.json();
+
+        if (result.errors) {
+            throw new Error(result.errors.map(e => e.message).join(', '));
+        }
+
+        if (!result.data) {
+            throw new Error('No data returned from Vendure API');
+        }
+
+        const newToken = extractAuthToken(response.headers);
+
+        return {
+            data: result.data,
+            ...(newToken && {token: newToken}),
+        };
+    } catch (error) {
+        clearTimeout(timeoutId);
+        // Retry once on timeout
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            const retryController = new AbortController();
+            const retryTimeoutId = setTimeout(() => retryController.abort(), 15000);
+            try {
+                const response = await doFetch(retryController.signal);
+                clearTimeout(retryTimeoutId);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result: VendureResponse<TResult> = await response.json();
+                if (result.errors) throw new Error(result.errors.map(e => e.message).join(', '));
+                if (!result.data) throw new Error('No data returned from Vendure API');
+                const newToken = extractAuthToken(response.headers);
+                return { data: result.data, ...(newToken && {token: newToken}) };
+            } finally {
+                clearTimeout(retryTimeoutId);
+            }
+        }
+        throw error;
     }
-
-    const result: VendureResponse<TResult> = await response.json();
-
-    if (result.errors) {
-        throw new Error(result.errors.map(e => e.message).join(', '));
-    }
-
-    if (!result.data) {
-        throw new Error('No data returned from Vendure API');
-    }
-
-    const newToken = extractAuthToken(response.headers);
-
-    return {
-        data: result.data,
-        ...(newToken && {token: newToken}),
-    };
 }
 
 /**

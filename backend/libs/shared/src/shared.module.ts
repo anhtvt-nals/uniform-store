@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { StorageService } from './storage/storage.service';
 import { MemoryCacheService } from './cache/memory-cache.service';
+import { MailService } from './mail/mail.service';
 import appConfig from './config/app.config';
 
 @Global()
@@ -14,8 +15,9 @@ import appConfig from './config/app.config';
   ],
   providers: [
     StorageService,
+    MailService,
     { provide: 'CacheService', useClass: MemoryCacheService },
   ],
-  exports: [StorageService, 'CacheService', ConfigModule],
+  exports: [StorageService, MailService, 'CacheService', ConfigModule],
 })
 export class SharedModule {}

@@ -15,6 +15,7 @@ import {TestimonialWidget} from "@/components/aura/testimonial-widget";
 import {ConsultationWidget} from "@/components/aura/consultation-widget";
 import {FAQSection} from "@/components/aura/faq-section";
 import {NewsSection} from "@/components/aura/news-section";
+import {CustomerContractsSection} from "@/components/aura/customer-contracts-section";
 import {FloatingButtons} from "@/components/aura/floating-buttons";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,6 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
+    const locale = await getRouteLocale();
     return (
         <div className="min-h-screen">
             <HeroSection />
@@ -51,7 +53,9 @@ export default async function Home() {
                     <FeaturedCategoryTabs />
                 </Suspense>
                 <WhyChooseUsSection />
-                <ProcessSection />
+            </main>
+            <ProcessSection />
+            <main className="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto">
                 <ProductionGallerySection />
                 <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                     <TestimonialWidget />
@@ -60,6 +64,9 @@ export default async function Home() {
                 <FAQSection />
                 <NewsSection />
             </main>
+            <Suspense>
+                <CustomerContractsSection locale={locale} />
+            </Suspense>
             <FloatingButtons />
         </div>
     );

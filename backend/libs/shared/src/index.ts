@@ -4,3 +4,5 @@ export * from './cache/cache.interface';
 export * from './cache/memory-cache.service';
 export * from './cache/redis-cache.service';
 export * from './config/app.config';
+export * from './mail/mail.service';
+export * from './mail/mail.module';

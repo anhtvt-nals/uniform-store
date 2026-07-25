@@ -13,9 +13,7 @@ import { CartService } from './cart.service';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ApplyCouponDto } from './dto/apply-coupon.dto';
-import { OptionalAuthGuard } from '@app/common';
-import { CurrentUser } from '@app/common';
-import { SessionId } from '@app/common';
+import { OptionalUserAuthGuard, CurrentUser, SessionId } from '@app/common';
 
 @ApiTags('Cart')
 @Controller('api/v1/cart')
@@ -23,7 +21,7 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Get current cart (creates one if not exists)' })
   getCart(
     @CurrentUser() user?: any,
@@ -33,7 +31,7 @@ export class CartController {
   }
 
   @Post('items')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Add item to cart' })
   addItem(
     @Body() dto: AddItemDto,
@@ -44,7 +42,7 @@ export class CartController {
   }
 
   @Patch('items/:lineId')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Update cart item quantity' })
   updateItem(
     @Param('lineId') lineId: string,
@@ -56,7 +54,7 @@ export class CartController {
   }
 
   @Delete('items/:lineId')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Remove item from cart' })
   removeItem(
     @Param('lineId') lineId: string,
@@ -67,7 +65,7 @@ export class CartController {
   }
 
   @Post('coupons')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Apply a coupon to the cart' })
   addCoupon(
     @Body() dto: ApplyCouponDto,
@@ -78,7 +76,7 @@ export class CartController {
   }
 
   @Delete('coupons/:code')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Remove a coupon from the cart' })
   removeCoupon(
     @Param('code') code: string,
@@ -89,7 +87,7 @@ export class CartController {
   }
 
   @Post('merge')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Merge guest cart into user cart after login' })
   mergeCart(
     @CurrentUser() user: any,

@@ -1,16 +1,23 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY package.json ./
 COPY apps/storefront-api/package.json apps/storefront-api/
+COPY apps/admin-api/package.json apps/admin-api/
 COPY libs/common/package.json libs/common/
 COPY libs/database/package.json libs/database/
 COPY libs/shared/package.json libs/shared/
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 
+RUN npx nest build common && npx nest build database && npx nest build shared
+RUN for lib in common database shared; do \
+      rm -rf "node_modules/@app/$lib" \
+      && cp -r "dist/libs/$lib" "node_modules/@app/$lib" \
+      && printf '{"name":"@app/%s","version":"0.1.0","private":true,"main":"index.js"}' "$lib" > "node_modules/@app/$lib/package.json"; \
+    done
 RUN npm run build:storefront
 
 FROM node:22-alpine
@@ -20,6 +27,7 @@ RUN addgroup --system app && adduser --system --ingroup app app
 
 COPY --chown=app:app --from=build /app/dist ./dist
 COPY --chown=app:app --from=build /app/node_modules ./node_modules
+COPY --chown=app:app --from=build /app/package.json ./package.json
 
 USER app
 

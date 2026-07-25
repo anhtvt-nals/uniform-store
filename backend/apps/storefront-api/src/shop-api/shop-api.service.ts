@@ -198,12 +198,9 @@ export class ShopApiService {
 
   private async handleLogout(
     _variables: Record<string, unknown>,
-    options: ExecuteOptions,
+    _options: ExecuteOptions,
   ): Promise<ExecuteResult> {
-    if (!options.token) {
-      return this.errorResult('logout', 'NOT_AUTHENTICATED', 'Not authenticated');
-    }
-    await this.authService.logout(options.token);
+    await this.authService.logout();
     return this.successResult('logout');
   }
 

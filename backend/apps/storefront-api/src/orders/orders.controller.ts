@@ -11,7 +11,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { PlaceOrderDto } from './dto/place-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
-import { OptionalAuthGuard, CurrentUser, SessionId } from '@app/common';
+import { OptionalUserAuthGuard, CurrentUser, SessionId } from '@app/common';
 
 @ApiTags('Orders')
 @Controller('api/v1/orders')
@@ -19,7 +19,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Place an order from current cart' })
   create(
     @Body() dto: PlaceOrderDto,
@@ -30,7 +30,7 @@ export class OrdersController {
   }
 
   @Get()
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'List my orders' })
   @ApiBearerAuth()
   findAll(
@@ -41,7 +41,7 @@ export class OrdersController {
   }
 
   @Get(':code')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'Get order detail by code' })
   findByCode(
     @Param('code') code: string,

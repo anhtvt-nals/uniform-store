@@ -10,7 +10,8 @@ import {Suspense} from "react";
 import {SearchInput} from '@/components/layout/search-input';
 import {NavbarUserSkeleton} from '@/components/shared/skeletons/navbar-user-skeleton';
 import {SearchInputSkeleton} from '@/components/shared/skeletons/search-input-skeleton';
-import {Phone} from "lucide-react";
+import {NavProducts} from '@/components/layout/navbar/nav-products';
+import {Phone, MessageSquare} from "lucide-react";
 import {Link} from '@/i18n/navigation';
 import {getTranslations} from "next-intl/server";
 import {getRouteLocale} from "@/i18n/server";
@@ -48,13 +49,17 @@ export async function Navbar() {
                         </Link>
                         <nav className="hidden xl:flex items-center gap-7 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                             {navLinks.map((item, i) => (
-                                <NavigationLink
-                                    key={i}
-                                    href={item.href}
-                                    className="hover:text-foreground transition whitespace-nowrap"
-                                >
-                                    {item.label}
-                                </NavigationLink>
+                                item.href === '/search' ? (
+                                    <NavProducts key={i} />
+                                ) : (
+                                    <NavigationLink
+                                        key={i}
+                                        href={item.href}
+                                        className="hover:text-foreground transition whitespace-nowrap"
+                                    >
+                                        {item.label}
+                                    </NavigationLink>
+                                )
                             ))}
                         </nav>
                     </div>

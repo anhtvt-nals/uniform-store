@@ -3,9 +3,6 @@ import {
   Post,
   Body,
   Get,
-  Patch,
-  Param,
-  Headers,
   UseGuards,
   Res,
 } from '@nestjs/common';
@@ -24,7 +21,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { VerifyDto } from './dto/verify.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { SupabaseAuthGuard, OptionalAuthGuard } from '@app/common';
+import { UserAuthGuard, OptionalUserAuthGuard } from '@app/common';
 import { CurrentUser } from '@app/common';
 
 @ApiTags('Auth')
@@ -69,12 +66,11 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout current session' })
-  async logout(@Headers('authorization') auth: string) {
-    const token = auth?.replace('Bearer ', '');
-    return this.authService.logout(token);
+  async logout() {
+    return this.authService.logout();
   }
 
   @Post('forgot-password')
@@ -100,27 +96,25 @@ export class AuthController {
   }
 
   @Post('change-password')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password (needs current password)' })
   async changePassword(
-    @Headers('authorization') auth: string,
+    @CurrentUser() user: any,
     @Body() dto: ChangePasswordDto,
   ) {
-    const token = auth?.replace('Bearer ', '');
-    return this.authService.changePassword(token, dto);
+    return this.authService.changePassword(user.id, dto);
   }
 
   @Post('change-email')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Request email change' })
   async changeEmail(
-    @Headers('authorization') auth: string,
+    @CurrentUser() user: any,
     @Body() dto: ChangeEmailDto,
   ) {
-    const token = auth?.replace('Bearer ', '');
-    return this.authService.changeEmail(token, dto);
+    return this.authService.changeEmail(user.id, dto);
   }
 
   @Post('verify-email')
@@ -130,7 +124,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(OptionalUserAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user' })
   async getMe(@CurrentUser() user?: any) {

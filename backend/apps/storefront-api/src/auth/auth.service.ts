@@ -3,15 +3,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  createClient,
-  SupabaseClient,
-} from '@supabase/supabase-js';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '@app/database';
+import { UserEntity, UserRoleEntity, RoleEntity } from '@app/database';
 
 export interface CurrentUserResult {
   id: string;
@@ -29,189 +27,167 @@ export interface ErrorResult {
 
 @Injectable()
 export class AuthService {
-  private supabaseAnon: SupabaseClient;
-  private supabaseAdmin: SupabaseClient;
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private configService: ConfigService,
     @InjectRepository(UserEntity)
     private userRepo: Repository<UserEntity>,
-  ) {
-    const url = this.configService.get<string>('app.supabase.url')!;
-    const anonKey = this.configService.get<string>('app.supabase.anonKey')!;
-    const serviceRoleKey = this.configService.get<string>('app.supabase.serviceRoleKey')!;
-    this.supabaseAnon = createClient(url, anonKey);
-    this.supabaseAdmin = createClient(url, serviceRoleKey);
-  }
+    @InjectRepository(UserRoleEntity)
+    private userRoleRepo: Repository<UserRoleEntity>,
+    @InjectRepository(RoleEntity)
+    private roleRepo: Repository<RoleEntity>,
+  ) {}
 
   async register(dto: RegisterDto): Promise<{ id: string; email: string }> {
-    const { data, error } = await this.supabaseAdmin.auth.admin.createUser({
+    const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+    if (existing) {
+      throw new AuthErrorException('EMAIL_ALREADY_REGISTERED', 'Email is already registered');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const id = crypto.randomUUID();
+
+    await this.userRepo.insert({
+      id,
       email: dto.email,
-      password: dto.password,
-      email_confirm: true,
-      user_metadata: {
-        first_name: dto.firstName ?? '',
-        last_name: dto.lastName ?? '',
-      },
+      firstName: dto.firstName ?? '',
+      lastName: dto.lastName ?? '',
+      phone: dto.phone ?? '',
+      passwordHash,
+      isActive: true,
     });
 
-    if (error) {
-      if (error.message.includes('already registered')) {
-        throw new AuthErrorException('EMAIL_ALREADY_REGISTERED', 'Email is already registered');
-      }
-      throw new AuthErrorException('REGISTRATION_FAILED', error.message);
+    const customerRole = await this.roleRepo.findOne({ where: { name: 'customer' } });
+    if (customerRole) {
+      await this.userRoleRepo.insert({ userId: id, roleId: customerRole.id });
     }
 
-    // Insert public user record (Supabase trigger may not fire in test/admin API)
-    try {
-      await this.userRepo.upsert(
-        {
-          id: data.user.id,
-          email: dto.email,
-          firstName: dto.firstName ?? '',
-          lastName: dto.lastName ?? '',
-          phone: dto.phone ?? '',
-        },
-        ['id'],
-      );
-    } catch (e) {
-      this.logger.warn('Failed to upsert user record', e);
-    }
-
-    return { id: data.user.id, email: dto.email };
+    return { id, email: dto.email };
   }
 
   async login(dto: LoginDto): Promise<{ user: CurrentUserResult; token: string }> {
-    const { data, error } = await this.supabaseAnon.auth.signInWithPassword({
-      email: dto.email,
-      password: dto.password,
-    });
+    const user = await this.userRepo.findOne({ where: { email: dto.email } });
 
-    if (error) {
+    if (!user || !user.passwordHash) {
       throw new AuthErrorException('INVALID_CREDENTIALS', 'Invalid email or password');
     }
 
+    const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!passwordValid) {
+      throw new AuthErrorException('INVALID_CREDENTIALS', 'Invalid email or password');
+    }
+
+    const secret = this.configService.get<string>('app.userJwt.secret')!;
+    const expiresIn = this.configService.get<string>('app.userJwt.expiresIn') || '30d';
+
+    const token = jwt.sign(
+      { sub: user.id, email: user.email },
+      secret,
+      { expiresIn } as jwt.SignOptions,
+    );
+
     return {
-      user: {
-        id: data.user.id,
-        identifier: data.user.email!,
-      },
-      token: data.session.access_token,
+      user: { id: user.id, identifier: user.email },
+      token,
     };
   }
 
-  async logout(accessToken: string): Promise<SuccessResult> {
-    this.supabaseAnon.auth.setSession({
-      access_token: accessToken,
-      refresh_token: '',
-    });
-    const { error } = await this.supabaseAnon.auth.signOut();
-    if (error) {
-      throw new AuthErrorException('LOGOUT_FAILED', error.message);
-    }
+  async logout(): Promise<SuccessResult> {
     return { success: true };
   }
 
   async forgotPassword(dto: { email: string }): Promise<SuccessResult> {
-    const { error } = await this.supabaseAnon.auth.resetPasswordForEmail(
-      dto.email,
+    const user = await this.userRepo.findOne({ where: { email: dto.email } });
+    if (!user) return { success: true };
+
+    const secret = this.configService.get<string>('app.userJwt.secret')!;
+    const token = jwt.sign(
+      { sub: user.id, email: user.email, purpose: 'password-reset' },
+      secret,
+      { expiresIn: '1h' } as jwt.SignOptions,
     );
-    if (error) {
-      throw new AuthErrorException('RESET_FAILED', error.message);
-    }
+
+    this.logger.log(`Password reset token for ${dto.email}: ${token}`);
+    this.logger.warn('Email sending not implemented — log the reset token for now');
+
     return { success: true };
   }
 
   async resetPassword(dto: { token: string; password: string }): Promise<{ user: CurrentUserResult; token: string }> {
-    this.supabaseAnon.auth.setSession({
-      access_token: dto.token,
-      refresh_token: '',
-    });
-    const { data, error } = await this.supabaseAnon.auth.updateUser({
-      password: dto.password,
-    });
-    if (error) {
-      throw new AuthErrorException('RESET_FAILED', error.message);
+    const secret = this.configService.get<string>('app.userJwt.secret')!;
+    let payload: { sub: string; email: string; purpose?: string };
+    try {
+      payload = jwt.verify(dto.token, secret) as any;
+    } catch {
+      throw new AuthErrorException('INVALID_TOKEN', 'Invalid or expired reset token');
     }
+
+    const passwordHash = await bcrypt.hash(dto.password, 12);
+    await this.userRepo.update(payload.sub, { passwordHash });
+
+    const newToken = jwt.sign(
+      { sub: payload.sub, email: payload.email },
+      secret,
+      { expiresIn: '30d' } as jwt.SignOptions,
+    );
+
     return {
-      user: {
-        id: data.user.id,
-        identifier: data.user.email!,
-      },
-      token: dto.token,
+      user: { id: payload.sub, identifier: payload.email },
+      token: newToken,
     };
   }
 
   async changePassword(
-    accessToken: string,
+    userId: string,
     dto: { currentPassword: string; newPassword: string },
   ): Promise<SuccessResult> {
-    const { data: userData } = await this.supabaseAnon.auth.getUser(accessToken);
-    if (!userData?.user?.email) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
       throw new AuthErrorException('USER_NOT_FOUND', 'User not found');
     }
 
-    const verify = await this.supabaseAnon.auth.signInWithPassword({
-      email: userData.user.email,
-      password: dto.currentPassword,
-    });
-    if (verify.error) {
+    const passwordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!passwordValid) {
       throw new AuthErrorException('INCORRECT_PASSWORD', 'Current password is incorrect');
     }
 
-    this.supabaseAnon.auth.setSession({
-      access_token: accessToken,
-      refresh_token: '',
-    });
-    const { error } = await this.supabaseAnon.auth.updateUser({
-      password: dto.newPassword,
-    });
-    if (error) {
-      throw new AuthErrorException('PASSWORD_UPDATE_FAILED', error.message);
-    }
+    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    await this.userRepo.update(userId, { passwordHash });
+
     return { success: true };
   }
 
   async changeEmail(
-    accessToken: string,
+    userId: string,
     dto: { password: string; newEmailAddress: string },
   ): Promise<SuccessResult> {
-    this.supabaseAnon.auth.setSession({
-      access_token: accessToken,
-      refresh_token: '',
-    });
-    const { error } = await this.supabaseAnon.auth.updateUser({
-      email: dto.newEmailAddress,
-    });
-    if (error) {
-      throw new AuthErrorException('EMAIL_UPDATE_FAILED', error.message);
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new AuthErrorException('USER_NOT_FOUND', 'User not found');
     }
+
+    const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!passwordValid) {
+      throw new AuthErrorException('INCORRECT_PASSWORD', 'Current password is incorrect');
+    }
+
+    await this.userRepo.update(userId, { email: dto.newEmailAddress });
     return { success: true };
   }
 
   async verifyEmailChange(token: string): Promise<SuccessResult> {
-    // For Supabase, email change tokens work via OTP verification
-    // This endpoint is called when user clicks the confirmation link
-    // for changing their email address. The token is a Supabase email_change OTP.
-    try {
-      // Try to use token as access token first
-      const { data, error } = await this.supabaseAnon.auth.getUser(token);
-      if (!error && data?.user) {
-        return { success: true };
-      }
-    } catch {
-      // Token is likely an OTP, which requires email context
-      // The frontend sends only { token } so we store the mapping
-      // when changeEmail is called
-    }
     return { success: true };
   }
 
   async getUserFromToken(accessToken: string): Promise<{ id: string; email: string } | null> {
-    const { data, error } = await this.supabaseAnon.auth.getUser(accessToken);
-    if (error || !data?.user) return null;
-    return { id: data.user.id, email: data.user.email ?? '' };
+    const secret = this.configService.get<string>('app.userJwt.secret')!;
+    try {
+      const payload = jwt.verify(accessToken, secret) as { sub: string; email: string };
+      return { id: payload.sub, email: payload.email };
+    } catch {
+      return null;
+    }
   }
 
   async getMe(userId: string): Promise<CurrentUserResult | null> {
@@ -257,30 +233,12 @@ export class AuthService {
     };
   }
 
-  async getOrCreateUser(supabaseUserId: string): Promise<{ id: string; email: string }> {
-    // Check if user record exists
-    let user = await this.userRepo.findOne({ where: { id: supabaseUserId } });
+  async getOrCreateUser(userId: string): Promise<{ id: string; email: string }> {
+    let user = await this.userRepo.findOne({ where: { id: userId } });
     if (user) {
       return { id: user.id, email: user.email };
     }
-
-    // Fetch from Supabase and create
-    const { data } = await this.supabaseAdmin.auth.admin.getUserById(supabaseUserId);
-    if (!data?.user) {
-      throw new AuthErrorException('USER_NOT_FOUND', 'User not found in Supabase');
-    }
-
-    await this.userRepo.upsert(
-      {
-        id: data.user.id,
-        email: data.user.email!,
-        firstName: data.user.user_metadata?.first_name ?? '',
-        lastName: data.user.user_metadata?.last_name ?? '',
-      },
-      ['id'],
-    );
-
-    return { id: data.user.id, email: data.user.email! };
+    throw new AuthErrorException('USER_NOT_FOUND', 'User not found');
   }
 }
 

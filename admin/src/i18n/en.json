@@ -47,7 +47,9 @@
     "uploads": "Uploads",
     "activityLogs": "Activity Logs",
     "settings": "Settings",
-    "permissions": "Permissions"
+    "permissions": "Permissions",
+    "quotes": "Quotes",
+    "contracts": "Contracts"
   },
   "header": {
     "myAccount": "My Account",
@@ -218,5 +220,19 @@
     "title": "Payment",
     "description": "Manage payment methods",
     "noMethods": "No payment methods"
+  },
+  "contracts": {
+    "title": "Customer Contracts",
+    "description": "Manage customer contract logos",
+    "add": "Add Contract",
+    "edit": "Edit Contract",
+    "search": "Search contracts...",
+    "name": "Customer Name",
+    "description": "Description",
+    "logoUrl": "Logo URL",
+    "order": "Order",
+    "active": "Active",
+    "empty": "No contracts found",
+    "formDesc": "Fill in the contract details below"
   }
 }

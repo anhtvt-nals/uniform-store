@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PagesController } from './pages.controller';
 import { PagesService } from './pages.service';
+import { SettingEntity } from '@app/database';
 
 @Module({
-  controllers: [PagesController],
-  providers: [PagesService],
-  exports: [PagesService],
+    imports: [TypeOrmModule.forFeature([SettingEntity])],
+    controllers: [PagesController],
+    providers: [PagesService],
+    exports: [PagesService],
 })
 export class PagesModule {}

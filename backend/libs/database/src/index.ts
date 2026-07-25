@@ -35,3 +35,5 @@ export * from './entities/article.entity';
 export * from './entities/article-category.entity';
 export * from './entities/article-tag.entity';
 export * from './entities/inquiry.entity';
+export * from './entities/quote-request.entity';
+export * from './entities/customer-contract.entity';

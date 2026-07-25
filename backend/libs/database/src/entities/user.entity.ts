@@ -26,6 +26,9 @@ export class UserEntity {
   @Column({ type: 'varchar', default: '' })
   phone: string;
 
+  @Column({ name: 'password_hash', type: 'varchar', nullable: true })
+  passwordHash?: string;
+
   @Column({ name: 'avatar_url', type: 'varchar', default: '' })
   avatarUrl: string;
 
