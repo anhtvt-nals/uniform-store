@@ -61,10 +61,11 @@ cd ..
 # 8. Restart services
 echo ""
 echo "🔄 Restarting services..."
-pm2 restart uniform-storefront-api 2>/dev/null || pm2 start backend/dist/apps/storefront-api/main.js --name uniform-storefront-api --cwd "$APP_DIR/backend"
-pm2 restart uniform-admin-api 2>/dev/null || pm2 start backend/dist/apps/admin-api/main.js --name uniform-admin-api --cwd "$APP_DIR/backend"
-pm2 restart uniform-storefront 2>/dev/null || (cd storefront && pm2 start npm --name uniform-storefront -- start -- -p 3001)
-pm2 restart uniform-admin 2>/dev/null || (cd admin && pm2 start npm --name uniform-admin -- start -- -p 5002)
+pm2 delete uniform-storefront-api uniform-admin-api uniform-storefront uniform-admin 2>/dev/null || true
+pm2 start "$APP_DIR/backend/dist/apps/storefront-api/main.js" --name uniform-storefront-api --cwd "$APP_DIR/backend"
+pm2 start "$APP_DIR/backend/dist/apps/admin-api/main.js" --name uniform-admin-api --cwd "$APP_DIR/backend"
+cd storefront && pm2 start npm --name uniform-storefront -- start -- -p 3001 && cd ..
+cd admin && pm2 start npm --name uniform-admin -- start -- -p 5002 && cd ..
 
 # 9. Save pm2 config
 pm2 save
