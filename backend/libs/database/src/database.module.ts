@@ -44,9 +44,7 @@ import {
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => {
-        const sslEnabled =
-          process.env.DB_SSL === 'true' ||
-          process.env.NODE_ENV === 'production';
+        const sslEnabled = process.env.DB_SSL === 'true';
 
         const baseConfig = {
           type: 'postgres' as const,

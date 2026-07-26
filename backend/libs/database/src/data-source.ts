@@ -4,9 +4,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const sslEnabled =
-  process.env.DB_SSL === 'true' ||
-  process.env.NODE_ENV === 'production';
+const sslEnabled = process.env.DB_SSL === 'true';
 
 const baseConfig: any = {
   type: 'postgres',
