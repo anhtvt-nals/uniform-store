@@ -197,6 +197,32 @@ server {
         proxy_set_header Connection "upgrade";
     }
 }
+
+server {
+    listen 443 ssl http2;
+    server_name storage.${DOMAIN};
+
+    ssl_certificate     /etc/nginx/ssl/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Disable buffering for large file uploads
+    client_max_body_size 100M;
+    proxy_buffering off;
+
+    location / {
+        proxy_pass http://127.0.0.1:9000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # MinIO specific headers
+        proxy_set_header X-Amz-Content-Sha256 \$http_x_amz_content_sha256;
+        proxy_set_header X-Amz-Date \$http_x_amz_date;
+        proxy_set_header Authorization \$http_authorization;
+    }
+}
 NGINX
 
 ln -sf /etc/nginx/sites-available/uniform-store /etc/nginx/sites-enabled/
@@ -232,7 +258,8 @@ echo "  1. Edit .env: nano $APP_DIR/.env"
 echo "  2. Setup DNS:"
 echo "       $DOMAIN → $(curl -s ifconfig.me)"
 echo "       admin.$DOMAIN → $(curl -s ifconfig.me)"
+echo "       storage.$DOMAIN → $(curl -s ifconfig.me)"
 echo "  3. Install Let's Encrypt:"
-echo "       certbot --nginx -d $DOMAIN -d admin.$DOMAIN"
+echo "       certbot --nginx -d $DOMAIN -d admin.$DOMAIN -d storage.$DOMAIN"
 echo "  4. Add GitHub Secrets for auto-deploy"
 echo ""
