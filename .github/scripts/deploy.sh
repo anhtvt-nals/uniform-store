@@ -14,7 +14,10 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 # 1. Pull latest code
 echo ""
 echo "📥 Pulling latest code..."
-git pull origin main
+echo "Resetting workspace..."
+git fetch origin main
+git reset --hard origin/main
+git clean -fd
 
 # 2. Install dependencies
 echo ""
