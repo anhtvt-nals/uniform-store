@@ -23,10 +23,10 @@ export class CustomerContractsService {
     }
 
     if (isActive !== undefined) {
-      qb.andWhere('c.is_active = :isActive', { isActive });
+      qb.andWhere('c.isActive = :isActive', { isActive });
     }
 
-    qb.orderBy('c.display_order', 'ASC').addOrderBy('c.created_at', 'DESC');
+    qb.orderBy('c.displayOrder', 'ASC').addOrderBy('c.createdAt', 'DESC');
 
     const total = await qb.clone().getCount();
     const items = await qb

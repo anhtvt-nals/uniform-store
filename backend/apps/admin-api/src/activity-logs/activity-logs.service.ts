@@ -76,8 +76,8 @@ export class ActivityLogsService {
   async getDistinctEntityTypes() {
     const result = await this.logRepo
       .createQueryBuilder('l')
-      .select('DISTINCT l.entity_type', 'entityType')
-      .orderBy('l.entity_type')
+      .select('DISTINCT l.entityType', 'entityType')
+      .orderBy('l.entityType')
       .getRawMany();
     return result.map((r) => r.entityType);
   }

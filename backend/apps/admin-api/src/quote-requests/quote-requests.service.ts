@@ -18,7 +18,7 @@ export class QuoteRequestsService {
 
     if (search) {
       qb.where(
-        '(q.customer_name ILIKE :search OR q.phone ILIKE :search OR q.email ILIKE :search)',
+        '(q.customerName ILIKE :search OR q.phone ILIKE :search OR q.email ILIKE :search)',
         { search: `%${search}%` },
       );
     }
@@ -27,7 +27,7 @@ export class QuoteRequestsService {
       qb.andWhere('q.status = :status', { status });
     }
 
-    qb.orderBy('q.created_at', 'DESC');
+    qb.orderBy('q.createdAt', 'DESC');
 
     const total = await qb.clone().getCount();
     const items = await qb

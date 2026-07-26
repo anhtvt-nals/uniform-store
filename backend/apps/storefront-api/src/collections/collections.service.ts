@@ -98,7 +98,7 @@ export class CollectionsService {
     if (sort) {
       this.applyProductSort(qb, sort);
     } else {
-      qb.orderBy('p.created_at', 'DESC');
+      qb.orderBy('p.createdAt', 'DESC');
     }
 
     const items = await qb.getRawMany();
@@ -161,8 +161,17 @@ export class CollectionsService {
 
   private applyProductSort(qb: any, sort: string): void {
     const parts = sort.split(':');
-    const field = parts[0] || 'created_at';
+    const field = parts[0] || 'createdAt';
     const dir = parts[1]?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-    qb.orderBy(`p.${field}`, dir);
+    // Map snake_case to camelCase for common fields
+    const fieldMap: Record<string, string> = {
+      'created_at': 'createdAt',
+      'updated_at': 'updatedAt',
+      'is_active': 'isActive',
+      'name': 'name',
+      'price': 'price',
+    };
+    const mappedField = fieldMap[field] || field;
+    qb.orderBy(`p.${mappedField}`, dir);
   }
 }

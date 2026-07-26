@@ -30,7 +30,7 @@ export class InquiriesService {
       qb.andWhere('i.status = :status', { status });
     }
 
-    qb.orderBy('i.created_at', 'DESC');
+    qb.orderBy('i.createdAt', 'DESC');
 
     const total = await qb.clone().getCount();
     const items = await qb
