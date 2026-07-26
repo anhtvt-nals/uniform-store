@@ -19,8 +19,8 @@ interface ProductInfoProps {
         id: string;
         name: string;
         description: string;
-        sortDescription?: string;
-        detail?: string;
+        sortDescription?: string | null;
+        detail?: string | null;
         variants: Array<{
             id: string;
             name: string;

@@ -113,9 +113,7 @@ export default async function ProductDetailPage({params, searchParams}: PageProp
     const productForDisplay = {
         ...product,
         optionGroups: getDisplayOptionGroups(product),
-        sortDescription: product.sortDescription ?? undefined,
-        detail: product.detail ?? undefined,
-    } as typeof product & { sortDescription?: string; detail?: string };
+    };
 
     return (
         <>
