@@ -7,7 +7,7 @@
 set -e
 
 DOMAIN="${1:-localhost}"
-APP_DIR="/opt/uniform-store"
+APP_DIR="$(pwd)"
 
 echo "🔧 Setting up VPS for: $DOMAIN"
 
