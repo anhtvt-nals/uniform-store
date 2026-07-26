@@ -6,3 +6,4 @@ export * from './cache/redis-cache.service';
 export * from './config/app.config';
 export * from './mail/mail.service';
 export * from './mail/mail.module';
+export * from './interceptors/storage-url.interceptor';

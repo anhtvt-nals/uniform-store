@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const compression = require('compression');
 import { HttpExceptionFilter, TransformInterceptor } from '@app/common';
+import { StorageUrlInterceptor } from '@app/shared';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,7 +30,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(
+    new TransformInterceptor(),
+    app.get(StorageUrlInterceptor),
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Storefront API')

@@ -89,19 +89,21 @@ export class UploadsService {
       dto.contentType,
       maxSize,
     );
+    // Store only key in DB, build URL at runtime
     const publicUrl = this.storageService.buildPublicUrl(key);
 
     return { uploadUrl, publicUrl, key };
   }
 
   async confirmUpload(dto: ConfirmUploadDto) {
-    const publicUrl = this.storageService.buildPublicUrl(dto.key);
+    // Store only key in database, URL will be built at runtime by interceptor
+    const key = dto.key;
 
     switch (dto.entityType) {
       case EntityType.PRODUCT: {
         const image = this.productImageRepo.create({
           productId: dto.entityId,
-          url: publicUrl,
+          url: key,
           alt: dto.alt ?? {},
           variantId: dto.variantId ?? null,
         });
@@ -115,7 +117,7 @@ export class UploadsService {
         if (!category) {
           throw new NotFoundException(`Category not found: ${dto.entityId}`);
         }
-        category.imageUrl = publicUrl;
+        category.imageUrl = key;
         await this.categoryRepo.save(category);
         break;
       }
@@ -126,13 +128,14 @@ export class UploadsService {
         if (!brand) {
           throw new NotFoundException(`Brand not found: ${dto.entityId}`);
         }
-        brand.logoUrl = publicUrl;
+        brand.logoUrl = key;
         await this.brandRepo.save(brand);
         break;
       }
     }
 
-    return { url: publicUrl, entityType: dto.entityType, entityId: dto.entityId };
+    // Return key, interceptor will build URL
+    return { url: key, entityType: dto.entityType, entityId: dto.entityId };
   }
 
   async deleteFile(dto: DeleteFileDto) {
@@ -148,9 +151,8 @@ export class UploadsService {
     if (dto.entityType && dto.entityId) {
       switch (dto.entityType) {
         case EntityType.PRODUCT: {
-          const publicUrl = this.storageService.buildPublicUrl(dto.key);
           const image = await this.productImageRepo.findOne({
-            where: { url: publicUrl },
+            where: { url: dto.key },
           });
           if (image) {
             await this.productImageRepo.softRemove(image);
@@ -161,7 +163,7 @@ export class UploadsService {
           const category = await this.categoryRepo.findOne({
             where: { id: dto.entityId },
           });
-          if (category && category.imageUrl === this.storageService.buildPublicUrl(dto.key)) {
+          if (category && category.imageUrl === dto.key) {
             category.imageUrl = '';
             await this.categoryRepo.save(category);
           }
@@ -171,7 +173,7 @@ export class UploadsService {
           const brand = await this.brandRepo.findOne({
             where: { id: dto.entityId },
           });
-          if (brand && brand.logoUrl === this.storageService.buildPublicUrl(dto.key)) {
+          if (brand && brand.logoUrl === dto.key) {
             brand.logoUrl = '';
             await this.brandRepo.save(brand);
           }
