@@ -70,14 +70,20 @@ Vào GitHub repo → **Settings → Secrets and variables → Actions** → thê
 
 > **Lưu ý:** `VPS_SSH_KEY` phải là private key tương ứng với public key đã copy lên VPS.
 
-Tạo SSH key nếu chưa có:
+### Tạo SSH key (chạy trên laptop/máy local, KHÔNG phải trên VPS):
+
 ```bash
+# 1. Tạo cặp key mới trên máy local
 ssh-keygen -t ed25519 -C "github-actions" -f ~/.ssh/github-actions
-# Copy public key lên VPS:
+
+# 2. Copy PUBLIC key lên VPS
 ssh-copy-id -i ~/.ssh/github-actions.pub root@VPS_IP
-# Lấy private key để paste vào GitHub:
+
+# 3. Lấy PRIVATE key để paste vào GitHub Secrets
 cat ~/.ssh/github-actions
 ```
+
+> ⚠️ **Bảo mật:** Private key (`~/.ssh/github-actions`) chỉ lưu trên máy local + GitHub Secrets, **không bao giờ** copy lên VPS. Public key (`.pub`) thì được copy lên VPS.
 
 ---
 
@@ -107,11 +113,19 @@ Script này tự động:
 - Start 4 service qua PM2
 - Tạo cấu hình Nginx
 
+> ⚠️ **Quan trọng — đặt mật khẩu DB trước khi chạy script:** `docker-compose.infra.yml` chỉ áp dụng `POSTGRES_PASSWORD` khi Postgres khởi tạo volume dữ liệu **lần đầu tiên**. Nếu bạn để mặc định rồi sửa `DB_PASSWORD` trong `.env` sau đó, container Postgres đang chạy **sẽ không đổi mật khẩu** (mật khẩu thật vẫn là giá trị lúc khởi tạo). Vì vậy hãy truyền `DB_PASSWORD` (và `MINIO_ACCESS_KEY`/`MINIO_SECRET_KEY` nếu muốn) ngay khi chạy script lần đầu:
+
 ```bash
-bash .github/scripts/setup-vps.sh yourdomain.com
+DB_PASSWORD='your-strong-password' bash .github/scripts/setup-vps.sh yourdomain.com
 ```
 
 > Thay `yourdomain.com` bằng domain thật (hoặc IP nếu chưa có domain).
+
+Nếu đã lỡ chạy script với mật khẩu mặc định, đổi mật khẩu Postgres thủ công thay vì chỉ sửa `.env`:
+```bash
+docker exec -it uniform-postgres psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'your-strong-password';"
+# rồi mới cập nhật DB_PASSWORD trong .env cho khớp
+```
 
 ### Bước 4: Điền biến môi trường
 
@@ -121,11 +135,10 @@ Sau khi script chạy xong, mở file `.env` để điền các giá trị thậ
 nano /opt/uniform-store/.env
 ```
 
-Các biến bắt buộc:
-- `DB_PASSWORD` — mật khẩu PostgreSQL
-- `JWT_SECRET` — đã tự động sinh, có thể giữ nguyên
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — nếu dùng Supabase
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SALES_EMAIL`, `MAIL_FROM` — nếu cần email
+`JWT_SECRET` đã được tự động sinh (giữ nguyên là được). Các biến còn lại tuỳ nhu cầu:
+- `DB_PASSWORD` — nếu chưa đặt ở Bước 3, đổi theo hướng dẫn ALTER USER ở trên (sửa trực tiếp trong `.env` không có tác dụng với container đã khởi tạo)
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — **tuỳ chọn**, chỉ cần nếu dùng Supabase
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SALES_EMAIL`, `MAIL_FROM` — **tuỳ chọn**, backend có giá trị mặc định (`noreply@minhanuniform.vn`, `sales@minhanuniform.vn`) nếu bỏ trống thì tính năng gửi email sẽ không hoạt động nhưng app vẫn chạy bình thường. Các biến này chưa có sẵn trong template `.env` do script tạo ra, cần tự thêm nếu cần dùng.
 
 Sau đó chạy lại deploy để build với env mới:
 ```bash
@@ -159,6 +172,8 @@ certbot --nginx -d yourdomain.com -d admin.yourdomain.com
    - `Lint & Type Check (storefront)` — `tsc --noEmit`
    - `Lint & Type Check (admin)` — `tsc --noEmit`
    - `Backend Tests` — `jest` với PostgreSQL container
+
+> ⚠️ **Đã sửa lỗi:** trước đây các step này chạy với `|| true` nên **luôn báo thành công** dù `tsc`/`jest` thật sự lỗi — CI xanh giả, code lỗi vẫn được CD tự động deploy lên VPS. Đã bỏ `|| true` trong `.github/workflows/ci.yml`, giờ CI sẽ fail đúng khi có lỗi type-check hoặc test, và CD sẽ không chạy nếu CI fail.
 
 ### Kiểm tra CD
 
