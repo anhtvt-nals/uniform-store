@@ -33,7 +33,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new TransformInterceptor(),
     app.get(StorageUrlInterceptor),
-  );,
   );
 
   const globalPrefix = process.env.ADMIN_API_PREFIX || 'api/v1/admin';
