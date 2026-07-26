@@ -66,6 +66,8 @@ export class StorageUrlInterceptor implements NestInterceptor {
       'image_url',
       'logoUrl',
       'logo_url',
+      'contractImageUrl',
+      'contract_image_url',
       'previewUrl',
       'preview_url',
       'preview',
