@@ -132,8 +132,8 @@ cd ..
 
 # ─── Start apps with PM2 ───
 echo "🚀 Starting apps..."
-pm2 start backend/dist/apps/storefront-api/main.js --name uniform-storefront-api --cwd "$APP_DIR/backend"
-pm2 start backend/dist/apps/admin-api/main.js --name uniform-admin-api --cwd "$APP_DIR/backend"
+pm2 start "$APP_DIR/backend/dist/apps/storefront-api/main.js" --name uniform-storefront-api --cwd "$APP_DIR/backend"
+pm2 start "$APP_DIR/backend/dist/apps/admin-api/main.js" --name uniform-admin-api --cwd "$APP_DIR/backend"
 cd storefront && pm2 start npm --name uniform-storefront -- start -- -p 3001 && cd ..
 cd admin && pm2 start npm --name uniform-admin -- start -- -p 5002 && cd ..
 pm2 save
