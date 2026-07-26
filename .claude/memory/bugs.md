@@ -136,6 +136,31 @@ The hazard is that the number no longer identifies a migration, so "run everythi
 
 ---
 
+### B-013 · `NEXT_HTTP_ERROR_FALLBACK;404` spam in the storefront PM2 log — **Verified (mechanism); attribution needs an access-log check**
+
+`uniform-storefront-error.log` fills with
+`An error occurred in the Server Components render … digest: 'NEXT_HTTP_ERROR_FALLBACK;404'`.
+
+That digest is not a crash — it is the marker Next.js uses when `notFound()` is thrown
+during a Server Component render. It logs to stderr even though the request is handled.
+
+`localePrefix` is `'always'`, so **any** URL whose first path segment is not `vi`, `en` or
+`de` matches the `[locale]` dynamic segment, fails `hasLocale()` in
+`src/app/[locale]/layout.tsx:81`, and throws `notFound()`. Bot traffic (`/wp-admin`,
+`/.env`) does this constantly on a public host — mostly harmless noise.
+
+The volume spike observed 2026-07-26 is very likely self-inflicted: the broken image
+URLs from the storage-key regression (`https://electroai.shop/products/unknown/<file>.jpg`)
+are requests to the **storefront Next server**, first segment `products` — so every
+broken image renders a 404 page and writes one of these lines.
+
+To confirm which it is:
+`awk '$9==404 {print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -20`
+— `/products/...` paths mean the image regression, `/wp-admin`-style paths mean bots.
+Expect the count to drop sharply once the `/shop-api` fix is deployed.
+
+Only worth acting on if it is neither: that would mean real pages are 404ing.
+
 ## Documentation drift
 
 ### B-008 · Root `README.md` describes a system that no longer exists — **Verified**

@@ -183,6 +183,20 @@ circular bundle that crashed the built output. Required for `webpack: true` in
 `nest-cli.json` to work; the Dockerfiles compile libs separately and copy them into
 `node_modules/@app/*` for the same reason.
 
+### D-026 · A recursive response walker must not treat `Date` as a plain object
+`StorageUrlInterceptor.transformUrls()` rebuilds objects field by field. A `Date` passes
+`typeof x === 'object'` and is not an array, so it fell into the object branch — and
+`Object.entries(new Date())` is `[]`, so **every date in every response was silently
+replaced with `{}`**. The client then did `new Date({})` → `Invalid Date` → date-fns
+`format()` threw `RangeError: Invalid time value` and took down the whole admin table.
+
+Latent from the day the interceptor was written; it only started biting when `601fb85`
+registered it as a provider so it actually ran.
+
+`Date`, `Buffer` and `RegExp` are now returned untouched before the object branch. Any
+future walker over response payloads needs the same guard — the failure is silent on the
+server and surfaces far away, in unrelated UI code.
+
 ### D-025 · `@Res()` bypasses the interceptor pipeline — transform by hand there
 Discovered 2026-07-26 when every storefront image 404'd at
 `https://electroai.shop/products/unknown/<file>.jpg` — the site origin plus a raw storage

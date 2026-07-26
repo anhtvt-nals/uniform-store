@@ -47,6 +47,18 @@ export class StorageUrlInterceptor implements NestInterceptor {
       return data.map((item) => this.transformUrls(item));
     }
 
+    // Values that are objects but must never be walked. Object.entries() on a
+    // Date returns [], so rebuilding it field by field silently produces {} —
+    // every createdAt/updatedAt in the response would reach the client as an
+    // empty object and blow up any date formatting downstream.
+    if (
+      data instanceof Date ||
+      Buffer.isBuffer(data) ||
+      data instanceof RegExp
+    ) {
+      return data;
+    }
+
     // Handle objects
     if (typeof data === 'object') {
       const result: any = {};

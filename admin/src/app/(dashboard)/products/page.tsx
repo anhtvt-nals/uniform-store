@@ -16,7 +16,7 @@ import { Plus, Pencil, Trash2, RotateCcw, FolderTree, X } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { useT } from "@/i18n"
-import { format } from "date-fns"
+import { formatDate } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 type Product = {
@@ -213,7 +213,7 @@ export default function ProductsPage() {
                           : p.isActive ? <Badge variant="success">Active</Badge>
                           : <Badge variant="secondary">Inactive</Badge>}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{format(new Date(p.createdAt), "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{formatDate(p.createdAt)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon" asChild>
