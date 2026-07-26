@@ -110,7 +110,12 @@ export default async function ProductDetailPage({params, searchParams}: PageProp
 
     // Hide options that belong to a shared option group but have no variant on
     // this product (Vendure 3.6 shared/global option groups).
-    const productForDisplay = {...product, optionGroups: getDisplayOptionGroups(product), sortDescription: product.sortDescription ?? undefined, detail: product.detail ?? undefined,};
+    const productForDisplay = {
+        ...product,
+        optionGroups: getDisplayOptionGroups(product),
+        sortDescription: product.sortDescription ?? undefined,
+        detail: product.detail ?? undefined,
+    } as typeof product & { sortDescription?: string; detail?: string };
 
     return (
         <>
