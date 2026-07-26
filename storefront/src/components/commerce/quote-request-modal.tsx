@@ -3,14 +3,12 @@
 import {useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Drawer, DrawerContent, DrawerHeader, DrawerTitle} from '@/components/ui/drawer';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Label} from '@/components/ui/label';
 import {Textarea} from '@/components/ui/textarea';
 import {CheckCircle2, Loader2, Check} from 'lucide-react';
-import {useMediaQuery} from '@/lib/hooks/use-media-query';
 
 interface QuoteRequestModalProps {
     open: boolean;
@@ -34,7 +32,6 @@ interface FormErrors {
 
 export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModalProps) {
     const t = useTranslations('Home');
-    const isDesktop = useMediaQuery('(min-width: 768px)');
     const [form, setForm] = useState<FormState>({
         customerName: '',
         phone: '',
@@ -140,11 +137,12 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                     value={form.customerName}
                     onChange={(e) => handleChange('customerName', e.target.value)}
                     placeholder={t('quoteName')}
+                    className="text-sm md:text-base"
                 />
                 {errors.customerName && <p className="text-xs text-red-500">{errors.customerName}</p>}
             </div>
 
-            <div className="grid grid-cols-[3fr_7fr] gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-[3fr_7fr] gap-3">
                 <div className="space-y-1.5">
                     <Label>{t('quotePhone')} <span className="text-red-500">*</span></Label>
                     <Input
@@ -152,6 +150,7 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                         onChange={(e) => handleChange('phone', e.target.value)}
                         placeholder={t('quotePhone')}
                         type="tel"
+                        className="text-sm md:text-base"
                     />
                     {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
                 </div>
@@ -163,16 +162,17 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                         onChange={(e) => handleChange('email', e.target.value)}
                         placeholder={t('quoteEmail')}
                         type="email"
+                        className="text-sm md:text-base"
                     />
                     {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
                 </div>
             </div>
 
-            <div className="grid grid-cols-[3fr_7fr] gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-[3fr_7fr] gap-3">
                 <div className="space-y-1.5">
                     <Label>{t('quoteRegion')}</Label>
                     <Select value={form.region} onValueChange={(v) => handleChange('region', v || '')}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full text-sm md:text-base">
                             <SelectValue placeholder={t('quoteRegion')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -189,6 +189,7 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                         value={form.address}
                         onChange={(e) => handleChange('address', e.target.value)}
                         placeholder={t('quoteAddress')}
+                        className="text-sm md:text-base"
                     />
                 </div>
             </div>
@@ -200,6 +201,7 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                     onChange={(e) => handleChange('productType', e.target.value)}
                     placeholder={t('quoteProductType')}
                     rows={2}
+                    className="text-sm md:text-base"
                 />
             </div>
 
@@ -211,6 +213,7 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
                     placeholder={t('quoteQuantity')}
                     type="number"
                     min="1"
+                    className="text-sm md:text-base"
                 />
                 {errors.quantity && <p className="text-xs text-red-500">{errors.quantity}</p>}
             </div>
@@ -266,39 +269,15 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
         </div>
     );
 
-    if (isDesktop) {
-        return (
-            <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-                <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
-                    <DialogHeader className="gap-4">
-                        {titleHeader}
-                        {trustBadges}
-                    </DialogHeader>
-                    {success ? successContent : formContent}
-                </DialogContent>
-            </Dialog>
-        );
-    }
-
     return (
-        <Drawer open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-            <DrawerContent className="max-h-[90vh]">
-                <DrawerHeader className="text-left gap-4">
-            <div className="flex items-center gap-3 mb-1">
-                        <img src="/logo.jpeg" alt="Minh An Uniform" className="h-8 w-auto object-contain" />
-                        <div>
-                            <DrawerTitle className="text-lg sm:text-xl bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                                {t('quoteTitle')}
-                            </DrawerTitle>
-                            <p className="text-sm text-muted-foreground">{t('quoteDesc')}</p>
-                        </div>
-                    </div>
+        <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
+            <DialogContent className="sm:max-w-[550px] max-w-[calc(100%-2rem)] mx-auto max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="gap-4">
+                    {titleHeader}
                     {trustBadges}
-                </DrawerHeader>
-                <div className="px-4 pb-8 overflow-y-auto">
-                    {success ? successContent : formContent}
-                </div>
-            </DrawerContent>
-        </Drawer>
+                </DialogHeader>
+                {success ? successContent : formContent}
+            </DialogContent>
+        </Dialog>
     );
 }
