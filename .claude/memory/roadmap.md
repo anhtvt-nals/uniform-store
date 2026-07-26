@@ -68,13 +68,23 @@ independently-stored `assets.key` column exactly. `037` additionally had to stri
 **bucket** segment, not just `scheme://host/` — see decisions D-010. `contractImageUrl`
 was added to the interceptor's field whitelist so contract images survive the conversion.
 
+`/shop-api` fixed 2026-07-26. Converting the data to keys broke every storefront image
+(they resolved against the site origin, `https://electroai.shop/products/...` → 404):
+`ShopApiController` uses `@Res()`, so the global `StorageUrlInterceptor` never ran on the
+one endpoint that serves all storefront imagery. The controller now calls
+`transformUrls()` explicitly; `source` was added to the field whitelist. See decisions
+D-025. Verified by type-check plus a runtime check of the transform against a
+Vendure-shaped payload.
+
 Still open before this can be called done:
 
-1. Run `npm run migration:run` on the VPS and confirm `migration:status` shows 0 pending.
-2. **First** confirm `STORAGE_PUBLIC_URL` in the live `backend/.env` ends with the bucket
-   (`/uniform-store`). On a host provisioned by `setup-vps.sh` it does not, and the
-   conversion will 404 every image — bugs.md B-011.
-3. Fix `uploadFile()` so direct uploads stop writing absolute URLs back into the database
+1. **Deploy the backend.** The `/shop-api` fix is code — storefront images stay broken
+   until `storefront-api` is rebuilt and restarted.
+2. Confirm `STORAGE_PUBLIC_URL` in the live `backend/.env` ends with the bucket
+   (`https://storage.electroai.shop/uniform-store`). Without it every image 404s even
+   with the fix deployed — bugs.md B-011.
+3. Run `npm run migration:run` on the VPS and confirm `migration:status` shows 0 pending.
+4. Fix `uploadFile()` so direct uploads stop writing absolute URLs back into the database
    — bugs.md B-012. Until then the data drifts back to mixed state.
 
 ---

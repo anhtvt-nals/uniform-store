@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Response } from 'express';
+import { StorageUrlInterceptor } from '@app/shared';
 import { ShopApiService } from './shop-api.service';
 
 interface GraphQLRequest {
@@ -18,7 +19,10 @@ interface GraphQLRequest {
 @ApiTags('Shop API (GraphQL Proxy)')
 @Controller()
 export class ShopApiController {
-  constructor(private readonly shopApiService: ShopApiService) {}
+  constructor(
+    private readonly shopApiService: ShopApiService,
+    private readonly storageUrlInterceptor: StorageUrlInterceptor,
+  ) {}
 
   @Post('shop-api')
   @ApiOperation({
@@ -45,6 +49,11 @@ export class ShopApiController {
       }
     }
 
-    res.json({ data: result.data });
+    // @Res() takes over the response, so the global StorageUrlInterceptor never
+    // sees this payload. Apply it manually or storage keys reach the browser as
+    // relative paths and resolve against the storefront origin (404).
+    // Cannot use @Res({ passthrough: true }) here: TransformInterceptor would
+    // then wrap the body in { success, data } and break the GraphQL contract.
+    res.json({ data: this.storageUrlInterceptor.transformUrls(result.data) });
   }
 }

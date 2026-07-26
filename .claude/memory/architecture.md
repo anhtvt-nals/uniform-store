@@ -217,7 +217,8 @@ S3-compatible object storage (MinIO in dev and on the VPS; AWS S3 / R2 also supp
 presigned upload URL, presigned download URL, and `buildPublicUrl(key)`.
 
 **As of commit `084f8e9` the database is supposed to store bare object keys, not URLs.**
-`StorageUrlInterceptor` runs on every response, walks the payload, and for any field
+`StorageUrlInterceptor` runs on every response **that goes through the interceptor
+pipeline** (see the `@Res()` caveat below), walks the payload, and for any field
 named `url`, `imageUrl`, `image_url`, `logoUrl`, `logo_url`, `previewUrl`, `preview_url`,
 `preview`, `thumbnailUrl` or `thumbnail_url`, it prefixes
 `STORAGE_PUBLIC_URL` — *unless* the value already starts with `http://` or `https://`,
@@ -225,8 +226,21 @@ in which case it is passed through untouched.
 
 Point of the design: the storage domain can change with an env var and no data migration.
 
-Caveat: the migration that was supposed to strip existing URLs down to keys (`037`) does
-not run — see bugs.md. The pass-through branch is what keeps old rows working.
+**`STORAGE_PUBLIC_URL` must include the bucket** (`https://storage.<domain>/uniform-store`),
+because keys are bucket-less and nginx proxies the `storage.` subdomain to MinIO's root.
+See decisions D-010 and bugs.md B-011.
+
+**The `@Res()` caveat.** `ShopApiController` takes over the response with `@Res()` and
+calls `res.json()` directly, so **no global interceptor sees that payload** — neither
+`TransformInterceptor` (deliberate: the GraphQL contract is `{ data }`, not
+`{ success, data }`) nor `StorageUrlInterceptor` (not deliberate — it silently shipped
+raw storage keys to the storefront). The controller therefore calls
+`storageUrlInterceptor.transformUrls()` by hand before `res.json()`.
+
+This matters because `/shop-api` is where **all** storefront product imagery comes from.
+Any future global response transform has to be applied manually there too, and
+`@Res({ passthrough: true })` is not a fix — it would re-enable `TransformInterceptor`
+and break the GraphQL envelope.
 
 Upload paths: admin can either take a presigned URL (`POST /uploads/signed-url` then
 `/uploads/confirm`) or push a multipart file straight through the API

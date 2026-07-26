@@ -34,7 +34,12 @@ export class StorageUrlInterceptor implements NestInterceptor {
     );
   }
 
-  private transformUrls(data: any): any {
+  /**
+   * Public so controllers that take over the response with @Res() — and are
+   * therefore skipped by the interceptor pipeline — can apply the same
+   * transformation by hand. See ShopApiController.
+   */
+  transformUrls(data: any): any {
     if (!data) return data;
 
     // Handle arrays
@@ -71,6 +76,7 @@ export class StorageUrlInterceptor implements NestInterceptor {
       'previewUrl',
       'preview_url',
       'preview',
+      'source',
       'thumbnailUrl',
       'thumbnail_url',
     ];

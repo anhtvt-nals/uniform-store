@@ -183,6 +183,28 @@ circular bundle that crashed the built output. Required for `webpack: true` in
 `nest-cli.json` to work; the Dockerfiles compile libs separately and copy them into
 `node_modules/@app/*` for the same reason.
 
+### D-025 · `@Res()` bypasses the interceptor pipeline — transform by hand there
+Discovered 2026-07-26 when every storefront image 404'd at
+`https://electroai.shop/products/unknown/<file>.jpg` — the site origin plus a raw storage
+key, instead of the storage domain.
+
+`ShopApiController` uses `@Res()` without `passthrough: true` and calls `res.json()`. In
+NestJS that means the handler's return value never enters the interceptor pipeline, so
+**no global interceptor runs**. For `TransformInterceptor` that is intended — `/shop-api`
+must answer `{ data }`, not `{ success, data }`. For `StorageUrlInterceptor` it was not:
+once migration `037` converted the database to bare keys, those keys went to the browser
+untouched and resolved relative to the storefront origin.
+
+The symptom was masked for as long as the database held absolute URLs, which is why the
+bug and the migration surfaced together.
+
+Resolution: `transformUrls()` is public on the interceptor and the controller calls it
+explicitly before `res.json()`. `@Res({ passthrough: true })` is **not** an alternative —
+it would restore `TransformInterceptor` and break the GraphQL contract.
+
+Rule going forward: a controller that takes over the response owns every transformation
+the pipeline would have done for it. There is currently exactly one such controller.
+
 ### D-024 · `skipMagicNumbersValidation` on upload file-type checks
 NestJS 11's `FileTypeValidator` defaults to magic-number sniffing via the ESM `file-type`
 package, which rejects small files with no fallback to mimetype matching. The uploads
