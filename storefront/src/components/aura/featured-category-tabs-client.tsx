@@ -3,7 +3,7 @@ import {FragmentOf} from '@/graphql';
 import {ProductCardFragment} from '@/lib/vendure/fragments';
 import {ProductTile} from './product-tile';
 
-type CategoryShowcase = {id: string; name: string; slug: string; description: string; imageUrl?: string};
+type CategoryShowcase = {id: string; name: string; slug: string; description: string};
 
 export function FeaturedCategoryTabsClient({categories, productsMap, headingLabel, noProductsLabel}: {
     categories: CategoryShowcase[];
@@ -29,17 +29,12 @@ export function FeaturedCategoryTabsClient({categories, productsMap, headingLabe
                                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{headingLabel}</span>
                                 <h2 className="font-category-title mt-4 bg-gradient-to-r from-primary to-cyan-600 bg-clip-text text-3xl leading-[1.05] tracking-tight text-transparent sm:text-4xl lg:text-5xl">{category.name}</h2>
                                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{category.description}</p>
-                                {category.imageUrl && (
-                                    <div className="mt-8 min-h-[320px] flex-1 overflow-hidden rounded-[28px] lg:min-h-0">
-                                        <img src={category.imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
-                                    </div>
-                                )}
                             </Link>
                             <div className="mt-6 flex h-full lg:col-span-3 lg:mt-0 lg:pl-10">
                                 {products.length === 0 ? (
                                     <div className="flex min-h-64 items-center justify-center text-center text-sm text-muted-foreground">{noProductsLabel}</div>
                                 ) : (
-                                    <div className="grid h-full w-full auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <div className="grid w-full auto-rows-max content-start items-start grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                         {products.map((product, index) => <ProductTile key={index} product={product} index={index} compact />)}
                                     </div>
                                 )}

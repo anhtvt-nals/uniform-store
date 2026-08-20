@@ -42,7 +42,7 @@ export function ProductTile({product: productProp, index, compact = false}: {pro
         <>
             <Link
                 href={`/product/${product.slug}`}
-                className={`group relative flex h-full flex-col border border-border bg-background shadow-sm transition-shadow hover:shadow-md ${compact ? 'rounded-2xl p-2' : 'rounded-[24px] p-3'}`}
+                className={`group relative flex flex-col border border-border bg-background shadow-sm transition-shadow hover:shadow-md ${compact ? 'h-auto self-start rounded-2xl p-2' : 'h-full rounded-[24px] p-3'}`}
                 onMouseEnter={positionPreview}
             >
                 <div className="absolute top-5 left-5 z-20">
