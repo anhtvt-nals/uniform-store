@@ -24,6 +24,8 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci --workspaces
+      - run: npm run lint -- --max-warnings=0
+        working-directory: storefront
       - run: npx tsc --noEmit
         working-directory: backend
       - run: npm run check-types
@@ -45,4 +47,5 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
           script: cd /opt/uniform-store && bash .github/scripts/deploy.sh
