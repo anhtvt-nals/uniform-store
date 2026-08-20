@@ -26,22 +26,26 @@ Không cần Docker, PostgreSQL hay MinIO cục bộ trên VPS.
 ## VPS lần đầu
 
 ```bash
-git clone <repo-url> /opt/uniform-store
-cd /opt/uniform-store
-bash .github/scripts/setup-vps.sh yourdomain.com
+git clone <repo-url> "$HOME/uniform-store"
+cd "$HOME/uniform-store"
+bash .github/scripts/setup-vps.sh yourdomain.com ops@yourdomain.com
 ```
 
-Trước khi start app, kiểm tra lại `.env`, sau đó chạy migration:
+Lần chạy đầu tạo `.env` rồi dừng. Điền secrets, đặt `NODE_ENV=production`, sau đó chạy lại đúng lệnh trên. Script tự chạy migration, build, cấp SSL và start PM2.
+
+Chạy setup bằng user `ubuntu` có quyền `sudo`; PM2 và ứng dụng sẽ chạy dưới user này. Nếu trước đó bạn đã chạy setup bằng root, script sẽ dừng PM2 của root và chuyển quyền thư mục project sang `ubuntu`.
+
+Nếu dùng GitHub Actions, dùng các secrets: `VPS_USER=ubuntu` và `VPS_APP_DIR=/home/ubuntu/uniform-store`.
 
 ```bash
-cd /opt/uniform-store/backend
-npm run migration:run
+cd "$HOME/uniform-store/backend"
+npm run migration:status
 ```
 
 ## Triển khai cập nhật
 
 ```bash
-cd /opt/uniform-store
+cd "$HOME/uniform-store"
 bash .github/scripts/deploy.sh
 ```
 
@@ -52,7 +56,7 @@ pm2 list
 pm2 logs uniform-storefront-api
 pm2 restart all
 
-cd /opt/uniform-store/backend
+cd "$HOME/uniform-store/backend"
 npm run migration:status
 npm run migration:run
 ```

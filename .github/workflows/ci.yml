@@ -48,4 +48,4 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
-          script: cd /opt/uniform-store && bash .github/scripts/deploy.sh
+          script: cd "${{ secrets.VPS_APP_DIR }}" && bash .github/scripts/deploy.sh

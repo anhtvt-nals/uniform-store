@@ -20,16 +20,16 @@ yourdomain.com        → VPS_IP
 admin.yourdomain.com  → VPS_IP
 ```
 
-Use a fresh Ubuntu 22.04 or 24.04 VPS. The script must run as `root`; it installs Node.js 22, PM2, Nginx, Certbot, Fail2ban and enables UFW for SSH, HTTP and HTTPS.
+Use a fresh Ubuntu 22.04 or 24.04 VPS with an `ubuntu` user that can use `sudo`. The setup script uses `sudo` only for system packages, Nginx, firewall and certificates; PM2, builds, migrations and application processes run as `ubuntu`.
 
 ```bash
-ssh root@YOUR_VPS_IP
-git clone <repository-url> /opt/uniform-store
-cd /opt/uniform-store
+ssh ubuntu@YOUR_VPS_IP
+git clone <repository-url> "$HOME/uniform-store"
+cd "$HOME/uniform-store"
 bash .github/scripts/setup-vps.sh yourdomain.com ops@yourdomain.com
 ```
 
-On the first run, the script creates `/opt/uniform-store/.env` then exits. Fill in its real values, then run the same command again.
+On the first run, the script creates `$HOME/uniform-store/.env` then exits. Fill in its real values, then run the same command again.
 
 ## 2. Production environment
 
@@ -75,17 +75,18 @@ Add these repository secrets:
 | Secret | Value |
 | --- | --- |
 | `VPS_HOST` | VPS IP address or hostname |
-| `VPS_USER` | `root` when using the setup above |
+| `VPS_USER` | `ubuntu` (the user that ran setup and owns the project) |
 | `VPS_SSH_KEY` | private key corresponding to an authorized VPS SSH key |
 | `VPS_PORT` | optional SSH port; defaults to `22` |
+| `VPS_APP_DIR` | absolute repository path, for example `/home/ubuntu/uniform-store` |
 
 Pull requests to `main` install dependencies, typecheck all apps, lint storefront code and run backend tests. A push to `main` deploys only after verification succeeds. Deploy builds first, runs pending migrations, restarts or starts PM2 processes and checks service health before completing.
 
 ## 4. Manual deploy and operations
 
 ```bash
-ssh root@YOUR_VPS_IP
-cd /opt/uniform-store
+ssh ubuntu@YOUR_VPS_IP
+cd "$HOME/uniform-store"
 bash .github/scripts/deploy.sh
 ```
 

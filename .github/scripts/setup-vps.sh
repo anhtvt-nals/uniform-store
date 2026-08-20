@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Production VPS bootstrap for Ubuntu 22.04/24.04.
-# Run from a cloned repository as root:
+# Run as a regular deployment user (for example, ubuntu):
 #   bash .github/scripts/setup-vps.sh example.com ops@example.com
 set -euo pipefail
 
@@ -8,8 +8,11 @@ DOMAIN="${1:?Usage: bash .github/scripts/setup-vps.sh <domain> <letsencrypt-emai
 LETSENCRYPT_EMAIL="${2:?Usage: bash .github/scripts/setup-vps.sh <domain> <letsencrypt-email>}"
 APP_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
-if [[ "${EUID}" -ne 0 ]]; then
-    echo "Run this script as root (or with sudo)."
+DEPLOY_USER="$(id -un)"
+DEPLOY_HOME="${HOME}"
+
+if [[ "${EUID}" -eq 0 ]]; then
+    echo "Run this script as the deployment user (for example, ubuntu), not as root."
     exit 1
 fi
 
@@ -22,6 +25,8 @@ if [[ "${DOMAIN}" == "localhost" ]]; then
     echo "A public domain is required to issue a Let's Encrypt certificate."
     exit 1
 fi
+
+sudo -v
 
 env_value() {
     local key="$1"
@@ -39,7 +44,7 @@ require_env_value() {
 }
 
 write_nginx_config() {
-    cat > /etc/nginx/sites-available/uniform-store <<NGINX
+    cat <<NGINX | sudo tee /etc/nginx/sites-available/uniform-store >/dev/null
 server {
     listen 80;
     listen [::]:80;
@@ -100,26 +105,27 @@ wait_for_http() {
 
 echo "Setting up ${DOMAIN} from ${APP_DIR}"
 
-apt-get update
-apt-get install -y ca-certificates curl git build-essential fail2ban nginx certbot python3-certbot-nginx
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl git build-essential fail2ban nginx certbot python3-certbot-nginx ufw
 
 NODE_MAJOR="$(node --version 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/' || true)"
 if [[ "${NODE_MAJOR}" != "22" ]]; then
-    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-    apt-get install -y nodejs
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
+    sudo apt-get install -y nodejs
 fi
 
 if ! command -v pm2 >/dev/null 2>&1; then
-    npm install -g pm2
+    sudo npm install -g pm2
 fi
-pm2 startup systemd -u root --hp /root
+sudo env PATH="$PATH" pm2 startup systemd -u "${DEPLOY_USER}" --hp "${DEPLOY_HOME}"
 
-# ufw allow OpenSSH
-# ufw allow 80/tcp
-# ufw allow 443/tcp
-# ufw --force enable
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
 
 cd "${APP_DIR}"
+sudo chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_DIR}"
 if [[ ! -f .env ]]; then
     cp .env.example .env
     chmod 600 .env
@@ -149,16 +155,16 @@ EOF
 chmod 600 admin/.env.local storefront/.env.local
 
 write_nginx_config
-ln -sf /etc/nginx/sites-available/uniform-store /etc/nginx/sites-enabled/uniform-store
-rm -f /etc/nginx/sites-enabled/default
-nginx -t
-systemctl enable --now nginx
-systemctl reload nginx
+sudo ln -sf /etc/nginx/sites-available/uniform-store /etc/nginx/sites-enabled/uniform-store
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl enable --now nginx
+sudo systemctl reload nginx
 
 echo "Requesting TLS certificates. Ensure ${DOMAIN} and admin.${DOMAIN} already point to this VPS."
-certbot --nginx --non-interactive --agree-tos --redirect --email "${LETSENCRYPT_EMAIL}" -d "${DOMAIN}" -d "admin.${DOMAIN}"
-nginx -t
-systemctl reload nginx
+sudo certbot --nginx --non-interactive --agree-tos --redirect --email "${LETSENCRYPT_EMAIL}" -d "${DOMAIN}" -d "admin.${DOMAIN}"
+sudo nginx -t
+sudo systemctl reload nginx
 
 npm ci --workspaces
 (cd backend && npx nest build storefront-api && npx nest build admin-api)
@@ -166,6 +172,7 @@ npm ci --workspaces
 (cd admin && npm run build)
 (cd backend && npm run migration:run)
 
+sudo -H pm2 delete uniform-storefront-api uniform-admin-api uniform-storefront uniform-admin 2>/dev/null || true
 pm2 delete uniform-storefront-api uniform-admin-api uniform-storefront uniform-admin 2>/dev/null || true
 pm2 start "${APP_DIR}/backend/dist/apps/storefront-api/main.js" --name uniform-storefront-api --cwd "${APP_DIR}/backend" --time
 pm2 start "${APP_DIR}/backend/dist/apps/admin-api/main.js" --name uniform-admin-api --cwd "${APP_DIR}/backend" --time
