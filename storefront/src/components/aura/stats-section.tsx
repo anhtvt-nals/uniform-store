@@ -11,38 +11,30 @@ export async function StatsSection() {
             title: t('stats.customers'),
             value: "5,000+",
             sub: t('stats.customersSub'),
-            bg: "bg-muted",
-            text: "text-foreground",
-            subText: "text-muted-foreground",
-            icon: <Building className="w-10 h-10 text-muted-foreground" />,
+            accent: "text-primary",
+            icon: <Building className="w-10 h-10" />,
         },
         {
             title: t('stats.produced'),
             value: "2M+",
             sub: t('stats.producedSub'),
-            bg: "bg-background",
-            text: "text-foreground",
-            subText: "text-muted-foreground",
-            icon: <Shirt className="w-10 h-10 text-muted-foreground" />,
-            border: true,
+            accent: "text-sky-600",
+            icon: <Shirt className="w-10 h-10" />,
         },
         {
             title: t('stats.experience'),
-            value: "10+",
+            value: "24/7",
             sub: t('stats.experienceSub'),
-            bg: "bg-muted",
-            text: "text-foreground",
-            subText: "text-muted-foreground",
-            icon: <Clock className="w-10 h-10 text-muted-foreground" />,
+            accent: "text-emerald-600",
+            icon: <Clock className="w-10 h-10" />,
         },
         {
             title: t('stats.retention'),
             value: "98%",
             sub: t('stats.retentionSub'),
-            bg: "bg-foreground",
-            text: "text-background",
-            subText: "text-background/60",
-            icon: <CircleChart className="text-background/60" />,
+            accent: "text-primary",
+            icon: <CircleChart />,
+            featured: true,
         },
     ];
 
@@ -51,16 +43,16 @@ export async function StatsSection() {
             {cards.map((card, i) => (
                 <div
                     key={i}
-                    className={`${card.bg} rounded-[32px] p-8 flex flex-col justify-between border ${card.border ? 'border-border' : 'border-transparent'} shadow-sm relative overflow-hidden transition-all hover:-translate-y-1`}
+                    className={`relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 ${card.featured ? 'border-primary/40 shadow-primary/10' : 'border-border'}`}
                 >
                     <div>
-                        <h3 className={`text-[10px] font-bold tracking-widest ${card.subText} mb-6 uppercase`}>{card.title}</h3>
+                        <h3 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-foreground/70">{card.title}</h3>
                         <div className="flex items-baseline gap-2">
-                            <span className={`text-5xl font-black tracking-tighter ${card.text}`}>{card.value}</span>
+                            <span className="text-5xl font-black tracking-tighter text-foreground">{card.value}</span>
                         </div>
-                        <div className={`text-sm font-semibold ${card.subText} mt-2`}>{card.sub}</div>
+                        <div className="mt-2 text-sm font-semibold text-muted-foreground">{card.sub}</div>
                     </div>
-                    <div className="z-10 w-full mt-6 flex justify-end">{card.icon}</div>
+                    <div className={`z-10 mt-6 flex w-full justify-end ${card.accent}`}>{card.icon}</div>
                 </div>
             ))}
         </div>

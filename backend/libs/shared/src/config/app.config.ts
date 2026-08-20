@@ -16,12 +16,16 @@ export default registerAs('app', () => ({
     expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '8h',
   },
   storage: {
-    endpoint: process.env.STORAGE_ENDPOINT || process.env.S3_ENDPOINT || '',
-    region: process.env.STORAGE_REGION || process.env.S3_REGION || 'us-east-1',
-    accessKeyId: process.env.STORAGE_ACCESS_KEY || process.env.S3_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.STORAGE_SECRET_KEY || process.env.S3_SECRET_ACCESS_KEY || '',
-    bucket: process.env.STORAGE_BUCKET || process.env.S3_BUCKET || 'uniform-store',
-    publicUrl: process.env.STORAGE_PUBLIC_URL || '',
+    endpoint:
+      process.env.R2_ENDPOINT ||
+      (process.env.R2_ACCOUNT_ID
+        ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+        : ''),
+    region: process.env.R2_REGION || 'auto',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    bucket: process.env.R2_BUCKET || 'uniform-store',
+    publicUrl: process.env.R2_PUBLIC_URL || '',
   },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',

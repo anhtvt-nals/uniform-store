@@ -34,7 +34,7 @@
     "warranty6m": "Bảo hành 6 tháng",
     "warrantyDesc": "Mọi lỗi từ nhà sản xuất",
     "freeDesign": "Thiết kế miễn phí",
-    "freeDesignDesc": "Lên mẫu 3D trong 2H",
+    "freeDesignDesc": "Lên mẫu trong 2H",
     "nationwideShipping": "Giao hàng toàn quốc",
     "nationwideShippingDesc": "Miễn phí ship từ 50 áo",
     "slides": [
@@ -64,19 +64,19 @@
     "features": {
       "highQuality": {
         "title": "Chất Liệu Cao Cấp",
-        "description": "Sử dụng vải cotton 100%, cá sấu Thái, lụa hàn... đảm bảo độ bền, thoáng mát và không xù lông."
+        "description": "Nhiều chất liệu vải cao cấp, 100% cotton, bamboo… phù hợp nhiều nhu cầu sử dụng."
       },
       "bestPrices": {
         "title": "Thiết Kế Miễn Phí",
-        "description": "Đội ngũ designer chuyên nghiệp hỗ trợ lên ý tưởng và thiết kế mẫu 3D theo yêu cầu chỉ trong 2H."
+        "description": "Đội ngũ designer chuyên nghiệp hỗ trợ lên ý tưởng và thiết kế mẫu theo yêu cầu chỉ trong 2H."
       },
-      "fastDelivery": {
-        "title": "Sản Xuất Nhanh Chóng",
-        "description": "Quy trình khép kín từ dệt, nhuộm, may, in thêu giúp tối ưu thời gian, có thể giao hàng trong 3-5 ngày."
+      "closedProduction": {
+        "title": "Sản Xuất Khép Kín",
+        "description": "Quy trình sản xuất được tối ưu hóa, đội ngũ nhân viên lành nghề, sản phẩm đạt chất lượng cao."
       },
-      "warranty": {
-        "title": "Bảo Hành Uy Tín",
-        "description": "Cam kết bảo hành hình in, thêu và đường may lên đến 6 tháng. 1 đổi 1 nếu có lỗi từ nhà sản xuất."
+      "nationwideDelivery": {
+        "title": "Giao Hàng Toàn Quốc",
+        "description": "Hợp tác với nhiều đơn vị vận chuyển, giao hàng tất cả các tỉnh thành, nhanh chóng, thuận tiện."
       }
     },
     "processTitle": "Quy Trình Đặt Hàng",
@@ -85,12 +85,12 @@
       "step1Title": "Tư Vấn & Báo Giá",
       "step1Time": "30 Phút",
       "step1Desc": "Tiếp nhận yêu cầu, tư vấn chất liệu và gửi báo giá chi tiết.",
-      "step2Title": "Thiết Kế Mẫu 3D",
+      "step2Title": "Thiết Kế Mẫu",
       "step2Time": "2 Giờ",
-      "step2Desc": "Lên mockup 3D miễn phí, chỉnh sửa theo ý kiến khách hàng.",
+      "step2Desc": "Tư vấn, lên thiết kế miễn phí theo ý tưởng khách hàng phù hợp theo từng sản phẩm.",
       "step3Title": "May Mẫu & Duyệt",
       "step3Time": "3 Ngày",
-      "step3Desc": "Tiến hành may mẫu thực tế để khách hàng kiểm tra form dáng và chất liệu.",
+      "step3Desc": "Các đơn hàng có số lượng từ 100 sản phẩm sẽ được may mẫu để khách hàng đánh giá trước khi sản xuất hàng loạt.",
       "step4Title": "Sản Xuất Hàng Loạt",
       "step4Time": "7-15 Ngày",
       "step4Desc": "Đưa vào dây chuyền sản xuất đồng loạt, kiểm tra KCS nghiêm ngặt.",
@@ -106,17 +106,19 @@
       "customersSub": "khách hàng",
       "produced": "SẢN PHẨM ĐÃ SẢN XUẤT",
       "producedSub": "áo đồng phục",
-      "experience": "KINH NGHIỆM SẢN XUẤT",
-      "experienceSub": "năm hoạt động",
+      "experience": "Xưởng may trực tiếp",
+      "experienceSub": "Phục vụ",
       "retention": "TỶ LỆ KHÁCH QUAY LẠI",
       "retentionSub": "hài lòng chất lượng"
     },
     "bulkOrderTitle": "Báo Giá Đồng Phục",
-    "bulkOrderEstimate": "Số Lượng Ước Tính",
+    "bulkOrderEstimate": "Số Lượng",
+    "bulkOrderNote": "5 - Số lượng nhiều\n(liên hệ trực tiếp)",
     "bulkOrderCta": "Mua Ngay",
-    "bulkOrderFreeDesign": "Miễn phí thiết kế logo",
+    "bulkOrderFreeDesign": "Miễn phí thiết kế",
     "bulkOrderFreeShip": "Giao hàng toàn quốc",
-    "bulkOrderWarranty": "Bảo hành hình in 6 tháng",
+    "bulkOrderWarranty": "Đa dạng vải, sản phẩm",
+    "bulkOrderWarranty3Month": "Bảo hành đường kim mũi chỉ 3 tháng",
     "customerContractsTitle": "Khách hàng đã ký hợp đồng",
     "customerContractsDesc": "Hàng trăm doanh nghiệp đã tin tưởng và hợp tác cùng chúng tôi",
     "testimonialTitle": "Khách hàng đánh giá",
@@ -131,22 +133,22 @@
       "author3": "Lê Hoàng C",
       "role3": "CEO - Startup Việt"
     },
-    "consultationTitle": "Nhận Demo 3D",
+    "consultationTitle": "Nhận Thiết Kế Mẫu",
     "consultationTitle2": "Trong 2 Giờ",
-    "consultationDesc": "Để lại thông tin để nhận bản vẽ thiết kế đồng phục 3D hoàn toàn miễn phí cho doanh nghiệp của bạn.",
-    "consultationPlaceholder": "Nhận tư vấn ngay...",
+    "consultationDesc": "Để lại thông tin để nhận bản vẽ thiết kế đồng phục hoàn toàn miễn phí cho doanh nghiệp của bạn.",
+    "consultationPlaceholder": "Nhận tư vấn",
     "faqTitle": "Câu Hỏi Thường Gặp",
     "faqDesc": "Giải đáp những thắc mắc chung của khách hàng khi đặt may đồng phục tại Minh An.",
     "faqCta": "Liên Hệ Tư Vấn",
     "faq": {
       "q1": "Thời gian sản xuất đồng phục là bao lâu?",
-      "a1": "Thông thường từ 7-15 ngày làm việc tùy thuộc vào số lượng và độ phức tạp của mẫu thiết kế. Với đơn hàng gấp, chúng tôi có thể xử lý trong 3-5 ngày.",
+      "a1": "Thông thường từ 7-15 ngày làm việc tùy thuộc vào số lượng và độ phức tạp của mẫu thiết kế. Với đơn hàng gấp, chúng tôi có thể xử lý trong 5-7 ngày.",
       "q2": "Có hỗ trợ thiết kế mẫu miễn phí không?",
-      "a2": "Có, Minh An Uniform hỗ trợ thiết kế mẫu 3D hoàn hoàn toàn miễn phí cho tất cả khách hàng đến khi chốt được mẫu ưng ý nhất.",
+      "a2": "Có, Minh An Uniform hỗ trợ thiết kế mẫu hoàn hoàn toàn miễn phí cho tất cả khách hàng đến khi chốt được mẫu ưng ý nhất.",
       "q3": "Số lượng đặt hàng tối thiểu là bao nhiêu?",
-      "a3": "Chúng tôi nhận sản xuất từ 20 áo/mẫu. Tuy nhiên, đơn hàng số lượng lớn sẽ nhận được mức chiết khấu tốt nhất.",
+      "a3": "Chúng tôi nhận sản xuất từ 10 sản phẩm/mẫu. Tuy nhiên, đơn hàng số lượng lớn sẽ được mức giá tốt nhất.",
       "q4": "Chất liệu vải có đảm bảo không?",
-      "a4": "Tất cả chất liệu đều được kiểm định chất lượng, cam kết không bai xù, phai màu và được bảo hành lên đến 6 tháng."
+      "a4": "Tất cả các sản phẩm từ chất liệu vải đến sản phẩm thực tế đều được kiểm tra kỹ trước khi giao hàng, Bảo hành đường kim mũi chỉ 3 tháng."
     },
     "newsTitle": "Tin Tức & Sự Kiện",
     "newsDesc": "Cập nhật thông tin mới nhất về thị trường đồng phục.",
@@ -219,7 +221,7 @@
       "title": "Câu Hỏi Thường Gặp",
       "shipping": {
         "question": "Thời gian sản xuất và giao hàng bao lâu?",
-        "answer": "Thông thường từ 7-15 ngày làm việc tùy số lượng và độ phức tạp. Đơn gấp có thể xử lý trong 3-5 ngày. Miễn phí ship từ 50 áo."
+        "answer": "Thông thường từ 7-15 ngày làm việc tùy số lượng và độ phức tạp. Đơn gấp có thể xử lý trong 5-7 ngày. Miễn phí ship từ 50 áo."
       },
       "returns": {
         "question": "Chính sách bảo hành như thế nào?",

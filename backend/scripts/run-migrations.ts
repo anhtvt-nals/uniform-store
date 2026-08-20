@@ -1,7 +1,10 @@
 import 'reflect-metadata';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
 import { Client } from 'pg';
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const MIGRATIONS_TABLE = 'schema_migrations';
 
@@ -82,12 +85,13 @@ function getMigrationFiles(): string[] {
 async function main() {
   const command = process.argv[2] || 'run';
 
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required to run migrations.');
+  }
+
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    user: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_DATABASE || 'uniform_store',
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
   });
 
   await client.connect();

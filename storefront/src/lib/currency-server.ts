@@ -12,6 +12,10 @@ export async function getActiveCurrencyCode(): Promise<string> {
     const cookieValue = await getCurrencyCookie();
     if (cookieValue) return cookieValue;
 
-    const channel = await getActiveChannelCached();
-    return channel.defaultCurrencyCode;
+    try {
+        const channel = await getActiveChannelCached();
+        return channel.defaultCurrencyCode;
+    } catch {
+        return 'VND';
+    }
 }

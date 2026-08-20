@@ -47,7 +47,7 @@ export default async function Home() {
     return (
         <div className="min-h-screen">
             <HeroSection />
-            <main className="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto">
+            <main className="max-w-[1400px] mx-auto mt-12 p-4 md:mt-16 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto">
                 <StatsSection />
                 <Suspense>
                     <FeaturedCategoryTabs />

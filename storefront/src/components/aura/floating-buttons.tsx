@@ -1,6 +1,6 @@
 "use client";
 
-import {PhoneCall} from 'lucide-react';
+import {Menu, PhoneCall, X} from 'lucide-react';
 import {useEffect, useState} from 'react';
 import {QuoteButton} from '@/components/commerce/quote-button';
 
@@ -20,6 +20,7 @@ type Settings = {
 
 export function FloatingButtons() {
     const [settings, setSettings] = useState<Settings | null>(null);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         fetch('/api/v1/settings/public')
@@ -42,8 +43,8 @@ export function FloatingButtons() {
     const fbUrl = settings?.facebook_url || 'https://facebook.com/minhanuniform';
     const zaloUrl = settings?.zalo_url || 'https://zalo.me/0901234567';
 
-    return (
-        <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
+    const actions = (
+        <>
             <a
                 href={fbUrl}
                 target="_blank"
@@ -51,7 +52,7 @@ export function FloatingButtons() {
                 className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative cursor-pointer"
             >
                 <FacebookIcon className="w-5 h-5" />
-                <span className="absolute right-14 bg-background text-foreground text-xs font-bold px-3 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Facebook</span>
+                <span className="pointer-events-none absolute right-14 hidden whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-foreground shadow-md transition group-hover:opacity-100 md:block md:opacity-0">Facebook</span>
             </a>
             <a
                 href={zaloUrl}
@@ -60,13 +61,33 @@ export function FloatingButtons() {
                 className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative border border-gray-200 cursor-pointer"
             >
                 <img src="/zalo.webp" alt="Chat Zalo" className="w-6 h-6 object-contain" />
-                <span className="absolute right-14 bg-background text-foreground text-xs font-bold px-3 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Chat Zalo</span>
+                <span className="pointer-events-none absolute right-14 hidden whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-foreground shadow-md transition group-hover:opacity-100 md:block md:opacity-0">Chat Zalo</span>
             </a>
             <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative cursor-pointer">
                 <PhoneCall className="w-6 h-6" />
-                <span className="absolute right-14 bg-background text-foreground text-xs font-bold px-3 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Gọi Ngay</span>
+                <span className="pointer-events-none absolute right-14 hidden whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-foreground shadow-md transition group-hover:opacity-100 md:block md:opacity-0">Gọi Ngay</span>
             </a>
             <QuoteButton variant="floating" />
-        </div>
+        </>
+    );
+
+    return (
+        <>
+            <div className="fixed bottom-6 right-6 z-50 hidden flex-col items-end gap-3 md:flex">
+                {actions}
+            </div>
+            <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 md:hidden">
+                {isOpen && <div className="flex flex-col items-end gap-3">{actions}</div>}
+                <button
+                    type="button"
+                    aria-label={isOpen ? 'Đóng liên hệ nhanh' : 'Mở liên hệ nhanh'}
+                    aria-expanded={isOpen}
+                    onClick={() => setIsOpen((open) => !open)}
+                    className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition hover:scale-105"
+                >
+                    {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+                </button>
+            </div>
+        </>
     );
 }

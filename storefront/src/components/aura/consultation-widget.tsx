@@ -2,10 +2,28 @@
 
 import {useTranslations} from 'next-intl';
 import {Sparkles, Send} from 'lucide-react';
-import {Link} from '@/i18n/navigation';
+import {useEffect, useState} from 'react';
+
+const DEFAULT_ZALO_URL = 'https://zalo.me/0901234567';
 
 export function ConsultationWidget() {
     const t = useTranslations('Home');
+    const [zaloUrl, setZaloUrl] = useState(DEFAULT_ZALO_URL);
+
+    useEffect(() => {
+        fetch('/api/v1/settings/public')
+            .then((res) => res.json())
+            .then((settings: unknown) => {
+                if (typeof settings !== 'object' || settings === null) return;
+
+                const value = (settings as Record<string, unknown>).zalo_url;
+                if (typeof value === 'string' && value.trim()) {
+                    setZaloUrl(value);
+                }
+            })
+            .catch(() => {});
+    }, []);
+
     return (
         <div className="bg-primary text-primary-foreground rounded-[32px] p-8 flex flex-col justify-between relative overflow-hidden h-full shadow-lg group">
             <div className="absolute top-0 right-[-20px] p-8 opacity-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700 ease-out">
@@ -25,8 +43,10 @@ export function ConsultationWidget() {
                 </div>
             </div>
 
-            <Link
-                href="/search"
+            <a
+                href={zaloUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="relative z-10 w-full bg-primary-foreground/10 p-1.5 rounded-full flex items-center backdrop-blur-sm border border-primary-foreground/20 hover:border-primary-foreground transition-colors mt-auto"
             >
                 <span className="bg-transparent border-none outline-none text-sm text-primary-foreground px-4 flex-1 w-full pointer-events-none">
@@ -35,7 +55,7 @@ export function ConsultationWidget() {
                 <span className="w-10 h-10 rounded-full bg-background text-foreground flex items-center justify-center transition shrink-0">
                     <Send className="w-4 h-4 ml-0.5" />
                 </span>
-            </Link>
+            </a>
         </div>
     );
 }

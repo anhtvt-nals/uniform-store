@@ -7,13 +7,12 @@ import {Suspense} from 'react';
 
 async function NewsSectionInner() {
     const locale = await getRouteLocale();
-    const t = await getTranslations({locale, namespace: 'Home'});
-    const news = (await getAllBlogs(locale)).slice(0, 3);
+    const news = (await getAllBlogs(locale)).slice(0, 4);
 
     if (news.length === 0) return null;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {news.map((item) => (
                 <Link
                     key={item.slug}
@@ -51,7 +50,7 @@ export async function NewsSection() {
         <div className="md:col-span-12 py-12">
             <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-10">
                 <div>
-                    <h2 className="text-3xl font-black text-foreground tracking-tighter mb-2">{t('newsTitle')}</h2>
+                    <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-2">{t('newsTitle')}</h2>
                     <p className="text-muted-foreground">{t('newsDesc')}</p>
                 </div>
                 <Link

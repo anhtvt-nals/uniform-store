@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { resolve } from 'path';
 import { StorageService } from './storage/storage.service';
 import { MemoryCacheService } from './cache/memory-cache.service';
 import { MailService } from './mail/mail.service';
@@ -10,6 +11,7 @@ import appConfig from './config/app.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: resolve(process.cwd(), '../.env'),
       load: [appConfig],
       isGlobal: true,
     }),

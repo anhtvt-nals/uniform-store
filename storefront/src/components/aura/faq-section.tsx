@@ -20,7 +20,7 @@ export function FAQSection() {
         <div className="md:col-span-12 py-12">
             <div className="flex flex-col md:flex-row gap-12">
                 <div className="md:w-1/3">
-                    <h2 className="text-3xl font-black text-foreground tracking-tighter mb-4">{t('faqTitle')}</h2>
+                    <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-4">{t('faqTitle')}</h2>
                     <p className="text-muted-foreground mb-6">{t('faqDesc')}</p>
                     <Link
                         href="/search"

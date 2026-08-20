@@ -3,7 +3,7 @@
 # Deploy Script — runs on VPS
 # Git pull → install → build → restart services
 # ══════════════════════════════════════════════════════════════
-set -e
+set -euo pipefail
 
 APP_DIR="$(pwd)"
 
@@ -19,20 +19,19 @@ git fetch origin main
 git reset --hard origin/main
 git clean -fd
 
+for env_file in .env storefront/.env.local admin/.env.local; do
+    if [ ! -s "$env_file" ]; then
+        echo "Missing required deployment configuration: $env_file"
+        exit 1
+    fi
+done
+
 # 2. Install dependencies
 echo ""
 echo "📦 Installing dependencies..."
 npm ci --workspaces
 
-# 3. Setup admin .env if missing
-if [ ! -f admin/.env ]; then
-    echo "Creating admin/.env..."
-    cat > admin/.env << 'ADMINENV'
-NEXT_PUBLIC_ADMIN_API_URL=https://admin.${DOMAIN:-localhost}/api/v1/admin
-ADMINENV
-fi
-
-# 4. Build backend
+# 3. Build backend
 echo ""
 echo "🔨 Building backend..."
 cd backend
@@ -44,21 +43,21 @@ cd ..
 echo ""
 echo "🔨 Building storefront..."
 cd storefront
-npm run build 2>&1 || echo "⚠️  Storefront build failed, continuing..."
+npm run build
 cd ..
 
 # 6. Build admin
 echo ""
 echo "🔨 Building admin..."
 cd admin
-npm run build 2>&1 || echo "⚠️  Admin build failed, continuing..."
+npm run build
 cd ..
 
 # 7. Run migrations
 echo ""
 echo "🗄️  Running migrations..."
 cd backend
-npx tsx scripts/run-migrations.ts run 2>&1 || echo "⚠️  Migration skipped"
+npm run migration:run
 cd ..
 
 # 8. Restart services

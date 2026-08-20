@@ -4,7 +4,7 @@
 
 Minh An Uniform — Vietnamese corporate uniform manufacturing ecommerce platform. Next.js storefront selling custom uniforms (áo thun, áo sơ mi, đồng phục công sở, etc.) to businesses.
 
-**Stack**: Next.js frontend + NestJS (TypeScript) backend + PostgreSQL 16 (Docker)
+**Stack**: Next.js frontend + NestJS (TypeScript) backend + Supabase PostgreSQL + Cloudflare R2
 
 ## Current State
 
@@ -13,19 +13,19 @@ Minh An Uniform — Vietnamese corporate uniform manufacturing ecommerce platfor
 | Frontend (Next.js) | ✅ Complete | `apps/storefront/` |
 | Backend (NestJS) | ✅ Complete | `backend/` — NestJS monorepo |
 | Admin Panel | ✅ Running | `admin/` — Next.js 16, port 5002 |
-| Docker/Deploy | ✅ Complete | `backend/docker/` — Compose + Dockerfiles |
+| Deploy | ✅ Complete | Node.js/PM2 + Nginx, using managed Supabase PostgreSQL and Cloudflare R2 |
 
 ## Tech Stack
 
 - **Frontend**: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: NestJS (TypeScript), NestJS monorepo mode
-- **Database**: PostgreSQL 16 (Docker Compose — `docker-compose.yml`)
+- **Database**: Supabase PostgreSQL via `DATABASE_URL`
 - **ORM**: TypeORM with migrations
 - **Validation**: class-validator + class-transformer
 - **API Docs**: @nestjs/swagger (OpenAPI)
 - **Auth (customers)**: Custom JWT (bcrypt passwords) — no longer Supabase
 - **Auth (admins)**: Custom JWT (bcrypt passwords)
-- **Storage**: S3-compatible (MinIO dev, AWS S3/R2 prod)
+- **Storage**: Cloudflare R2 via its S3-compatible API
 - **Cache**: In-memory LRU initially → Redis later
 - **Rate Limiting**: @nestjs/throttler
 - **Logging**: Structured JSON (NestJS Logger + interceptor)
@@ -158,9 +158,6 @@ backend/
 │   ├── common/                  # Shared: guards, interceptors, filters, decorators, DTOs, pipes
 │   ├── database/                # TypeORM entities, migrations, data source
 │   └── shared/                  # Shared: storage (S3), cache (memory→Redis), config
-├── docker/
-│   ├── docker-compose.yml       # Postgres, MinIO, Redis, both API apps, Nginx
-│   └── nginx.conf               # Reverse proxy config
 ├── migrations/                  # SQL migration files (28 files)
 ├── nest-cli.json                # Monorepo configuration (5 projects)
 ├── package.json                 # Workspace root (apps/*, libs/*)
@@ -177,8 +174,8 @@ backend/
 | Shared libs | ✅ Complete | 3 libs (common, database, shared), 44 files |
 | Storefront API | ✅ Complete | 12 modules + 1 GraphQL proxy, 77+ files |
 | Admin API | ✅ Complete | 18 modules (2 new: activity-logs, permissions), 85+ files |
-| Docker setup | ✅ Complete | compose.yml, 2 Dockerfiles, nginx, init-minio; now supports DATABASE_URL for Supabase |
-| Database config | ✅ Supabase | Supports DATABASE_URL env var + SSL (detects supabase.co automatically); graceful fallback to individual DB_* vars |
+| Deploy configuration | ✅ Complete | Docker files removed; applications run directly with Node.js/PM2 and Nginx |
+| Database config | ✅ Supabase | `DATABASE_URL` is required and SSL is configured via `DB_SSL` |
 | Entities | ✅ Complete | AssetEntity, UserEntity, RoleEntity, UserRoleEntity, AdminUserEntity, CategoryEntity, BrandEntity, ProductEntity, ProductVariantEntity, ProductImageEntity, ProductOptionGroupEntity, ProductOptionEntity, ProductVariantOptionEntity, InventoryEntity, StockHistoryEntity, CartEntity, CartItemEntity, CartCouponEntity, OrderEntity, OrderItemEntity, AddressEntity, DiscountEntity, CouponEntity, CouponUsageEntity, ActivityLogEntity, SettingEntity (26 entities total) |
 | DB Schema Design | ✅ Complete | `.ai/database.md` updated — full schema (32 existing + 11 new tables), ASCII ERD, key decisions, migration summary. 5 new migrations added. |
 | Auth implementation | ✅ Complete | Guards, decorators, storefront auth (custom JWT + bcrypt), admin auth (bcrypt + JWT). Supabase Auth removed. |
@@ -200,10 +197,34 @@ backend/
 | Admin Dashboard (Next.js 16) | http://localhost:5002 | ✅ Running |
 | Admin API (NestJS) | http://localhost:3002/api/v1/admin/health | ✅ Running |
 | Storefront API (NestJS) | http://localhost:3000/health | ❌ Stopped (start with `npm run dev` in `backend/`) |
-| PostgreSQL 16 | localhost:5432 | ✅ Running (Docker) |
-| MinIO S3 | localhost:9000 (API), localhost:9001 (Console) | ✅ Running (Docker) |
+| Supabase PostgreSQL | Managed | ✅ External service |
+| Cloudflare R2 | Managed | ✅ External service |
 
 ## Recent Changes
+
+### Demo News Content (2026-08-20)
+- Added idempotent `npm run seed:demo-articles` in `backend/`, which creates or updates six published Vietnamese uniform-industry articles with rich HTML content, Unsplash thumbnails, article categories, and tags.
+
+### Frontend UX Convention (2026-08-20)
+- For homepage category showcases: keep the left introduction block free of container background and outer padding; place text first and a proportionate rounded banner below it.
+- Category product cards use the `compact` variant (roughly half the default thumbnail height); its desktop-only, non-interactive image preview matches the card width and opens to the right, falling back to the left when viewport space is insufficient.
+- Keep statistic cards on one light surface; reserve a primary border/icon accent for emphasis rather than switching one card to a dark theme. Uppercase labels use `text-foreground/70` or stronger for readable contrast.
+- Floating contact actions are evenly spaced on desktop and collapse into a menu FAB on mobile.
+
+### Demo Catalog & Homepage Category Showcase (2026-08-20)
+- Added idempotent `npm run seed:demo-catalog` in `backend/`: creates or updates three root categories (`dong-phuc-cong-so`, `dong-phuc-khach-san`, `dong-phuc-ao-polo`) and six demo products with a default variant and Unsplash image per category.
+- `npm run seed:demo-assets` downloads those seeded Unsplash images, uploads them to R2 with the normal `products/<product-id>/...` key convention, records them in `assets`, then links the matching `product_images` rows to the R2 public URLs.
+- Rebuilt the homepage category list as three category showcases: category image, name and description on the left; six product cards in a three-column desktop grid on the right.
+- Extended the GraphQL compatibility `GetTopCollections` payload with category description and featured asset, retaining its previous fields.
+
+### Managed Infrastructure Migration (2026-08-20)
+- Removed all Docker Compose files, Dockerfiles, MinIO initialization, and Docker-specific deploy setup.
+- Supabase PostgreSQL is now required through `DATABASE_URL`; migration runner uses the same SSL-enabled connection.
+- Cloudflare R2 is the configured object-storage provider through `R2_*` environment variables.
+- Updated environment templates, PM2/Nginx deployment docs, and Next.js remote image configuration for R2 public/custom domains.
+- Backend and migration tooling now load the shared root `.env`; only frontend `.env.local` files remain for Next.js build-time public values.
+- Reworked pending migrations `002` and `017` for Supabase: no writes to managed `auth` schema and no `auth.uid()`-dependent RLS policies.
+- Applied migrations `001`–`037` (36 files, with existing numeric gaps) to the Supabase database; migration status is 36 applied and 0 pending.
 
 ### Homepage Redesign — B2B Landing Page (2026-07-25)
 Complete homepage overhaul from catalog layout to high-converting B2B landing page:

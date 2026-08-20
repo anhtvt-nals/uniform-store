@@ -446,6 +446,8 @@ export class ShopApiService {
       id: cat.id,
       name: cat.name?.[options.languageCode ?? 'en'] ?? cat.name?.en ?? '',
       slug: cat.slug,
+      description: cat.description?.[options.languageCode ?? 'en'] ?? cat.description?.en ?? '',
+      featuredAsset: cat.imageUrl ? {id: cat.id, preview: cat.imageUrl} : null,
       children: cat.children?.map(mapCat) ?? [],
     });
     const items = result.items.map(mapCat);

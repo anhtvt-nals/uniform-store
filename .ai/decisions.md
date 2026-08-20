@@ -18,11 +18,11 @@
 
 ## ADR-003: Supabase Auth for Customers
 
-**Status**: Accepted
+**Status**: Superseded
 **Context**: Need customer auth with email/password, email verification, password reset.
-**Decision**: Supabase Auth for customer authentication.
-**Rationale**: Built-in email/password auth, JWT sessions, Row Level Security, no password hash storage.
-**Consequences**: Customers table references auth.users. Guest checkout uses session_id. Admin auth is separate (custom JWT).
+**Decision**: Supabase Auth was initially selected, then replaced by custom JWT authentication with bcrypt password hashes in `public.users`.
+**Rationale**: The storefront and backend own the authentication flow; the application must not modify Supabase-managed `auth` objects.
+**Consequences**: `users` does not reference `auth.users`; customer and admin auth use separate custom JWT secrets.
 
 ## ADR-004: TypeORM with Migrations
 
@@ -77,7 +77,7 @@
 **Context**: Public API vs internal admin API have different security requirements.
 **Decision**: Two separate NestJS applications in monorepo.
 **Rationale**: Security isolation, different auth mechanisms, different rate limits. Admin API on internal network.
-**Consequences**: Two Docker containers. Shared code via NestJS library modules.
+**Consequences**: Two independently deployed Node.js processes. Shared code via NestJS library modules.
 
 ## ADR-011: Order Code Generation
 
@@ -95,18 +95,19 @@
 
 ## ADR-013: Row Level Security
 
-**Status**: Accepted
+**Status**: Superseded
 **Context**: Defense-in-depth for data access.
-**Decision**: Enable RLS on customer-facing tables. API uses service_role key.
-**Consequences**: Frontend never connects directly to Supabase. RLS is backup.
+**Decision**: Authorization is enforced in NestJS guards and services; Supabase Auth-dependent RLS policies are not installed.
+**Rationale**: The storefront never connects to Supabase directly and authentication uses custom JWTs, so `auth.uid()` policies are invalid.
+**Consequences**: Database access is restricted to backend credentials. API authorization must remain server-side.
 
 ## ADR-014: S3-Compatible Storage
 
 **Status**: Accepted
 **Context**: Need to store product images, article images, user uploads.
-**Decision**: S3-compatible storage (MinIO dev, AWS S3/R2 production).
-**Rationale**: Stateless deployment, CDN-friendly, presigned URLs.
-**Consequences**: No direct file serving. Asset URLs in database.
+**Decision**: Cloudflare R2 through its S3-compatible API in every environment.
+**Rationale**: Stateless deployment, CDN-friendly public custom domains, presigned URLs, and no storage service to operate on the VPS.
+**Consequences**: No direct file serving. Asset URLs in database; runtime requires `R2_*` credentials.
 
 ## ADR-015: Cache Abstraction Layer
 
@@ -133,13 +134,21 @@
 ## ADR-018: Health Check Endpoints
 
 **Status**: Accepted
-**Context**: Need health checks for Docker orchestration.
+**Context**: Need health checks for managed deployment monitoring.
 **Decision**: @nestjs/terminus for /health and /ready endpoints.
 **Consequences**: /health = liveness. /ready = checks DB connection.
 
 ## ADR-019: Stateless Container Deployment
 
 **Status**: Accepted
-**Context**: Need horizontal scaling.
-**Decision**: All state in database or external services. JWT stateless auth.
-**Consequences**: No local file storage. No sticky sessions. Easy to scale.
+**Context**: Need horizontal scaling without self-hosting infrastructure.
+**Decision**: All state is held in Supabase PostgreSQL or Cloudflare R2. Applications run as stateless Node.js/PM2 processes.
+**Consequences**: No Docker, local database, or local file storage. No sticky sessions. Easy to scale.
+
+## ADR-020: Homepage Category Showcase Data
+
+**Status**: Accepted
+**Context**: The homepage category showcase needs each category's localized description and thumbnail, in addition to its existing name and slug.
+**Decision**: Extend the existing `GetTopCollections` GraphQL compatibility response with `description` and `featuredAsset`; retain its existing fields and data source.
+**Rationale**: Category descriptions and images are already managed catalog data. Returning them with the existing collection query avoids duplicated frontend content and keeps the storefront contract backward compatible.
+**Consequences**: Collection consumers may request these optional fields; the proxy maps them from `categories.description` and `categories.image_url`.

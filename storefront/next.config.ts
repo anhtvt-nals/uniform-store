@@ -3,6 +3,17 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
+const storageImagePattern = (() => {
+    const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL;
+    if (!storageUrl) return [];
+
+    try {
+        return [new URL(`${storageUrl.replace(/\/+$/, '')}/**`)];
+    } catch {
+        return [];
+    }
+})();
+
 const nextConfig: NextConfig = {
     cacheComponents: true,
     images: {
@@ -28,6 +39,12 @@ const nextConfig: NextConfig = {
             {
                 hostname: 's3.amazonaws.com',
             },
+            // Cloudflare R2 public development domains and configured custom domain
+            {
+                protocol: 'https',
+                hostname: '*.r2.dev',
+            },
+            ...storageImagePattern,
             // Marketing visuals (hero/gallery/news) sourced from Unsplash
             {
                 hostname: 'images.unsplash.com',

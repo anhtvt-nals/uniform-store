@@ -185,21 +185,6 @@ export function HeroSlider({
                         ))}
                     </div>
                 )}
-
-                {/* Trust badges */}
-                <div className="bg-background/90 backdrop-blur-xl border border-border rounded-[24px] p-4 lg:p-6 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-0 md:divide-x divide-border shadow-sm pointer-events-auto relative z-30">
-                    {trustBadges.map((b, i) => (
-                        <div key={i} className="px-4 flex items-center gap-4 justify-center md:justify-start">
-                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                <BadgeIcon icon={b.icon} />
-                            </div>
-                            <div>
-                                <div className="text-xs font-bold text-foreground uppercase tracking-widest">{b.title}</div>
-                                <div className="text-[10px] text-muted-foreground mt-1">{b.desc}</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     );

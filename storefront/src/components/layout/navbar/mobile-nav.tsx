@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import {Menu, Search, ShoppingBag, User, Package, MapPin} from 'lucide-react';
 import {Button} from '@/components/ui/button';
@@ -27,6 +27,7 @@ interface MobileNavProps {
 
 export function MobileNav({collections}: MobileNavProps) {
     const t = useTranslations('Navigation');
+    const [mounted, setMounted] = useState(false);
     const [open, setOpen] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const router = useRouter();
@@ -42,9 +43,22 @@ export function MobileNav({collections}: MobileNavProps) {
         setOpen(false);
     };
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return (
+            <Button variant="ghost" size="icon" className="shrink-0" disabled>
+                <Menu className="size-5" />
+                <span className="sr-only">{t('openMenu')}</span>
+            </Button>
+        );
+    }
+
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="shrink-0" />}>
                 <Menu className="size-5" />
                 <span className="sr-only">{t('openMenu')}</span>
             </SheetTrigger>
@@ -66,22 +80,31 @@ export function MobileNav({collections}: MobileNavProps) {
                         />
                     </form>
 
-                    {/* Shop All */}
-                    <div>
-                        <SheetClose
-                            render={
-                                <Link
-                                    href="/search"
-                                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
-                                />
-                            }
-                            nativeButton={false}
-                            onClick={handleLinkClick}
-                        >
-                            <ShoppingBag className="h-5 w-5" />
-                            {t('shopAll')}
-                        </SheetClose>
-                    </div>
+                    {/* Primary navigation */}
+                    <nav className="flex flex-col gap-0.5">
+                        {[
+                            {href: '/', label: t('home')},
+                            {href: '/search', label: t('products')},
+                            {href: '/dich-vu', label: t('services')},
+                            {href: '/ve-chung-toi', label: t('about')},
+                            {href: '/tin-tuc', label: t('news')},
+                        ].map((item) => (
+                            <SheetClose
+                                key={item.href}
+                                render={
+                                    <Link
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
+                                    />
+                                }
+                                nativeButton={false}
+                                onClick={handleLinkClick}
+                            >
+                                {item.href === '/search' && <ShoppingBag className="h-5 w-5" />}
+                                {item.label}
+                            </SheetClose>
+                        ))}
+                    </nav>
 
                     {/* Collections */}
                     {collections.length > 0 && (

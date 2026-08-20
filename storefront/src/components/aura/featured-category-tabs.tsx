@@ -13,8 +13,11 @@ type CollectionItem = {
     id: string;
     name: string;
     slug: string;
+    description: string;
     featuredAsset?: { id: string; preview: string } | null;
 };
+
+const showcaseSlugs = ['dong-phuc-cong-so', 'dong-phuc-khach-san', 'dong-phuc-ao-polo'];
 
 async function getCollectionProducts(locale: string, currencyCode: string, collectionSlug: string, take: number) {
 
@@ -39,11 +42,12 @@ export async function FeaturedCategoryTabs() {
     const locale = await getRouteLocale();
     const currencyCode = await getActiveCurrencyCode();
     const t = await getTranslations({locale, namespace: 'Product'});
-
     const collections = (await getTopCollections(locale)) as CollectionItem[];
-    const top5 = collections.slice(0, 5);
+    const showcaseCategories = showcaseSlugs
+        .map((slug) => collections.find((collection) => collection.slug === slug))
+        .filter((collection): collection is CollectionItem => Boolean(collection));
 
-    if (top5.length === 0) {
+    if (showcaseCategories.length === 0) {
         return null;
     }
 
@@ -51,11 +55,10 @@ export async function FeaturedCategoryTabs() {
         <div className="md:col-span-12 flex flex-col gap-6 mt-4">
             <Suspense fallback={<FullSkeleton />}>
                 <FeaturedCategoryTabsInner
-                    categories={top5}
+                    categories={showcaseCategories}
                     locale={locale}
                     currencyCode={currencyCode}
-                    title={t('featuredProducts')}
-                    viewAllLabel={t('viewAllProducts')}
+                    headingLabel={t('featuredProducts')}
                     noProductsLabel={t('noProductsFound')}
                 />
             </Suspense>
@@ -67,22 +70,19 @@ async function FeaturedCategoryTabsInner({
     categories,
     locale,
     currencyCode,
-    title,
-    viewAllLabel,
+    headingLabel,
     noProductsLabel,
 }: {
     categories: CollectionItem[];
     locale: string;
     currencyCode: string;
-    title: string;
-    viewAllLabel: string;
+    headingLabel: string;
     noProductsLabel: string;
 }) {
-    // Pre-load products for all categories (4 each)
     const allProducts = await Promise.all(
         categories.map(async (cat) => {
-            const items = await getCollectionProducts(locale, currencyCode, cat.slug, 4);
-            return { slug: cat.slug, products: items.slice(0, 4) };
+            const items = await getCollectionProducts(locale, currencyCode, cat.slug, 6);
+            return { slug: cat.slug, products: items.slice(0, 6) };
         }),
     );
 
@@ -93,12 +93,16 @@ async function FeaturedCategoryTabsInner({
 
     return (
         <FeaturedCategoryTabsClient
-            categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
+            categories={categories.map((c) => ({
+                id: c.id,
+                name: c.name,
+                slug: c.slug,
+                description: c.description,
+                imageUrl: c.featuredAsset?.preview,
+            }))}
             productsMap={productsMap}
-            title={title}
-            viewAllLabel={viewAllLabel}
+            headingLabel={headingLabel}
             noProductsLabel={noProductsLabel}
-            tileLabels={{ viewAllProducts: viewAllLabel }}
         />
     );
 }

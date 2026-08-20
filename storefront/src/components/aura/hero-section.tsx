@@ -65,7 +65,7 @@ async function BulkOrderWidget() {
                     <div className="bg-primary-foreground/10 rounded-2xl p-5 border border-primary-foreground/10 backdrop-blur-sm">
                         <div className="text-[10px] font-bold text-primary-foreground/60 tracking-widest mb-1 uppercase">{home('bulkOrderEstimate')}</div>
                         <div className="flex justify-between items-end">
-                            <div className="text-4xl font-black tracking-tighter">50-100</div>
+                            <div className="text-4xl font-black tracking-tighter whitespace-pre">{home('bulkOrderNote')}</div>
                             <div className="flex items-center gap-1 text-sm font-bold bg-primary-foreground/20 px-3 py-1.5 rounded-lg">
                                 <span>Áo</span>
                             </div>
@@ -81,9 +81,13 @@ async function BulkOrderWidget() {
                             <CheckCircle2 className="w-4 h-4 text-green-300" />
                             <span className="text-sm font-bold">{home('bulkOrderFreeShip')}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mb-2">
                             <CheckCircle2 className="w-4 h-4 text-green-300" />
                             <span className="text-sm font-bold">{home('bulkOrderWarranty')}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-green-300" />
+                            <span className="text-sm font-bold">{home('bulkOrderWarranty3Month')}</span>
                         </div>
                     </div>
                 </div>

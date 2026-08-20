@@ -10,8 +10,7 @@ import {Suspense} from "react";
 import {SearchInput} from '@/components/layout/search-input';
 import {NavbarUserSkeleton} from '@/components/shared/skeletons/navbar-user-skeleton';
 import {SearchInputSkeleton} from '@/components/shared/skeletons/search-input-skeleton';
-import {NavProducts} from '@/components/layout/navbar/nav-products';
-import {Phone, MessageSquare} from "lucide-react";
+import {Phone} from "lucide-react";
 import {Link} from '@/i18n/navigation';
 import {getTranslations} from "next-intl/server";
 import {getRouteLocale} from "@/i18n/server";
@@ -20,23 +19,12 @@ export async function Navbar() {
     const locale = await getRouteLocale();
     const t = await getTranslations({locale, namespace: 'Navigation'});
 
-    const navLinks = [
-        {href: "/", label: t('home'), active: true},
-        {href: "/search", label: t('products')},
-        {href: "/dich-vu", label: t('services')},
-        {href: "/ve-chung-toi", label: t('about')},
-        {href: "/tin-tuc", label: t('news')},
-    ];
-
     return (
         <header className="sticky top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10">
-                <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
-                    {/* Left: mobile menu + logo + desktop nav */}
-                    <div className="flex items-center gap-6 lg:gap-10 min-w-0">
-                        <Suspense>
-                            <MobileNavWrapper locale={locale} />
-                        </Suspense>
+            <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-10">
+                <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4">
+                    {/* Left: logo, primary links, then menu */}
+                    <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 min-w-0">
                         <Link href="/" className="flex items-center gap-2 shrink-0">
                             <Image
                                 src="/logo.jpeg"
@@ -47,28 +35,33 @@ export async function Navbar() {
                                 priority
                             />
                         </Link>
-                        <nav className="hidden xl:flex items-center gap-7 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                            {navLinks.map((item, i) => (
-                                item.href === '/search' ? (
-                                    <NavProducts key={i} />
-                                ) : (
-                                    <NavigationLink
-                                        key={i}
-                                        href={item.href}
-                                        className="hover:text-foreground transition whitespace-nowrap"
-                                    >
-                                        {item.label}
-                                    </NavigationLink>
-                                )
-                            ))}
+                        <nav className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                            <NavigationLink
+                                href="/"
+                                className="hidden sm:inline-flex hover:text-foreground transition whitespace-nowrap"
+                            >
+                                {t('home')}
+                            </NavigationLink>
+                            <NavigationLink
+                                href="/search"
+                                className="inline-flex hover:text-foreground transition whitespace-nowrap"
+                            >
+                                {t('products')}
+                            </NavigationLink>
                         </nav>
+                        <Suspense>
+                            <MobileNavWrapper locale={locale} />
+                        </Suspense>
                     </div>
 
                     {/* Right: actions */}
-                    <div className="flex items-center gap-3 lg:gap-5 shrink-0">
-                        <div className="hidden 2xl:flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest">
+                    <div className="flex items-center gap-1 sm:gap-3 lg:gap-5 shrink-0">
+                        <a
+                            href="tel:0901234567"
+                            className="hidden 2xl:flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/20 transition-colors"
+                        >
                             <Phone className="w-4 h-4" /> 090 123 4567
-                        </div>
+                        </a>
                         <div className="hidden xl:block">
                             <Suspense fallback={<SearchInputSkeleton />}>
                                 <SearchInput/>
@@ -82,15 +75,19 @@ export async function Navbar() {
                                 <CurrencyPickerWrapper />
                             </Suspense>
                         </div>
-                        <Suspense>
-                            <ThemeSwitcher />
-                        </Suspense>
+                        <div className="hidden min-[420px]:block">
+                            <Suspense>
+                                <ThemeSwitcher />
+                            </Suspense>
+                        </div>
                         <Suspense>
                             <NavbarCart/>
                         </Suspense>
-                        <Suspense fallback={<NavbarUserSkeleton />}>
-                            <NavbarUser/>
-                        </Suspense>
+                        <div className="hidden min-[500px]:block">
+                            <Suspense fallback={<NavbarUserSkeleton />}>
+                                <NavbarUser/>
+                            </Suspense>
+                        </div>
                     </div>
                 </div>
             </div>

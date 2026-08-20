@@ -1,7 +1,7 @@
 "use client";
 
 import {useTranslations} from 'next-intl';
-import {useState} from 'react';
+import {type MouseEvent, useState} from 'react';
 import {Link} from '@/i18n/navigation';
 import {FragmentOf, readFragment} from '@/graphql';
 import {ProductCardFragment} from '@/lib/vendure/fragments';
@@ -9,9 +9,10 @@ import {Price} from '@/components/commerce/price';
 import {Eye} from 'lucide-react';
 import {ProductQuickView} from './product-quick-view';
 
-export function ProductTile({product: productProp, index}: {product: FragmentOf<typeof ProductCardFragment>; index: number}) {
+export function ProductTile({product: productProp, index, compact = false}: {product: FragmentOf<typeof ProductCardFragment>; index: number; compact?: boolean}) {
     const t = useTranslations('Product');
     const [quickViewOpen, setQuickViewOpen] = useState(false);
+    const [previewSide, setPreviewSide] = useState<'left' | 'right'>('right');
     const product = readFragment(ProductCardFragment, productProp);
     const imageUrl = product.productAsset?.preview;
     const price = product.priceWithTax;
@@ -31,20 +32,26 @@ export function ProductTile({product: productProp, index}: {product: FragmentOf<
         priceNode = <Price value={price.value} currencyCode={product.currencyCode} />;
     }
 
+    const positionPreview = (event: MouseEvent<HTMLAnchorElement>) => {
+        if (!compact) return;
+        const {left, right, width} = event.currentTarget.getBoundingClientRect();
+        setPreviewSide(right + width + 16 <= window.innerWidth || left < width + 16 ? 'right' : 'left');
+    };
+
     return (
         <>
             <Link
                 href={`/product/${product.slug}`}
-                className="group flex flex-col bg-background border border-border rounded-[24px] p-3 shadow-sm hover:shadow-md transition-shadow relative"
+                className={`group relative flex h-full flex-col border border-border bg-background shadow-sm transition-shadow hover:shadow-md ${compact ? 'rounded-2xl p-2' : 'rounded-[24px] p-3'}`}
+                onMouseEnter={positionPreview}
             >
                 <div className="absolute top-5 left-5 z-20">
                     {index === 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">{t('bestSeller')}</span>}
                     {index === 1 && <span className="bg-blue-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">{t('new')}</span>}
                 </div>
 
-                <div className="relative rounded-[16px] bg-muted overflow-hidden flex-1 aspect-[4/5] mb-4">
+                <div className={`relative overflow-hidden bg-muted ${compact ? 'mb-3 aspect-[16/15] rounded-xl' : 'mb-4 aspect-[4/5] flex-1 rounded-[16px]'}`}>
                     {imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={imageUrl}
                             alt={product.productName}
@@ -78,6 +85,12 @@ export function ProductTile({product: productProp, index}: {product: FragmentOf<
                         </button>
                     </div>
                 </div>
+
+                {compact && imageUrl && (
+                    <div aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-40 hidden w-full -translate-y-1/2 scale-95 rounded-2xl border border-border bg-background p-2 opacity-0 shadow-xl transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 lg:block ${previewSide === 'right' ? 'left-[calc(100%+1rem)]' : 'right-[calc(100%+1rem)]'}`}>
+                        <img src={imageUrl} alt="" className="aspect-[4/5] w-full rounded-xl object-cover" />
+                    </div>
+                )}
 
                 <div className="px-1 flex flex-col gap-1.5">
                     <h4 className="font-bold text-sm text-foreground truncate">{product.productName}</h4>

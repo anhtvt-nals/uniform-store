@@ -24,8 +24,6 @@ uniform-store/
 │   └── scripts/run-migrations.ts
 ├── storefront/       # Next.js 16 public site, port 3001 (next-intl: vi/en/de)
 ├── admin/            # Next.js 16 admin dashboard, port 5002 (no i18n routing)
-├── docker-compose.yml         # full local stack (Postgres, MinIO, both APIs, admin UI)
-├── docker-compose.infra.yml   # production: Postgres + MinIO only, bound to 127.0.0.1
 └── .github/          # CI (typecheck) + CD (SSH → VPS → deploy.sh)
 ```
 
@@ -62,9 +60,6 @@ npm run dev:storefront   # Next.js storefront on :3001
 npm run dev:admin        # Next.js admin on :5002
 
 npm run build            # backend → storefront → admin
-
-docker compose up -d                              # full local stack
-docker compose -f docker-compose.infra.yml up -d  # Postgres + MinIO only (prod model)
 ```
 
 Inside `backend/`:
@@ -156,15 +151,15 @@ documented reason.
 1. **Read `.claude/memory/bugs.md` before debugging.** Several failure modes here look
    like new bugs but are known and documented (storage URLs, failing migrations,
    silently-swallowed build failures in CI).
-2. **`README.md` at the root is stale.** It describes a Vendure + `apps/server` layout
-   that no longer exists. Do not use it as a source of truth; do not quietly "fix" it
-   either unless asked — it is a real edit to a tracked file.
+2. **Managed infrastructure:** database access requires Supabase `DATABASE_URL`; uploads
+   require Cloudflare R2 `R2_*` credentials. No local Docker services are available.
 3. `.ai/progress.md`, `.ai/tasks.md` and `.ai/roadmap.md` are frozen around 2026-07-14
    and understate what is built (they list cart/checkout/orders/dashboard as pending;
    all exist). `.ai/memory.md` is current to ~2026-07-25 and is reliable.
    `.claude/memory/roadmap.md` reflects the state as of 2026-07-26.
-4. **Never commit `.env` files.** Only `.env.example` files are tracked. `backend/.env`
-   exists locally with real values and is ignored by the root `.gitignore`.
+4. **Never commit `.env` files.** Only `.env.example` files are tracked. Backend and
+   migration tooling load the shared root `.env`; frontend-local `.env.local` files are
+   limited to Next.js build-time configuration.
 5. Two independent JWT systems (customer / admin) with separate secrets and separate
    user tables. Do not unify them without a decision record.
 6. Keep the memory files current as you work — see §7 for the workflow.

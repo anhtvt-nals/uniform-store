@@ -44,6 +44,10 @@ import {
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => {
+        if (!process.env.DATABASE_URL) {
+          throw new Error('DATABASE_URL is required. Configure a Supabase PostgreSQL connection string.');
+        }
+
         const sslEnabled = process.env.DB_SSL === 'true';
 
         const baseConfig = {
@@ -92,18 +96,7 @@ import {
           ssl: sslEnabled ? { rejectUnauthorized: false } : false,
         };
 
-        if (process.env.DATABASE_URL) {
-          return { ...baseConfig, url: process.env.DATABASE_URL };
-        }
-
-        return {
-          ...baseConfig,
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'uniform_store',
-        };
+        return { ...baseConfig, url: process.env.DATABASE_URL };
       },
     }),
   ],

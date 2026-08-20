@@ -8,6 +8,11 @@ export const GetTopCollectionsQuery = graphql(`
                 id
                 name
                 slug
+                description
+                featuredAsset {
+                    id
+                    preview
+                }
                 children {
                     id
                     name
@@ -453,4 +458,3 @@ export const GetCollectionProductsQuery = graphql(`
         }
     }
 `, [ProductCardFragment]);
-

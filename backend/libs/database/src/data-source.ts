@@ -1,10 +1,15 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const sslEnabled = process.env.DB_SSL === 'true';
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required. Configure a Supabase PostgreSQL connection string.');
+}
 
 const baseConfig: any = {
   type: 'postgres',
@@ -15,14 +20,6 @@ const baseConfig: any = {
   ssl: sslEnabled ? { rejectUnauthorized: false } : false,
 };
 
-if (process.env.DATABASE_URL) {
-  baseConfig.url = process.env.DATABASE_URL;
-} else {
-  baseConfig.host = process.env.DB_HOST || 'localhost';
-  baseConfig.port = parseInt(process.env.DB_PORT || '5432', 10);
-  baseConfig.username = process.env.DB_USERNAME || 'postgres';
-  baseConfig.password = process.env.DB_PASSWORD || 'postgres';
-  baseConfig.database = process.env.DB_DATABASE || 'uniform_store';
-}
+baseConfig.url = process.env.DATABASE_URL;
 
 export const AppDataSource = new DataSource(baseConfig);

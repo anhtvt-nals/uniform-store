@@ -62,20 +62,20 @@
     "whyShopWithUs": "Why Shop With Us",
     "features": {
       "highQuality": {
-        "title": "High Quality",
-        "description": "Premium products carefully selected for you"
+        "title": "Premium Materials",
+        "description": "A wide range of premium fabrics, including 100% cotton and bamboo, for diverse needs."
       },
       "bestPrices": {
-        "title": "Best Prices",
-        "description": "Competitive pricing on all our products"
+        "title": "Free Design",
+        "description": "Our professional designers develop ideas and 3D samples to your requirements within two hours."
       },
-      "fastDelivery": {
-        "title": "Fast Delivery",
-        "description": "Quick and reliable shipping worldwide"
+      "closedProduction": {
+        "title": "Integrated Production",
+        "description": "An optimized production process and skilled team deliver consistently high-quality products."
       },
-      "warranty": {
-        "title": "Trusted Warranty",
-        "description": "Print, embroidery and stitching warranty up to 6 months. 1-for-1 exchange for manufacturer defects."
+      "nationwideDelivery": {
+        "title": "Nationwide Delivery",
+        "description": "We partner with multiple carriers to deliver quickly and conveniently to every province."
       }
     },
     "whyShopWithUsDesc": "We don't just sew shirts — we deliver professional brand identity solutions for your business.",
@@ -85,12 +85,12 @@
       "step1Title": "Consult & Quote",
       "step1Time": "30 Min",
       "step1Desc": "Receive requirements, advise on materials and send a detailed quote.",
-      "step2Title": "3D Design",
+      "step2Title": "Sample Design",
       "step2Time": "2 Hours",
-      "step2Desc": "Free 3D mockup, revisions per client feedback.",
+      "step2Desc": "We consult and create a free design based on the client's idea and each product's needs.",
       "step3Title": "Sample & Approval",
       "step3Time": "3 Days",
-      "step3Desc": "Sew a real sample for the client to check fit and material.",
+      "step3Desc": "Orders of 100 or more items receive a sewn sample for approval before mass production.",
       "step4Title": "Mass Production",
       "step4Time": "7-15 Days",
       "step4Desc": "Run on the production line with strict QC inspection.",
@@ -113,10 +113,12 @@
     },
     "bulkOrderTitle": "Uniform Quote",
     "bulkOrderEstimate": "Estimated Quantity",
+    "bulkOrderNote": "5 - More (Contact us directly)",
     "bulkOrderCta": "Shop Now",
-    "bulkOrderFreeDesign": "Free logo design",
+    "bulkOrderFreeDesign": "Free design",
     "bulkOrderFreeShip": "Nationwide shipping",
-    "bulkOrderWarranty": "6-month print warranty",
+    "bulkOrderWarranty": "Variety of fabrics, products",
+    "bulkOrderWarranty3Month": "3-month stitching warranty",
     "customerContractsTitle": "Trusted by Leading Brands",
     "customerContractsDesc": "Hundreds of businesses have signed contracts with us",
     "testimonialTitle": "Customer reviews",
@@ -131,16 +133,16 @@
       "author3": "Le Hoang C",
       "role3": "CEO - Startup Viet"
     },
-    "consultationTitle": "Get a 3D Demo",
+    "consultationTitle": "Get a Sample Design",
     "consultationTitle2": "Within 2 Hours",
-    "consultationDesc": "Leave your info to receive a completely free 3D uniform design draft for your business.",
-    "consultationPlaceholder": "Get advice now...",
+    "consultationDesc": "Leave your details to receive a completely free uniform design draft for your business.",
+    "consultationPlaceholder": "Get advice",
     "faqTitle": "Frequently Asked Questions",
     "faqDesc": "Answers to common questions when ordering uniforms at Minh An.",
     "faqCta": "Contact for Advice",
     "faq": {
       "q1": "How long does uniform production take?",
-      "a1": "Usually 7-15 working days depending on quantity and design complexity. Urgent orders can be handled in 3-5 days.",
+      "a1": "Usually 7-15 working days depending on quantity and design complexity. Urgent orders can be handled in 5-7 days.",
       "q2": "Do you support free design?",
       "a2": "Yes, Minh An Uniform offers completely free 3D design for all customers until the best sample is approved.",
       "q3": "What is the minimum order quantity?",

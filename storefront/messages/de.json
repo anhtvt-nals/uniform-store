@@ -62,20 +62,20 @@
     "whyShopWithUs": "Warum bei uns einkaufen",
     "features": {
       "highQuality": {
-        "title": "Hohe Qualität",
-        "description": "Sorgfältig ausgewählte Premiumprodukte für Sie"
+        "title": "Hochwertige Materialien",
+        "description": "Vielfältige hochwertige Stoffe wie 100 % Baumwolle und Bambus für unterschiedliche Anforderungen."
       },
       "bestPrices": {
-        "title": "Beste Preise",
-        "description": "Wettbewerbsfähige Preise für alle unsere Produkte"
+        "title": "Kostenloses Design",
+        "description": "Unser Designteam entwickelt Ideen und 3D-Muster nach Ihren Anforderungen innerhalb von zwei Stunden."
       },
-      "fastDelivery": {
-        "title": "Schnelle Lieferung",
-        "description": "Schneller und zuverlässiger Versand weltweit"
+      "closedProduction": {
+        "title": "Integrierte Produktion",
+        "description": "Ein optimierter Produktionsprozess und erfahrene Mitarbeitende sichern hohe Produktqualität."
       },
-      "warranty": {
-        "title": "Vertrauenswürdige Garantie",
-        "description": "Druck-, Stick- und Nahtgarantie bis zu 6 Monate. 1-zu-1-Austausch bei Herstellerfehlern."
+      "nationwideDelivery": {
+        "title": "Landesweite Lieferung",
+        "description": "Mit mehreren Versandpartnern liefern wir schnell und bequem in alle Provinzen."
       }
     },
     "whyShopWithUsDesc": "Wir nähen nicht nur Hemden – wir liefern professionelle Markenidentitätslösungen für Ihr Unternehmen.",
@@ -85,12 +85,12 @@
       "step1Title": "Beratung & Angebot",
       "step1Time": "30 Min",
       "step1Desc": "Anforderungen aufnehmen, Material beraten und detailliertes Angebot senden.",
-      "step2Title": "3D-Design",
+      "step2Title": "Musterdesign",
       "step2Time": "2 Stunden",
-      "step2Desc": "Kostenloses 3D-Mockup, Überarbeitungen nach Kundenfeedback.",
+      "step2Desc": "Wir beraten Sie und erstellen kostenlos ein Design passend zur Idee des Kunden und zum Produkt.",
       "step3Title": "Muster & Freigabe",
       "step3Time": "3 Tage",
-      "step3Desc": "Echtes Muster nähen, damit der Kunde Passform und Material prüft.",
+      "step3Desc": "Bei Bestellungen ab 100 Stück wird vor der Serienproduktion ein Muster zur Freigabe genäht.",
       "step4Title": "Massenproduktion",
       "step4Time": "7-15 Tage",
       "step4Desc": "Produktion mit strenger Qualitätskontrolle.",
@@ -113,10 +113,12 @@
     },
     "bulkOrderTitle": "Uniform-Angebot",
     "bulkOrderEstimate": "Geschätzte Menge",
+    "bulkOrderNote": "5 - Mehr (Kontaktieren Sie uns direkt)",
     "bulkOrderCta": "Jetzt kaufen",
-    "bulkOrderFreeDesign": "Kostenloses Logo-Design",
+    "bulkOrderFreeDesign": "Kostenloses Design",
     "bulkOrderFreeShip": "Bundesweite Lieferung",
-    "bulkOrderWarranty": "6-Monats-Druckgarantie",
+    "bulkOrderWarranty": "Vielfalt an Stoffen und Produkten",
+    "bulkOrderWarranty3Month": "3-monatige Nahtgarantie",
     "customerContractsTitle": "Vertrauen führender Marken",
     "customerContractsDesc": "Hunderte von Unternehmen haben Verträge mit uns abgeschlossen",
     "testimonialTitle": "Kundenbewertungen",
@@ -131,16 +133,16 @@
       "author3": "Le Hoang C",
       "role3": "CEO - Startup Viet"
     },
-    "consultationTitle": "3D-Demo erhalten",
+    "consultationTitle": "Musterdesign erhalten",
     "consultationTitle2": "Innerhalb 2 Stunden",
-    "consultationDesc": "Hinterlassen Sie Ihre Daten für einen kostenlosen 3D-Uniform-Entwurf.",
-    "consultationPlaceholder": "Jetzt Beratung erhalten...",
+    "consultationDesc": "Hinterlassen Sie Ihre Daten für einen vollständig kostenlosen Uniform-Entwurf für Ihr Unternehmen.",
+    "consultationPlaceholder": "Beratung erhalten",
     "faqTitle": "Häufige Fragen",
     "faqDesc": "Antworten zu häufigen Fragen bei Uniformbestellungen bei Minh An.",
     "faqCta": "Beratung kontaktieren",
     "faq": {
       "q1": "Wie lange dauert die Uniformproduktion?",
-      "a1": "Meist 7-15 Werktage je nach Menge und Designkomplexität. Eilbestellungen in 3-5 Tagen.",
+      "a1": "Meist 7-15 Werktage je nach Menge und Designkomplexität. Eilbestellungen in 5-7 Tagen.",
       "q2": "Bieten Sie kostenloses Design?",
       "a2": "Ja, Minh An bietet komplett kostenloses 3D-Design bis zur Musterauswahl.",
       "q3": "Was ist die Mindestbestellmenge?",

@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from "next";
 import {locale as rootLocale} from "next/root-params";
 import {hasLocale, NextIntlClientProvider} from "next-intl";
 import localFont from "next/font/local";
+import {Black_Ops_One} from "next/font/google";
 import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {routing} from "@/i18n/routing";
@@ -19,6 +20,13 @@ const inter = localFont({
     src: "../../fonts/Inter-Latin.woff2",
     weight: "100 900",
     variable: "--font-inter",
+});
+
+const blackOpsOne = Black_Ops_One({
+    weight: "400",
+    subsets: ["latin"],
+    variable: "--font-black-ops-one",
+    display: "swap",
 });
 
 export function generateStaticParams() {
@@ -87,7 +95,7 @@ export default async function LocaleLayout({children}: {children: React.ReactNod
     return (
         <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
             <body
-                className={`${inter.variable} antialiased flex flex-col min-h-screen bg-background text-foreground`}
+                className={`${inter.variable} ${blackOpsOne.variable} antialiased flex flex-col min-h-screen bg-background text-foreground`}
             >
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     <Suspense>

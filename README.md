@@ -1,86 +1,47 @@
-# uniform-store
+# Minh An Uniform Store
 
-A full-stack e-commerce application built with [Vendure](https://www.vendure.io/) and [Next.js](https://nextjs.org/).
+Monorepo thương mại điện tử gồm storefront Next.js, admin Next.js và hai NestJS API. Dự án chạy trực tiếp bằng Node.js; không dùng Docker.
 
-## Project Structure
+## Hạ tầng quản lý
 
-This is a monorepo using npm workspaces:
+- **Database:** Supabase PostgreSQL, kết nối qua `DATABASE_URL`.
+- **Object storage:** Cloudflare R2, truy cập qua S3 API và public custom domain.
+- **Ứng dụng:** Node.js 22+; chạy local với npm workspaces hoặc production với PM2.
 
-```
-uniform-store/
-├── apps/
-│   ├── server/       # Vendure backend (GraphQL API, Admin Dashboard, S3 asset storage)
-│   └── storefront/   # Next.js storefront (Minh An Uniform / aura-fashion UI)
-└── package.json      # Root workspace configuration
-```
+## Cấu hình
 
-## Getting Started
+1. Sao chép `.env.example` thành `.env` và điền Supabase/R2 credentials.
+2. Đặt `NEXT_PUBLIC_STORAGE_URL` trong `storefront/.env.local` và `admin/.env.local` bằng cùng giá trị `R2_PUBLIC_URL` nếu ảnh được render bởi Next.js.
 
-### Development
+`DATABASE_URL` nên là URI **Session pooler** của Supabase cho API Node.js chạy lâu dài. Để chạy migration hoặc backup, dùng URI direct connection do Supabase cung cấp. Backend và migration runner đều đọc file `.env` tại root.
 
-Start both the server and storefront in development mode:
+## Phát triển
 
 ```bash
+npm install
 npm run dev
 ```
 
-Or run them individually:
+Hoặc chạy từng ứng dụng:
 
 ```bash
-# Start only the server
-npm run dev:server
-
-# Start only the storefront
+npm run dev:backend
 npm run dev:storefront
+npm run dev:admin
 ```
 
-### Access Points
+Chạy migration:
 
-- **Vendure Dashboard**: http://localhost:3000/dashboard
-- **Shop GraphQL API**: http://localhost:3000/shop-api
-- **Admin GraphQL API**: http://localhost:3000/admin-api
-- **Storefront**: http://localhost:3001
-
-### Admin Credentials
-
-Use these credentials to log in to the Vendure Dashboard:
-
-- **Username**: superadmin
-- **Password**: superadmin
-
-## S3 Asset Storage (server)
-
-By default assets are stored on local disk. To use Amazon S3 (or S3-compatible
-services like MinIO / Cloudflare R2 / Backblaze B2), set in `apps/server/.env`:
-
-```env
-ASSET_STORAGE=s3
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_REGION=us-east-1
-S3_BUCKET=vendure-assets
-# Optional for S3-compatible: S3_ENDPOINT=http://localhost:9000
-# Optional CDN prefix:   S3_PUBLIC_URL_PREFIX=https://bucket.s3.amazonaws.com/assets
+```bash
+cd backend
+npm run migration:run
 ```
 
-See `apps/server/README.md` for details.
-
-## Production Build
-
-Build all packages:
+## Build production
 
 ```bash
 npm run build
-```
-
-Start the production server:
-
-```bash
 npm run start
 ```
 
-## Learn More
-
-- [Vendure Documentation](https://docs.vendure.io)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Vendure Discord Community](https://vendure.io/community)
+Xem [DEPLOY.md](DEPLOY.md) để triển khai bằng PM2 và Nginx.

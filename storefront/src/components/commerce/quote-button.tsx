@@ -48,7 +48,7 @@ export function QuoteButton({variant = 'inline'}: QuoteButtonProps) {
             <>
                 <button
                     onClick={() => setOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-primary/90 transition shadow-lg shadow-primary/20"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-foreground px-8 py-4 text-sm font-bold uppercase tracking-widest text-primary shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-foreground/90 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-foreground/50"
                 >
                     {t('quoteBtn')}
                 </button>

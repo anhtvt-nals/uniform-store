@@ -8,11 +8,11 @@ export async function ProcessSection() {
     const t = await getTranslations({locale, namespace: 'Home'});
 
     const steps = [
-        { num: "01", icon: <MessageCircle className="w-6 h-6" />, title: t('process.step1Title'), time: t('process.step1Time'), desc: t('process.step1Desc') },
-        { num: "02", icon: <PenTool className="w-6 h-6" />, title: t('process.step2Title'), time: t('process.step2Time'), desc: t('process.step2Desc') },
-        { num: "03", icon: <CheckCircle2 className="w-6 h-6" />, title: t('process.step3Title'), time: t('process.step3Time'), desc: t('process.step3Desc') },
-        { num: "04", icon: <BoxIcon className="w-6 h-6" />, title: t('process.step4Title'), time: t('process.step4Time'), desc: t('process.step4Desc') },
-        { num: "05", icon: <Truck className="w-6 h-6" />, title: t('process.step5Title'), time: t('process.step5Time'), desc: t('process.step5Desc') },
+        { num: "01", icon: <MessageCircle className="w-6 h-6" />, title: t('process.step1Title'), desc: t('process.step1Desc') },
+        { num: "02", icon: <PenTool className="w-6 h-6" />, title: t('process.step2Title'), desc: t('process.step2Desc') },
+        { num: "03", icon: <CheckCircle2 className="w-6 h-6" />, title: t('process.step3Title'), desc: t('process.step3Desc') },
+        { num: "04", icon: <BoxIcon className="w-6 h-6" />, title: t('process.step4Title'), desc: t('process.step4Desc') },
+        { num: "05", icon: <Truck className="w-6 h-6" />, title: t('process.step5Title'), desc: t('process.step5Desc') },
     ];
 
     return (
@@ -23,7 +23,7 @@ export async function ProcessSection() {
             </div>
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 relative">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-4">{t('processTitle')}</h2>
+                    <h2 className="font-category-title text-3xl md:text-4xl text-foreground tracking-tight mb-4">{t('processTitle')}</h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">{t('processDesc')}</p>
                 </div>
 
@@ -42,10 +42,6 @@ export async function ProcessSection() {
                                     <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-black border-4 border-background shadow-lg shadow-primary/20">
                                         {step.num}
                                     </div>
-                                </div>
-
-                                <div className="bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm group-hover:shadow-md">
-                                    {step.time}
                                 </div>
 
                                 <h3 className="font-bold text-foreground mb-2 text-lg">{step.title}</h3>

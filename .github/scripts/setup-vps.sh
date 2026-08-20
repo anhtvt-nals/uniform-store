@@ -29,17 +29,6 @@ if ! command -v pm2 &>/dev/null; then
     pm2 startup systemd -u root --hp /root
 fi
 
-# ─── Docker (for PostgreSQL + MinIO only) ───
-if ! command -v docker &>/dev/null; then
-    echo "🐳 Installing Docker..."
-    curl -fsSL https://get.docker.com | sh
-    systemctl enable docker
-fi
-
-if ! docker compose version &>/dev/null 2>&1; then
-    apt install -y docker-compose-plugin
-fi
-
 # ─── Nginx ───
 if ! command -v nginx &>/dev/null; then
     echo "📦 Installing Nginx..."
@@ -63,55 +52,27 @@ fi
 
 cd "$APP_DIR"
 
-# ─── Create .env ───
+# ─── Create environment templates ───
 if [ ! -f .env ]; then
-    cat > .env << EOF
-# ─── Database ───
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=${DB_PASSWORD:-postgres}
-DB_DATABASE=uniform_store
-DB_SSL=false
-
-# ─── Auth ───
-JWT_SECRET=$(openssl rand -hex 32)
-
-# ─── Supabase (optional) ───
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# ─── Storage ───
-STORAGE_ENDPOINT=http://127.0.0.1:9000
-STORAGE_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
-STORAGE_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
-STORAGE_BUCKET=uniform-store
-STORAGE_PUBLIC_URL=https://storage.${DOMAIN}
-
-# ─── Domain ───
-DOMAIN=${DOMAIN}
-CORS_ORIGINS=https://admin.${DOMAIN}
-
-# ─── Ports ───
-STOREFRONT_PORT=3001
-ADMIN_API_PORT=3002
-ADMIN_PORT=5002
-EOF
+    cp .env.example .env
     chmod 600 .env
-    echo "⚠️  Edit .env with real secrets: nano $APP_DIR/.env"
+    echo "⚠️  Fill in .env with Supabase and Cloudflare R2 credentials: nano $APP_DIR/.env"
 fi
 
-# ─── Start infrastructure ───
-echo "🐳 Starting PostgreSQL + MinIO..."
-docker compose -f docker-compose.infra.yml up -d
-
-# ─── Create admin .env ───
-if [ ! -f admin/.env ]; then
-    cat > admin/.env << EOF
+# ─── Create frontend build-time environment files ───
+if [ ! -f admin/.env.local ]; then
+    cat > admin/.env.local << EOF
 NEXT_PUBLIC_ADMIN_API_URL=https://admin.${DOMAIN}/api/v1/admin
 EOF
-    echo "Created admin/.env"
+    echo "Created admin/.env.local"
+fi
+
+if [ ! -f storefront/.env.local ]; then
+    cat > storefront/.env.local << EOF
+VENDURE_SHOP_API_URL=https://${DOMAIN}/shop-api
+NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
+EOF
+    echo "Created storefront/.env.local"
 fi
 
 # ─── Install app dependencies ───
@@ -198,31 +159,6 @@ server {
     }
 }
 
-server {
-    listen 443 ssl http2;
-    server_name storage.${DOMAIN};
-
-    ssl_certificate     /etc/nginx/ssl/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-
-    # Disable buffering for large file uploads
-    client_max_body_size 100M;
-    proxy_buffering off;
-
-    location / {
-        proxy_pass http://127.0.0.1:9000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        
-        # MinIO specific headers
-        proxy_set_header X-Amz-Content-Sha256 \$http_x_amz_content_sha256;
-        proxy_set_header X-Amz-Date \$http_x_amz_date;
-        proxy_set_header Authorization \$http_authorization;
-    }
-}
 NGINX
 
 ln -sf /etc/nginx/sites-available/uniform-store /etc/nginx/sites-enabled/
@@ -246,8 +182,8 @@ echo "✅ VPS setup complete!"
 echo "═══════════════════════════════════════════"
 echo ""
 echo "Services:"
-echo "  PostgreSQL  → 127.0.0.1:5432 (Docker)"
-echo "  MinIO       → 127.0.0.1:9000 (Docker)"
+echo "  Supabase PostgreSQL → managed service"
+echo "  Cloudflare R2       → managed service"
 echo "  Storefront  → 127.0.0.1:3001 (PM2)"
 echo "  Admin API   → 127.0.0.1:3002 (PM2)"
 echo "  Admin UI    → 127.0.0.1:5002 (PM2)"
@@ -258,8 +194,7 @@ echo "  1. Edit .env: nano $APP_DIR/.env"
 echo "  2. Setup DNS:"
 echo "       $DOMAIN → $(curl -s ifconfig.me)"
 echo "       admin.$DOMAIN → $(curl -s ifconfig.me)"
-echo "       storage.$DOMAIN → $(curl -s ifconfig.me)"
 echo "  3. Install Let's Encrypt:"
-echo "       certbot --nginx -d $DOMAIN -d admin.$DOMAIN -d storage.$DOMAIN"
+echo "       certbot --nginx -d $DOMAIN -d admin.$DOMAIN"
 echo "  4. Add GitHub Secrets for auto-deploy"
 echo ""
