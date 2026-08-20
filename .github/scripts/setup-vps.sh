@@ -101,7 +101,7 @@ wait_for_http() {
 echo "Setting up ${DOMAIN} from ${APP_DIR}"
 
 apt-get update
-apt-get install -y ca-certificates curl git build-essential fail2ban nginx certbot python3-certbot-nginx ufw
+apt-get install -y ca-certificates curl git build-essential fail2ban nginx certbot python3-certbot-nginx
 
 NODE_MAJOR="$(node --version 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/' || true)"
 if [[ "${NODE_MAJOR}" != "22" ]]; then
@@ -114,10 +114,10 @@ if ! command -v pm2 >/dev/null 2>&1; then
 fi
 pm2 startup systemd -u root --hp /root
 
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
+# ufw allow OpenSSH
+# ufw allow 80/tcp
+# ufw allow 443/tcp
+# ufw --force enable
 
 cd "${APP_DIR}"
 if [[ ! -f .env ]]; then
