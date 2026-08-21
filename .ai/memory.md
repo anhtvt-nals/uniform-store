@@ -609,3 +609,4 @@ git push → main
 - `backend/scripts/seed-production-gallery-assets.ts` uploads five images from `backend/assets` (cắt rập, may và hoàn thiện đồng phục) to the `production-gallery/` prefix in Cloudflare R2. Run `npm run seed:production-gallery` from `backend`; storefront resolves them from `NEXT_PUBLIC_STORAGE_URL`.
 - VPS deploy, fast rebuild and the GitHub Actions SSH command explicitly load NVM when needed, so npm is available in non-interactive `ubuntu` sessions.
 - Header phone CTA reads the public `store_phone` setting at request time; if it is missing, the CTA is hidden rather than displaying a hard-coded number.
+- Footer contact details read public settings at request time: `store_address`, `store_email` and `store_phone`. Migration 038 seeds the editable public `store_address` setting.

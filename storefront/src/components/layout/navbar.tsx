@@ -14,33 +14,11 @@ import {Phone} from "lucide-react";
 import {Link} from '@/i18n/navigation';
 import {getTranslations} from "next-intl/server";
 import {getRouteLocale} from "@/i18n/server";
-
-const BACKEND_URL = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace('/shop-api', '');
-
-function getPhoneSetting(value: unknown): string | null {
-    return typeof value === 'string' && value.trim() ? value.trim() : null;
-}
-
-async function getStorePhone(): Promise<string | null> {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/v1/settings/public`, {cache: 'no-store'});
-        if (!response.ok) return null;
-
-        const payload: unknown = await response.json();
-        const settings = typeof payload === 'object' && payload !== null && 'data' in payload
-            ? (payload as {data: unknown}).data
-            : payload;
-
-        return typeof settings === 'object' && settings !== null
-            ? getPhoneSetting((settings as Record<string, unknown>).store_phone)
-            : null;
-    } catch {
-        return null;
-    }
-}
+import {getPublicSettings, getStringSetting} from '@/lib/public-settings';
 
 export async function Navbar() {
-    const [locale, storePhone] = await Promise.all([getRouteLocale(), getStorePhone()]);
+    const [locale, settings] = await Promise.all([getRouteLocale(), getPublicSettings()]);
+    const storePhone = getStringSetting(settings, 'store_phone');
     const t = await getTranslations({locale, namespace: 'Navigation'});
 
     return (

@@ -4,6 +4,7 @@ import Image from "next/image";
 import {NavigationLink} from '@/components/shared/navigation-link';
 import {getTranslations} from 'next-intl/server';
 import {MapPin, Phone, Mail} from "lucide-react";
+import {getPublicSettings, getStringSetting} from '@/lib/public-settings';
 
 const COPYRIGHT_YEAR = 2026;
 
@@ -19,10 +20,13 @@ async function Copyright() {
 
 export async function Footer() {
 
-    const locale = await getRouteLocale();
+    const [locale, settings] = await Promise.all([getRouteLocale(), getPublicSettings()]);
 
     const t = await getTranslations({locale, namespace: 'Footer'});
     const collections = await getTopCollections(locale);
+    const address = getStringSetting(settings, 'store_address');
+    const phone = getStringSetting(settings, 'store_phone');
+    const supportEmail = getStringSetting(settings, 'store_email');
 
     return (
         <footer className="bg-background border-t border-border/60 mt-16 py-12 px-6 lg:px-10">
@@ -80,18 +84,24 @@ export async function Footer() {
                             {t('contact')}
                         </h4>
                         <ul className="space-y-3 text-sm text-muted-foreground/80">
-                            <li className="flex items-start gap-2.5">
-                                <MapPin className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                                <span className="text-xs">{t('address')}</span>
-                            </li>
-                            <li className="flex items-center gap-2.5">
-                                <Phone className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                                <span className="text-xs">090 123 4567</span>
-                            </li>
-                            <li className="flex items-center gap-2.5">
-                                <Mail className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                                <span className="text-xs">contact@minhanuniform.com</span>
-                            </li>
+                            {address && (
+                                <li className="flex items-start gap-2.5">
+                                    <MapPin className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0 mt-0.5" />
+                                    <span className="text-xs">{address}</span>
+                                </li>
+                            )}
+                            {phone && (
+                                <li className="flex items-center gap-2.5">
+                                    <Phone className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                                    <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="text-xs hover:text-foreground transition-colors">{phone}</a>
+                                </li>
+                            )}
+                            {supportEmail && (
+                                <li className="flex items-center gap-2.5">
+                                    <Mail className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                                    <a href={`mailto:${supportEmail}`} className="text-xs hover:text-foreground transition-colors">{supportEmail}</a>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
