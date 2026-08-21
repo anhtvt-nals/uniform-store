@@ -28,6 +28,7 @@
     "seed:demo-catalog": "ts-node scripts/seed-demo-catalog.ts",
     "seed:demo-assets": "ts-node scripts/seed-demo-assets.ts",
     "seed:demo-articles": "ts-node scripts/seed-demo-articles.ts",
+    "seed:production-gallery": "ts-node scripts/seed-production-gallery-assets.ts",
     "migration:generate": "npm run typeorm -- -d libs/database/src/data-source.ts migration:generate",
     "migration:revert": "npm run typeorm -- -d libs/database/src/data-source.ts migration:revert"
   },
