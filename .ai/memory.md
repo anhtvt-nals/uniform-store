@@ -202,6 +202,9 @@ backend/
 
 ## Recent Changes
 
+### Product SEO (2026-08-21)
+- Product detail pages now generate product-specific title, description, canonical/hreflang links, Vietnamese commercial keywords, Open Graph/Twitter data, indexable robots directives, and safe `Product` plus `BreadcrumbList` JSON-LD structured data using the live product, variant, collection, and asset data.
+
 ### Production VPS Deployment (2026-08-20)
 - Reworked `.github/scripts/setup-vps.sh` for Ubuntu production setup: validates root environment configuration, installs Node 22/PM2/Nginx/Certbot/UFW through `sudo`, configures loopback storefront API access, obtains Let's Encrypt certificates before serving HTTPS, creates a persistent 2GB swap file if absent, runs migrations, and validates health endpoints. PM2 and all application processes run as the `ubuntu` deployment user.
 - Hardened `.github/scripts/deploy.sh` to preserve ignored environment files, build and migrate before restart, use PM2 restart/start behavior, and fail on health-check errors. CI now includes storefront linting, stops SSH deployment on script errors, and uses `VPS_APP_DIR` rather than a hard-coded `/opt` path.
