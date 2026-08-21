@@ -4,10 +4,10 @@ import {ProductionGalleryClient, type GalleryImage} from './production-gallery-c
 
 const galleryAssets = [
     {key: 'thiet-ke-cat-rap-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Thợ vận hành máy cắt rập cho mẫu đồng phục'},
-    {key: 'cat-vai-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Công đoạn may chi tiết đồng phục'},
+    {key: 'cat-vai-dong-phuc-v2.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Công đoạn may chi tiết đồng phục'},
     {key: 'day-chuyen-may-dong-phuc-01.jpg', fallbackSrc: '/production/garment-workers-1.jpg', alt: 'Dây chuyền may đồng phục tại xưởng'},
     {key: 'day-chuyen-may-dong-phuc-02.jpg', fallbackSrc: '/production/textile-machine-1.jpg', alt: 'Công nhân vận hành dây chuyền may công nghiệp'},
-    {key: 'hoan-thien-dong-phuc.jpg', fallbackSrc: '/production/tailoring-shop-1.jpg', alt: 'Hoàn thiện và kiểm tra chất lượng đồng phục'},
+    {key: 'hoan-thien-dong-phuc-v2.jpg', fallbackSrc: '/production/tailoring-shop-1.jpg', alt: 'Hoàn thiện và kiểm tra chất lượng đồng phục'},
 ];
 
 const r2PublicUrl = process.env.NEXT_PUBLIC_STORAGE_URL?.replace(/\/+$/, '');

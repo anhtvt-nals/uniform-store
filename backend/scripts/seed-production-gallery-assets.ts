@@ -18,7 +18,7 @@ const assets: GalleryAsset[] = [
     source: '3537847f-f0f7-42d8-a7dd-79681a8f6546.jpeg',
   },
   {
-    key: 'production-gallery/cat-vai-dong-phuc.jpg',
+    key: 'production-gallery/cat-vai-dong-phuc-v2.jpg',
     alt: 'Công đoạn may chi tiết đồng phục',
     source: '31e4b09b-31c0-4772-a70a-1eac6f7f6d79.jpeg',
   },
@@ -33,7 +33,7 @@ const assets: GalleryAsset[] = [
     source: 'fb00c6f0-e617-487c-8706-8c16ec7e226b.jpeg',
   },
   {
-    key: 'production-gallery/hoan-thien-dong-phuc.jpg',
+    key: 'production-gallery/hoan-thien-dong-phuc-v2.jpg',
     alt: 'Hoàn thiện và kiểm tra chất lượng đồng phục',
     source: 'ac66e149-e190-4bca-8125-eebf5fe81244.jpeg',
   },
