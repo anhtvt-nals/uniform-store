@@ -3,11 +3,11 @@ import {getRouteLocale} from '@/i18n/server';
 import {ProductionGalleryClient, type GalleryImage} from './production-gallery-client';
 
 const galleryAssets = [
-    {key: 'cong-nhan-may-dong-phuc.jpg', fallbackSrc: '/production/garment-workers-1.jpg', alt: 'Công nhân may hoàn thiện đồng phục tại xưởng'},
-    {key: 'may-cong-nghiep-dong-phuc.jpg', fallbackSrc: '/production/textile-machine-1.jpg', alt: 'Máy may công nghiệp trong xưởng sản xuất đồng phục'},
-    {key: 'cat-vai-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Công đoạn cắt vải cho đơn hàng đồng phục'},
-    {key: 'kho-vai-dong-phuc.jpg', fallbackSrc: '/production/fabric-rolls-1.jpg', alt: 'Kho vải nguyên liệu dùng cho sản xuất đồng phục'},
-    {key: 'hoan-thien-dong-phuc.jpg', fallbackSrc: '/production/tailoring-shop-1.jpg', alt: 'Kiểm tra và hoàn thiện đồng phục may đo'},
+    {key: 'thiet-ke-cat-rap-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Thợ vận hành máy cắt rập cho mẫu đồng phục'},
+    {key: 'cat-vai-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Công đoạn may chi tiết đồng phục'},
+    {key: 'day-chuyen-may-dong-phuc-01.jpg', fallbackSrc: '/production/garment-workers-1.jpg', alt: 'Dây chuyền may đồng phục tại xưởng'},
+    {key: 'day-chuyen-may-dong-phuc-02.jpg', fallbackSrc: '/production/textile-machine-1.jpg', alt: 'Công nhân vận hành dây chuyền may công nghiệp'},
+    {key: 'hoan-thien-dong-phuc.jpg', fallbackSrc: '/production/tailoring-shop-1.jpg', alt: 'Hoàn thiện và kiểm tra chất lượng đồng phục'},
 ];
 
 const r2PublicUrl = process.env.NEXT_PUBLIC_STORAGE_URL?.replace(/\/+$/, '');
