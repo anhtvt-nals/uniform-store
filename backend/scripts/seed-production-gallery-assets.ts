@@ -6,17 +6,37 @@ import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
 dotenv.config({path: path.resolve(__dirname, '../../.env')});
 
 type GalleryAsset = {
-  source: string;
   key: string;
   alt: string;
+  source: string;
 };
 
 const assets: GalleryAsset[] = [
-  {source: 'garment-workers-1.jpg', key: 'production-gallery/cong-nhan-may-dong-phuc.jpg', alt: 'Công nhân may hoàn thiện đồng phục tại xưởng'},
-  {source: 'cutting-room-1.jpg', key: 'production-gallery/cat-vai-dong-phuc.jpg', alt: 'Công đoạn cắt vải cho đơn hàng đồng phục'},
-  {source: 'tailoring-shop-1.jpg', key: 'production-gallery/hoan-thien-dong-phuc.jpg', alt: 'Kiểm tra và hoàn thiện đồng phục may đo'},
-  {source: 'fabric-rolls-1.jpg', key: 'production-gallery/kho-vai-dong-phuc.jpg', alt: 'Kho vải nguyên liệu dùng cho sản xuất đồng phục'},
-  {source: 'textile-machine-1.jpg', key: 'production-gallery/may-cong-nghiep-dong-phuc.jpg', alt: 'Máy may công nghiệp trong xưởng sản xuất đồng phục'},
+  {
+    key: 'production-gallery/thiet-ke-cat-rap-dong-phuc.jpg',
+    alt: 'Thợ vận hành máy cắt rập cho mẫu đồng phục',
+    source: '3537847f-f0f7-42d8-a7dd-79681a8f6546.jpeg',
+  },
+  {
+    key: 'production-gallery/cat-vai-dong-phuc.jpg',
+    alt: 'Công đoạn may chi tiết đồng phục',
+    source: '31e4b09b-31c0-4772-a70a-1eac6f7f6d79.jpeg',
+  },
+  {
+    key: 'production-gallery/day-chuyen-may-dong-phuc-01.jpg',
+    alt: 'Dây chuyền may đồng phục tại xưởng',
+    source: '1e0cef08-3abb-41e4-b8f5-f1d9b933e5a3.jpeg',
+  },
+  {
+    key: 'production-gallery/day-chuyen-may-dong-phuc-02.jpg',
+    alt: 'Công nhân vận hành dây chuyền may công nghiệp',
+    source: 'fb00c6f0-e617-487c-8706-8c16ec7e226b.jpeg',
+  },
+  {
+    key: 'production-gallery/hoan-thien-dong-phuc.jpg',
+    alt: 'Hoàn thiện và kiểm tra chất lượng đồng phục',
+    source: 'ac66e149-e190-4bca-8125-eebf5fe81244.jpeg',
+  },
 ];
 
 function getStorageConfig() {
@@ -44,8 +64,7 @@ async function main() {
     },
     forcePathStyle: true,
   });
-  const sourceDirectory = path.resolve(__dirname, '../../storefront/public/production');
-
+  const sourceDirectory = path.resolve(__dirname, '../assets');
   for (const asset of assets) {
     const body = await readFile(path.join(sourceDirectory, asset.source));
     await client.send(new PutObjectCommand({
@@ -54,6 +73,7 @@ async function main() {
       Body: body,
       ContentType: 'image/jpeg',
       CacheControl: 'public, max-age=31536000, immutable',
+      Metadata: {source: `backend/assets/${asset.source}`},
     }));
     console.log(`  ✓ ${asset.key} — ${asset.alt}`);
   }
