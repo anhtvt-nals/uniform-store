@@ -600,5 +600,10 @@ git push → main
 - `.github/workflows/ci.yml` — lint + test
 - `.github/workflows/deploy.yml` — SSH → deploy.sh
 - `.github/scripts/deploy.sh` — full deploy script
+- `.github/scripts/rebuild.sh` — source-only VPS rebuild; refuses dependency or migration changes and skips `npm ci`
 - `.github/scripts/setup-vps.sh` — one-time VPS setup
 - `docker-compose.infra.yml` — PostgreSQL + MinIO only
+
+### Recent Operations Updates (2026-08-21)
+- GitHub Actions verification runs storefront lint and TypeScript checks for all apps; backend unit tests are skipped.
+- `backend/scripts/seed-production-gallery-assets.ts` uploads the five production gallery images from `storefront/public/production` to the `production-gallery/` prefix in Cloudflare R2. Run `npm run seed:production-gallery` from `backend`; storefront resolves them from `NEXT_PUBLIC_STORAGE_URL`.

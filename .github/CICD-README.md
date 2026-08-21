@@ -80,7 +80,7 @@ Add these repository secrets:
 | `VPS_PORT` | optional SSH port; defaults to `22` |
 | `VPS_APP_DIR` | absolute repository path, for example `/home/ubuntu/uniform-store` |
 
-Pull requests to `main` install dependencies, typecheck all apps, lint storefront code and run backend tests. A push to `main` deploys only after verification succeeds. Deploy builds first, runs pending migrations, restarts or starts PM2 processes and checks service health before completing.
+Pull requests to `main` install dependencies, typecheck all apps and lint storefront code. Backend unit tests are intentionally skipped in this pipeline. A push to `main` deploys only after verification succeeds. Deploy builds first, runs pending migrations, restarts or starts PM2 processes and checks service health before completing.
 
 ## 4. Manual deploy and operations
 
@@ -89,6 +89,15 @@ ssh ubuntu@YOUR_VPS_IP
 cd "$HOME/uniform-store"
 bash .github/scripts/deploy.sh
 ```
+
+For a source-only update, use the fast rebuild command. It pulls `main`, skips `npm ci` and migrations, then builds and restarts all PM2 processes:
+
+```bash
+cd "$HOME/uniform-store"
+bash .github/scripts/rebuild.sh
+```
+
+It stops if `package-lock.json` or `backend/migrations` changed; run `deploy.sh` for those updates.
 
 Useful checks:
 

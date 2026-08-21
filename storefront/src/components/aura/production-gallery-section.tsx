@@ -2,13 +2,19 @@ import {getTranslations} from 'next-intl/server';
 import {getRouteLocale} from '@/i18n/server';
 import {ProductionGalleryClient, type GalleryImage} from './production-gallery-client';
 
-const images: GalleryImage[] = [
-    {src: '/production/garment-workers-1.jpg', alt: 'Công nhân xưởng may'},
-    {src: '/production/textile-machine-1.jpg', alt: 'Máy may công nghiệp'},
-    {src: '/production/cutting-room-1.jpg', alt: 'Phòng cắt vải'},
-    {src: '/production/fabric-rolls-1.jpg', alt: 'Kho vải nguyên liệu'},
-    {src: '/production/tailoring-shop-1.jpg', alt: 'Xưởng may đo'},
+const galleryAssets = [
+    {key: 'cong-nhan-may-dong-phuc.jpg', fallbackSrc: '/production/garment-workers-1.jpg', alt: 'Công nhân may hoàn thiện đồng phục tại xưởng'},
+    {key: 'may-cong-nghiep-dong-phuc.jpg', fallbackSrc: '/production/textile-machine-1.jpg', alt: 'Máy may công nghiệp trong xưởng sản xuất đồng phục'},
+    {key: 'cat-vai-dong-phuc.jpg', fallbackSrc: '/production/cutting-room-1.jpg', alt: 'Công đoạn cắt vải cho đơn hàng đồng phục'},
+    {key: 'kho-vai-dong-phuc.jpg', fallbackSrc: '/production/fabric-rolls-1.jpg', alt: 'Kho vải nguyên liệu dùng cho sản xuất đồng phục'},
+    {key: 'hoan-thien-dong-phuc.jpg', fallbackSrc: '/production/tailoring-shop-1.jpg', alt: 'Kiểm tra và hoàn thiện đồng phục may đo'},
 ];
+
+const r2PublicUrl = process.env.NEXT_PUBLIC_STORAGE_URL?.replace(/\/+$/, '');
+const images: GalleryImage[] = galleryAssets.map(({key, fallbackSrc, alt}) => ({
+    src: r2PublicUrl ? `${r2PublicUrl}/production-gallery/${key}` : fallbackSrc,
+    alt,
+}));
 
 export async function ProductionGallerySection() {
     const locale = await getRouteLocale();

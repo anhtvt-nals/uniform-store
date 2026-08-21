@@ -49,6 +49,15 @@ cd "$HOME/uniform-store"
 bash .github/scripts/deploy.sh
 ```
 
+Khi chỉ thay đổi source code hoặc biến môi trường (không thay `package-lock.json` và không thêm migration), dùng rebuild nhanh để không chạy `npm ci`:
+
+```bash
+cd "$HOME/uniform-store"
+bash .github/scripts/rebuild.sh
+```
+
+Script vẫn lấy commit `main` mới nhất, build lại bốn ứng dụng, restart PM2 và health-check. Nếu phát hiện dependency hoặc migration thay đổi, script sẽ dừng và yêu cầu chạy `deploy.sh` đầy đủ.
+
 ## Lệnh hữu ích
 
 ```bash
