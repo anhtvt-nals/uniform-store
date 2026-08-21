@@ -111,3 +111,5 @@ sudo certbot renew --dry-run
 ```
 
 The deploy script resets tracked files to `origin/main`. Keep production-only configuration exclusively in ignored environment files, not as uncommitted edits to tracked files on the VPS.
+
+If Node was installed with NVM, the GitHub Actions SSH command and both deployment scripts load `$HOME/.nvm/nvm.sh` before invoking npm. This ensures the non-interactive SSH session uses the same Node installation as `ubuntu`.

@@ -9,6 +9,26 @@ set -euo pipefail
 APP_DIR="$(git rev-parse --show-toplevel)"
 cd "$APP_DIR"
 
+load_node() {
+    if command -v npm >/dev/null 2>&1; then
+        return
+    fi
+
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        # Non-interactive SSH sessions do not load ~/.profile, where NVM is normally initialized.
+        # shellcheck disable=SC1090
+        . "$NVM_DIR/nvm.sh"
+    fi
+
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+        echo "Node.js 22 and npm are required but were not found in PATH. Run setup-vps.sh as the deployment user."
+        exit 1
+    fi
+}
+
+load_node
+
 wait_for_http() {
     local url="$1"
     local label="$2"

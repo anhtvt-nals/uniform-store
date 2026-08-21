@@ -607,3 +607,4 @@ git push → main
 ### Recent Operations Updates (2026-08-21)
 - GitHub Actions verification runs storefront lint and TypeScript checks for all apps; backend unit tests are skipped.
 - `backend/scripts/seed-production-gallery-assets.ts` uploads the five production gallery images from `storefront/public/production` to the `production-gallery/` prefix in Cloudflare R2. Run `npm run seed:production-gallery` from `backend`; storefront resolves them from `NEXT_PUBLIC_STORAGE_URL`.
+- VPS deploy, fast rebuild and the GitHub Actions SSH command explicitly load NVM when needed, so npm is available in non-interactive `ubuntu` sessions.
