@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useMemo, useTransition} from 'react';
+import {useState, useMemo} from 'react';
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 
 
@@ -56,7 +56,6 @@ interface ProductInfoProps {
 
 export function ProductInfo({product, searchParams, currencyCode}: ProductInfoProps) {
     const t = useTranslations('Product');
-    const [isPending, startTransition] = useTransition();
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({

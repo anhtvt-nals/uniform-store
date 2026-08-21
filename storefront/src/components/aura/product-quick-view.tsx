@@ -171,7 +171,6 @@ export function ProductQuickView({slug, onClose}: {slug: string; onClose: () => 
                         {/* Image gallery */}
                         <div className="relative h-64 md:h-full bg-muted group min-h-0 rounded-l-[32px] overflow-hidden">
                             {images[currentImage]?.source ? (
-                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={images[currentImage].source}
                                     className="w-full h-full object-contain absolute inset-0 p-4"

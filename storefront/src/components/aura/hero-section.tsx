@@ -1,8 +1,7 @@
-import {Link} from '@/i18n/navigation';
 import {getTranslations} from 'next-intl/server';
 import {getRouteLocale} from '@/i18n/server';
 import {CheckCircle2} from 'lucide-react';
-import {HeroSlider, type HeroSlide, type HeroTrustBadge} from './hero-slider';
+import {HeroSlider, type HeroSlide} from './hero-slider';
 import {QuoteButton} from '@/components/commerce/quote-button';
 
 const slideImages = [
@@ -24,12 +23,6 @@ export async function HeroSection() {
         image: slideImages[i % slideImages.length],
     }));
 
-    const trustBadges: HeroTrustBadge[] = [
-        {icon: 'shield', title: t('warranty6m'), desc: t('warrantyDesc')},
-        {icon: 'pen', title: t('freeDesign'), desc: t('freeDesignDesc')},
-        {icon: 'truck', title: t('nationwideShipping'), desc: t('nationwideShippingDesc')},
-    ];
-
     return (
         <div className="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 mt-4">
             <HeroSlider
@@ -39,7 +32,6 @@ export async function HeroSection() {
                 badgeCustomers={t('customers')}
                 badgeProducts={t('productsProduced')}
                 badgeExperience={t('experience')}
-                trustBadges={trustBadges}
             />
             <BulkOrderWidget />
         </div>

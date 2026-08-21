@@ -12,12 +12,6 @@ export interface HeroSlide {
     image: string;
 }
 
-export interface HeroTrustBadge {
-    title: string;
-    desc: string;
-    icon: 'shield' | 'pen' | 'truck';
-}
-
 interface HeroSliderProps {
     slides: HeroSlide[];
     ctaShopNow: string;
@@ -25,35 +19,6 @@ interface HeroSliderProps {
     badgeCustomers: string;
     badgeProducts: string;
     badgeExperience: string;
-    trustBadges: HeroTrustBadge[];
-}
-
-function BadgeIcon({icon}: {icon: HeroTrustBadge['icon']}) {
-    if (icon === 'shield') return <ShieldIcon />;
-    if (icon === 'pen') return <PenIcon />;
-    return <TruckIcon />;
-}
-
-function ShieldIcon() {
-    return (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.038A11.969 11.969 0 013.5 5.25v.75A2.25 2.25 0 005.748 8.25c.449 0 .898.066 1.331.193M12 2.25c1.917 0 3.695.62 5.13 1.671a11.969 11.969 0 015.37 1.331c.43.127.879.193 1.331.193A2.25 2.25 0 0124 6v.75a11.969 11.969 0 01-8.25 11.354M12 2.25c-1.917 0-3.695.62-5.13 1.671A11.969 11.969 0 001.5 7.331M3.5 5.25a2.25 2.25 0 00-2.25 2.25v.75A11.969 11.969 0 008.25 18.354" />
-        </svg>
-    );
-}
-function PenIcon() {
-    return (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-        </svg>
-    );
-}
-function TruckIcon() {
-    return (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-        </svg>
-    );
 }
 
 export function HeroSlider({
@@ -63,7 +28,6 @@ export function HeroSlider({
     badgeCustomers,
     badgeProducts,
     badgeExperience,
-    trustBadges,
 }: HeroSliderProps) {
     const [current, setCurrent] = useState(0);
     const count = slides.length;
@@ -88,7 +52,6 @@ export function HeroSlider({
             {/* Slide images (crossfade) */}
             <div className="absolute right-[-40px] md:right-[-40px] top-10 md:top-auto md:bottom-10 w-64 md:w-80 h-[400px] md:h-[500px] rounded-2xl transform rotate-6 border-8 border-background shadow-2xl overflow-hidden z-0">
                 {slides.map((s, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                         key={i}
                         src={s.image}
