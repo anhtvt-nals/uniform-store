@@ -15,8 +15,32 @@ import {Link} from '@/i18n/navigation';
 import {getTranslations} from "next-intl/server";
 import {getRouteLocale} from "@/i18n/server";
 
+const BACKEND_URL = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace('/shop-api', '');
+
+function getPhoneSetting(value: unknown): string | null {
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+async function getStorePhone(): Promise<string | null> {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/v1/settings/public`, {cache: 'no-store'});
+        if (!response.ok) return null;
+
+        const payload: unknown = await response.json();
+        const settings = typeof payload === 'object' && payload !== null && 'data' in payload
+            ? (payload as {data: unknown}).data
+            : payload;
+
+        return typeof settings === 'object' && settings !== null
+            ? getPhoneSetting((settings as Record<string, unknown>).store_phone)
+            : null;
+    } catch {
+        return null;
+    }
+}
+
 export async function Navbar() {
-    const locale = await getRouteLocale();
+    const [locale, storePhone] = await Promise.all([getRouteLocale(), getStorePhone()]);
     const t = await getTranslations({locale, namespace: 'Navigation'});
 
     return (
@@ -56,12 +80,14 @@ export async function Navbar() {
 
                     {/* Right: actions */}
                     <div className="flex items-center gap-1 sm:gap-3 lg:gap-5 shrink-0">
-                        <a
-                            href="tel:0901234567"
-                            className="hidden 2xl:flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/20 transition-colors"
-                        >
-                            <Phone className="w-4 h-4" /> 090 123 4567
-                        </a>
+                        {storePhone && (
+                            <a
+                                href={`tel:${storePhone.replace(/[^0-9+]/g, '')}`}
+                                className="hidden 2xl:flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/20 transition-colors"
+                            >
+                                <Phone className="w-4 h-4" /> {storePhone}
+                            </a>
+                        )}
                         <div className="hidden xl:block">
                             <Suspense fallback={<SearchInputSkeleton />}>
                                 <SearchInput/>
