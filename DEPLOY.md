@@ -31,7 +31,7 @@ cd "$HOME/uniform-store"
 bash .github/scripts/setup-vps.sh yourdomain.com ops@yourdomain.com
 ```
 
-Lần chạy đầu tạo `.env` rồi dừng. Điền secrets, đặt `NODE_ENV=production`, sau đó chạy lại đúng lệnh trên. Script tự chạy migration, build, cấp SSL và start PM2.
+Lần chạy đầu tạo `.env` rồi dừng. Điền secrets, đặt `NODE_ENV=production`, sau đó chạy lại đúng lệnh trên. Script tự tạo swap 2GB nếu VPS chưa có, chạy migration, build, cấp SSL và start PM2.
 
 Chạy setup bằng user `ubuntu` có quyền `sudo`; PM2 và ứng dụng sẽ chạy dưới user này. Nếu trước đó bạn đã chạy setup bằng root, script sẽ dừng PM2 của root và chuyển quyền thư mục project sang `ubuntu`.
 

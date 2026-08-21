@@ -66,7 +66,7 @@ NEXT_PUBLIC_ADMIN_API_URL=https://admin.yourdomain.com/api/v1/admin
 
 `VENDURE_SHOP_API_URL` deliberately uses the VPS loopback interface. It must not point at the public storefront domain because the GraphQL compatibility API runs on port 3000.
 
-The second setup run obtains Let's Encrypt certificates, builds all apps, runs migrations, starts PM2 and validates local health endpoints.
+The second setup run obtains Let's Encrypt certificates, creates a persistent 2GB swap file when the VPS has none, builds all apps, runs migrations, starts PM2 and validates local health endpoints. Node uses a 1.5GB heap for dependency installation and builds; use a VPS with at least 1GB RAM and sufficient disk space for swap.
 
 ## 3. GitHub Actions deployment
 

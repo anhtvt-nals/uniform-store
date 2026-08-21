@@ -103,6 +103,21 @@ wait_for_http() {
     return 1
 }
 
+ensure_swap() {
+    if sudo swapon --show --noheadings | grep -q .; then
+        return
+    fi
+
+    echo "No swap detected; creating a 2GB swap file for dependency installation and builds..."
+    sudo fallocate -l 2G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile >/dev/null
+    sudo swapon /swapfile
+    if ! sudo grep -q '^/swapfile ' /etc/fstab; then
+        echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab >/dev/null
+    fi
+}
+
 echo "Setting up ${DOMAIN} from ${APP_DIR}"
 
 sudo apt-get update
@@ -123,6 +138,7 @@ sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw --force enable
+ensure_swap
 
 cd "${APP_DIR}"
 sudo chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_DIR}"
@@ -166,7 +182,8 @@ sudo certbot --nginx --non-interactive --agree-tos --redirect --email "${LETSENC
 sudo nginx -t
 sudo systemctl reload nginx
 
-npm ci --workspaces
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
+npm ci --workspaces --prefer-offline --no-audit --no-fund
 (cd backend && npx nest build storefront-api && npx nest build admin-api)
 (cd storefront && npm run build)
 (cd admin && npm run build)

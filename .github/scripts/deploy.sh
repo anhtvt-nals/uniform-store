@@ -65,7 +65,8 @@ done
 # 2. Install dependencies
 echo ""
 echo "📦 Installing dependencies..."
-npm ci --workspaces
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
+npm ci --workspaces --prefer-offline --no-audit --no-fund
 
 # 3. Build backend
 echo ""
