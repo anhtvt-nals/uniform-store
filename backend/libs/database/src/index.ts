@@ -7,6 +7,7 @@ export * from './entities/user-role.entity';
 export * from './entities/admin-user.entity';
 export * from './entities/category.entity';
 export * from './entities/brand.entity';
+export * from './entities/banner.entity';
 export * from './entities/product.entity';
 export * from './entities/product-variant.entity';
 export * from './entities/product-image.entity';

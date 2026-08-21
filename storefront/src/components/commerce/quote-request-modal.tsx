@@ -245,7 +245,7 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
     const titleHeader = (
         <>
             <div className="flex items-center gap-3 mb-1">
-                <img src="/logo.jpeg" alt="Minh An Uniform" className="h-8 w-auto object-contain" />
+                <img src="/logo.png" alt="Minh An Uniform" className="h-8 w-auto object-contain" />
                 <div>
                     <DialogTitle className="text-lg sm:text-xl bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
                         {t('quoteTitle')}

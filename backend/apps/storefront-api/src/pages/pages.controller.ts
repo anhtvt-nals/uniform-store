@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PagesService } from './pages.service';
 
@@ -8,8 +8,8 @@ export class PagesController {
   constructor(private readonly pagesService: PagesService) {}
 
   @Get('banners')
-  getBanners() {
-    return this.pagesService.getBanners();
+  getBanners(@Query('locale') locale?: string) {
+    return this.pagesService.getBanners(locale);
   }
 
   @Get('settings/public')

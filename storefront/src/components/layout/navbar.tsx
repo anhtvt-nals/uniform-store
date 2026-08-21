@@ -29,7 +29,7 @@ export async function Navbar() {
                     <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 min-w-0">
                         <Link href="/" className="flex items-center gap-2 shrink-0">
                             <Image
-                                src="/logo.jpeg"
+                                src="/logo.png"
                                 alt="Minh An Uniform"
                                 width={120}
                                 height={32}

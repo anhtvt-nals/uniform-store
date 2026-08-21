@@ -45,10 +45,6 @@ export function HeroSlider({
 
     return (
         <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[700px] md:min-h-[520px] rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-end p-4 md:p-6 lg:p-10">
-            <div className="absolute top-0 right-0 p-6 md:p-10 z-10 pointer-events-none">
-                <span className="text-6xl md:text-[120px] font-bold text-foreground/30 leading-none tracking-tighter">FW24</span>
-            </div>
-
             {/* Slide images (crossfade) */}
             <div className="absolute right-[-40px] md:right-[-40px] top-10 md:top-auto md:bottom-10 w-64 md:w-80 h-[400px] md:h-[500px] rounded-2xl transform rotate-6 border-8 border-background shadow-2xl overflow-hidden z-0">
                 {slides.map((s, i) => (
@@ -75,14 +71,16 @@ export function HeroSlider({
                             pointerEvents: i === current ? 'auto' : 'none',
                         }}
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-foreground text-background text-[10px] uppercase tracking-widest rounded-full mb-6 font-bold shadow-sm">
-                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                            {s.tag}
-                        </div>
+                        {s.tag && (
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-foreground text-background text-[10px] uppercase tracking-widest rounded-full mb-6 font-bold shadow-sm">
+                                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                                {s.tag}
+                            </div>
+                        )}
 
                         <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[1] mb-6 whitespace-pre-line">
-                            {s.title}{"\n"}
-                            <span className="text-primary">{s.titleHighlight}</span>
+                            {s.title.replace(/\\n/g, '\n')}
+                            {s.titleHighlight && <><span>{"\n"}</span><span className="text-primary">{s.titleHighlight}</span></>}
                         </h1>
                         <p className="text-muted-foreground font-medium text-sm md:text-base max-w-md mb-6 leading-relaxed">
                             {s.desc}

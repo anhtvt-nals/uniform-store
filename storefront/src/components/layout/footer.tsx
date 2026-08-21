@@ -35,7 +35,7 @@ export async function Footer() {
                     {/* Brand */}
                     <div className="col-span-2 md:col-span-1">
                         <Image
-                            src="/logo.jpeg"
+                            src="/logo.png"
                             alt="Minh An Uniform"
                             width={100}
                             height={28}

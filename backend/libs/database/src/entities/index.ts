@@ -6,6 +6,7 @@ export * from './article-category.entity';
 export * from './article-tag.entity';
 export * from './article.entity';
 export * from './brand.entity';
+export * from './banner.entity';
 export * from './cart-coupon.entity';
 export * from './cart-item.entity';
 export * from './cart.entity';

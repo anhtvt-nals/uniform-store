@@ -610,3 +610,4 @@ git push → main
 - VPS deploy, fast rebuild and the GitHub Actions SSH command explicitly load NVM when needed, so npm is available in non-interactive `ubuntu` sessions.
 - Header phone CTA reads the public `store_phone` setting at request time; if it is missing, the CTA is hidden rather than displaying a hard-coded number.
 - Footer contact details read public settings at request time: `store_address`, `store_email` and `store_phone`. Migration 038 seeds the editable public `store_address` setting.
+- Hero Slider is managed in Admin at `/hero-slides`. `banners` with `position='hero'` provide Vietnamese title, content (`subtitle`) and image; migration 039 seeds the three former hard-coded homepage slides.

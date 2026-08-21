@@ -53,6 +53,14 @@ export async function generateMetadata(): Promise<Metadata> {
         twitter: {
             card: "summary_large_image",
         },
+        icons: {
+            icon: [
+                {url: "/favicon.ico", sizes: "any"},
+                {url: "/favicon-32x32.png", type: "image/png", sizes: "32x32"},
+                {url: "/favicon-192x192.png", type: "image/png", sizes: "192x192"},
+            ],
+            apple: [{url: "/apple-touch-icon-180x180.png", type: "image/png", sizes: "180x180"}],
+        },
         robots: {
             index: true,
             follow: true,
