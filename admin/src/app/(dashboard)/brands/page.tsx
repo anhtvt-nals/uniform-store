@@ -53,7 +53,7 @@ export default function BrandsPage() {
     mutationFn: (id: string) => apiClient(`/brands/${id}`, { method: "DELETE", token }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] });
-      toast.success("Brand deleted successfully");
+      toast.success("Đã xóa thương hiệu");
       setDeleteId(null);
     },
     onError: (err: Error) => toast.error(err.message),
@@ -63,7 +63,7 @@ export default function BrandsPage() {
     mutationFn: (id: string) => apiClient(`/brands/${id}/restore`, { method: "PATCH", token }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] });
-      toast.success("Brand restored successfully");
+      toast.success("Đã khôi phục thương hiệu");
       setRestoreId(null);
     },
     onError: (err: Error) => toast.error(err.message),
@@ -73,8 +73,8 @@ export default function BrandsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Brands</h1>
-          <p className="text-muted-foreground text-sm">Manage product brands</p>
+          <h1 className="text-2xl font-bold tracking-tight">Thương hiệu</h1>
+          <p className="text-muted-foreground text-sm">Quản lý thương hiệu sản phẩm</p>
         </div>
         <Button asChild>
           <Link href="/brands/new">
@@ -109,12 +109,12 @@ export default function BrandsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Logo</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sort Order</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead>Tên</TableHead>
+                  <TableHead>Đường dẫn</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Thứ tự</TableHead>
+                  <TableHead>Ngày tạo</TableHead>
+                  <TableHead className="w-24">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -131,11 +131,11 @@ export default function BrandsPage() {
                     <TableCell className="text-muted-foreground">{brand.slug}</TableCell>
                     <TableCell>
                       {brand.deletedAt ? (
-                        <Badge variant="destructive">Deleted</Badge>
+                        <Badge variant="destructive">Đã xóa</Badge>
                       ) : brand.isActive ? (
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="success">Đang hoạt động</Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary">Đã tắt</Badge>
                       )}
                     </TableCell>
                     <TableCell>{brand.sortOrder}</TableCell>
@@ -175,13 +175,13 @@ export default function BrandsPage() {
       ) : (
         <EmptyState
           title={t("brands.noBrands")}
-          description={search ? "Try a different search term." : "Create your first brand."}
+          description={search ? "Hãy thử từ khóa tìm kiếm khác." : "Tạo thương hiệu đầu tiên."}
           action={<Button asChild><Link href="/brands/new"><Plus className="h-4 w-4" /> {t("brands.newBrand")}</Link></Button>}
         />
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} title="Delete Brand" description="This brand will be soft-deleted. You can restore it later." isLoading={deleteMutation.isPending} />
-      <ConfirmDialog open={!!restoreId} onOpenChange={() => setRestoreId(null)} onConfirm={() => restoreId && restoreMutation.mutate(restoreId)} title="Restore Brand" description="This will restore the soft-deleted brand." confirmText="Restore" isLoading={restoreMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} title="Xóa thương hiệu" description="Thương hiệu sẽ được xóa tạm thời và có thể khôi phục sau." isLoading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!restoreId} onOpenChange={() => setRestoreId(null)} onConfirm={() => restoreId && restoreMutation.mutate(restoreId)} title="Khôi phục thương hiệu" description="Thương hiệu đã xóa sẽ được khôi phục." confirmText="Khôi phục" isLoading={restoreMutation.isPending} />
     </div>
   );
 }

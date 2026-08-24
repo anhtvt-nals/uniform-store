@@ -5,6 +5,7 @@ import {GetOrderDetailQuery} from '@/lib/vendure/queries';
 import {getTranslations} from 'next-intl/server';
 import {getRouteLocale} from '@/i18n/server';
 import {OrderDetail} from './order-detail';
+import {redirect} from 'next/navigation';
 
 type OrderDetailPageProps = PageProps<'/[locale]/account/orders/[code]'>;
 
@@ -18,6 +19,8 @@ export async function generateMetadata({params}: OrderDetailPageProps): Promise<
 }
 
 export default async function OrderDetailPage(props: PageProps<'/[locale]/account/orders/[code]'>) {
+    redirect('/tra-cuu-don-hang');
+
     const locale = await getRouteLocale();
     const t = await getTranslations({locale, namespace: 'Common'});
 

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiClient, getToken } from "@/lib/api"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select } from "@/components/ui/select"
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient, getToken } from "@/lib/api";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -15,42 +15,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
-import { toast } from "sonner"
-import { Search, Eye, Trash2 } from "lucide-react"
-import { useT } from "@/i18n"
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Search, Eye, Trash2 } from "lucide-react";
+import { useT } from "@/i18n";
+import { QuoteModuleTabs } from "@/components/quotes/quote-module-tabs";
 
 type Inquiry = {
-  id: string
-  productId: string
-  fullName: string
-  email: string
-  phone: string
-  company: string
-  quantity: number
-  notes: string
-  status: string
-  createdAt: string
-  product?: { id: string; name: Record<string, string>; slug: string }
-}
+  id: string;
+  productId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  company: string;
+  quantity: number;
+  notes: string;
+  status: string;
+  createdAt: string;
+  product?: { id: string; name: Record<string, string>; slug: string };
+};
 
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
-  pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800" },
-  contacted: { label: "Contacted", className: "bg-blue-100 text-blue-800" },
-  completed: { label: "Completed", className: "bg-green-100 text-green-800" },
-  cancelled: { label: "Cancelled", className: "bg-gray-100 text-gray-800" },
-}
+  pending: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800" },
+  contacted: { label: "Đã liên hệ", className: "bg-blue-100 text-blue-800" },
+  completed: { label: "Hoàn tất", className: "bg-green-100 text-green-800" },
+  cancelled: { label: "Đã hủy", className: "bg-gray-100 text-gray-800" },
+};
 
 export default function InquiriesPage() {
   const { t } = useT();
-  const token = getToken()
-  const queryClient = useQueryClient()
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("")
-  const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<Inquiry | null>(null)
+  const token = getToken();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Inquiry | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["inquiries", search, status, page],
@@ -58,12 +64,17 @@ export default function InquiriesPage() {
       apiClient<{ items: Inquiry[]; total: number; totalPages: number }>(
         "/inquiries",
         {
-          params: { search: search || undefined, status: status || undefined, page, limit: 20 },
+          params: {
+            search: search || undefined,
+            status: status || undefined,
+            page,
+            limit: 20,
+          },
           token,
-        }
+        },
       ),
     select: (res) => res.data,
-  })
+  });
 
   const statusMutation = useMutation({
     mutationFn: (vars: { id: string; status: string }) =>
@@ -73,26 +84,29 @@ export default function InquiriesPage() {
         token,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inquiries"] })
-      toast.success("Status updated")
-      setSelected(null)
+      queryClient.invalidateQueries({ queryKey: ["inquiries"] });
+      toast.success("Đã cập nhật trạng thái");
+      setSelected(null);
     },
-  })
+  });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
       apiClient(`/inquiries/${id}`, { method: "DELETE", token }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inquiries"] })
-      toast.success("Inquiry deleted")
+      queryClient.invalidateQueries({ queryKey: ["inquiries"] });
+      toast.success("Đã xóa yêu cầu");
     },
-  })
+  });
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{t("inquiries.title")}</h1>
-        <p className="text-muted-foreground text-sm">{t("inquiries.description")}</p>
+        <p className="text-muted-foreground text-sm">
+          {t("inquiries.description")}
+        </p>
+        <div className="mt-4"><QuoteModuleTabs /></div>
       </div>
 
       <Card>
@@ -103,7 +117,10 @@ export default function InquiriesPage() {
               <Input
                 placeholder={t("inquiries.search")}
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 className="pl-9"
               />
             </div>
@@ -111,7 +128,10 @@ export default function InquiriesPage() {
               className="w-[150px]"
               placeholder={t("inquiries.allStatuses")}
               value={status}
-              onChange={(e) => { setStatus(e.target.value); setPage(1) }}
+              onChange={(e) => {
+                setStatus(e.target.value);
+                setPage(1);
+              }}
               options={[
                 { value: "", label: t("inquiries.allStatuses") },
                 { value: "pending", label: t("inquiries.pending") },
@@ -123,7 +143,11 @@ export default function InquiriesPage() {
           </div>
 
           {isLoading ? (
-            <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
           ) : (
             <div className="rounded-md border">
               <Table>
@@ -135,25 +159,40 @@ export default function InquiriesPage() {
                     <TableHead>{t("inquiries.qty")}</TableHead>
                     <TableHead>{t("inquiries.status")}</TableHead>
                     <TableHead>{t("inquiries.date")}</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[100px]">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {data?.items?.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell
+                        colSpan={7}
+                        className="text-center text-muted-foreground py-8"
+                      >
                         {t("inquiries.noInquiries")}
                       </TableCell>
                     </TableRow>
                   )}
                   {data?.items?.map((inquiry) => (
                     <TableRow key={inquiry.id}>
-                      <TableCell className="font-medium">{inquiry.fullName}</TableCell>
-                      <TableCell className="text-muted-foreground">{inquiry.email}</TableCell>
-                      <TableCell>{inquiry.product?.name?.vi || inquiry.product?.name?.en || "-"}</TableCell>
+                      <TableCell className="font-medium">
+                        {inquiry.fullName}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {inquiry.email}
+                      </TableCell>
+                      <TableCell>
+                        {inquiry.product?.name?.vi ||
+                          inquiry.product?.name?.en ||
+                          "-"}
+                      </TableCell>
                       <TableCell>{inquiry.quantity}</TableCell>
                       <TableCell>
-                        <Badge className={STATUS_MAP[inquiry.status]?.className || ""}>
+                        <Badge
+                          className={
+                            STATUS_MAP[inquiry.status]?.className || ""
+                          }
+                        >
                           {STATUS_MAP[inquiry.status]?.label || inquiry.status}
                         </Badge>
                       </TableCell>
@@ -162,10 +201,20 @@ export default function InquiriesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelected(inquiry)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setSelected(inquiry)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(inquiry.id)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => deleteMutation.mutate(inquiry.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -183,8 +232,22 @@ export default function InquiriesPage() {
                 Page {page} of {data.totalPages} ({data.total} total)
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
-                <Button variant="outline" size="sm" disabled={page >= data.totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Trước
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= data.totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Sau
+                </Button>
               </div>
             </div>
           )}
@@ -193,7 +256,9 @@ export default function InquiriesPage() {
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogHeader>
-          <DialogTitle>{t("inquiries.detail")} {selected?.fullName}</DialogTitle>
+          <DialogTitle>
+            {t("inquiries.detail")} {selected?.fullName}
+          </DialogTitle>
           <DialogDescription>{selected?.email}</DialogDescription>
         </DialogHeader>
         {selected && (
@@ -217,8 +282,14 @@ export default function InquiriesPage() {
               )}
             </div>
             <div>
-              <p className="text-muted-foreground mb-1">{t("inquiries.product")}</p>
-              <p className="font-medium">{selected.product?.name?.vi || selected.product?.name?.en || "-"}</p>
+              <p className="text-muted-foreground mb-1">
+                {t("inquiries.product")}
+              </p>
+              <p className="font-medium">
+                {selected.product?.name?.vi ||
+                  selected.product?.name?.en ||
+                  "-"}
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -230,28 +301,36 @@ export default function InquiriesPage() {
                 <Select
                   className="h-8 mt-1"
                   value={selected.status}
-                  onChange={(e) => statusMutation.mutate({ id: selected.id, status: e.target.value })}
+                  onChange={(e) =>
+                    statusMutation.mutate({
+                      id: selected.id,
+                      status: e.target.value,
+                    })
+                  }
                   options={[
-                    { value: "pending", label: "Pending" },
-                    { value: "contacted", label: "Contacted" },
-                    { value: "completed", label: "Completed" },
-                    { value: "cancelled", label: "Cancelled" },
+                    { value: "pending", label: "Chờ xử lý" },
+                    { value: "contacted", label: "Đã liên hệ" },
+                    { value: "completed", label: "Hoàn tất" },
+                    { value: "cancelled", label: "Đã hủy" },
                   ]}
                 />
               </div>
             </div>
             {selected.notes && (
               <div>
-                <p className="text-muted-foreground mb-1">{t("inquiries.notes")}</p>
+                <p className="text-muted-foreground mb-1">
+                  {t("inquiries.notes")}
+                </p>
                 <p className="bg-muted rounded p-3">{selected.notes}</p>
               </div>
             )}
             <p className="text-muted-foreground text-xs">
-              {t("inquiries.submitted")}: {new Date(selected.createdAt).toLocaleString()}
+              {t("inquiries.submitted")}:{" "}
+              {new Date(selected.createdAt).toLocaleString()}
             </p>
           </div>
         )}
       </Dialog>
     </div>
-  )
+  );
 }

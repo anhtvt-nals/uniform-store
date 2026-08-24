@@ -1,6 +1,6 @@
 import type {TadaDocumentNode} from 'gql.tada';
 import {print} from 'graphql';
-import {getAuthToken} from '@/lib/auth';
+import {getAuthToken, getCartSessionId} from '@/lib/auth';
 
 const VENDURE_API_URL = process.env.VENDURE_SHOP_API_URL || process.env.NEXT_PUBLIC_VENDURE_SHOP_API_URL;
 const VENDURE_CHANNEL_TOKEN = process.env.VENDURE_CHANNEL_TOKEN || process.env.NEXT_PUBLIC_VENDURE_CHANNEL_TOKEN || '__default_channel__';
@@ -17,6 +17,7 @@ interface VendureRequestOptions {
     channelToken?: string;
     languageCode?: string;
     currencyCode?: string;
+    sessionId?: string;
     fetch?: RequestInit;
     tags?: string[];
 }
@@ -49,6 +50,7 @@ export async function query<TResult, TVariables>(
         channelToken,
         languageCode,
         currencyCode,
+        sessionId,
         fetch: fetchOptions,
         tags,
     } = options || {};
@@ -66,6 +68,11 @@ export async function query<TResult, TVariables>(
 
     if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    const cartSessionId = sessionId || await getCartSessionId();
+    if (cartSessionId) {
+        headers['x-session-id'] = cartSessionId;
     }
 
     // Set the channel token header (use provided channelToken or default)

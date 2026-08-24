@@ -56,8 +56,8 @@ export default function EditCategoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edit Category</h1>
-        <p className="text-muted-foreground text-sm">Update category details</p>
+        <h1 className="text-2xl font-bold tracking-tight">Chỉnh sửa danh mục</h1>
+        <p className="text-muted-foreground text-sm">Cập nhật thông tin danh mục</p>
       </div>
       <CategoryForm
         defaultValues={data}

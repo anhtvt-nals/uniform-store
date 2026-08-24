@@ -12,6 +12,11 @@ export class PagesController {
     return this.pagesService.getBanners(locale);
   }
 
+  @Get('testimonials')
+  getTestimonials(@Query('locale') locale?: string) {
+    return this.pagesService.getTestimonials(locale);
+  }
+
   @Get('settings/public')
   getPublicSettings() {
     return this.pagesService.getPublicSettings();

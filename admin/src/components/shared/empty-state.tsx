@@ -7,8 +7,8 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  title = "No items found",
-  description = "Get started by creating your first item.",
+  title = "Chưa có dữ liệu",
+  description = "Hãy tạo dữ liệu đầu tiên để bắt đầu.",
   action,
 }: EmptyStateProps) {
   return (

@@ -33,7 +33,6 @@ export async function NavbarUser() {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem render={<Link href="/account/profile" />}>{t('profile')}</DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/account/orders" />}>{t('orders')}</DropdownMenuItem>
                 <DropdownMenuSeparator/>
                 <DropdownMenuItem render={<LoginButton isLoggedIn={true} />} nativeButton />
             </DropdownMenuContent>

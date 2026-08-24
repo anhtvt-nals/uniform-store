@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {BannerEntity, SettingEntity} from '@app/database';
+import {BannerEntity, SettingEntity, TestimonialEntity} from '@app/database';
 
 @Injectable()
 export class PagesService {
@@ -10,6 +10,8 @@ export class PagesService {
         private readonly settingsRepo: Repository<SettingEntity>,
         @InjectRepository(BannerEntity)
         private readonly bannersRepo: Repository<BannerEntity>,
+        @InjectRepository(TestimonialEntity)
+        private readonly testimonialsRepo: Repository<TestimonialEntity>,
     ) {}
 
     async getPublicSettings() {
@@ -33,6 +35,21 @@ export class PagesService {
             title: banner.title[locale] || banner.title.vi || '',
             content: banner.subtitle[locale] || banner.subtitle.vi || '',
             image: banner.imageUrl,
+        }));
+    }
+
+    async getTestimonials(locale = 'vi') {
+        const testimonials = await this.testimonialsRepo.find({
+            where: {isActive: true},
+            order: {sortOrder: 'ASC', createdAt: 'ASC'},
+        });
+        return testimonials.map((testimonial) => ({
+            id: testimonial.id,
+            text: testimonial.content[locale] || testimonial.content.vi || '',
+            author: testimonial.author[locale] || testimonial.author.vi || '',
+            role: testimonial.role[locale] || testimonial.role.vi || '',
+            avatarUrl: testimonial.avatarUrl,
+            rating: testimonial.rating,
         }));
     }
 

@@ -47,15 +47,15 @@ export async function NewsSection() {
     const t = await getTranslations({locale, namespace: 'Home'});
 
     return (
-        <div className="md:col-span-12 py-12">
-            <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-10">
+        <div className="md:col-span-12 py-8 md:py-12">
+            <div className="relative mb-10 flex flex-col items-center gap-4 text-center">
                 <div>
                     <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-2">{t('newsTitle')}</h2>
                     <p className="text-muted-foreground">{t('newsDesc')}</p>
                 </div>
                 <Link
                     href="/tin-tuc"
-                    className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4 transition-colors w-fit"
+                    className="group inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 transition-colors hover:underline md:absolute md:bottom-0 md:right-0"
                 >
                     {t('newsViewAll')}
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

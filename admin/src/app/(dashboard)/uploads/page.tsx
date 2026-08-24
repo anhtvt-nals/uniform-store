@@ -1,44 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiClient, getToken } from "@/lib/api"
-import { ImageUploader } from "@/components/shared/image-uploader"
-import { SearchInput } from "@/components/shared/search-input"
-import { Pagination } from "@/components/shared/pagination"
-import { ConfirmDialog } from "@/components/shared/confirm-dialog"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, ExternalLink, ImageIcon } from "lucide-react"
-import { toast } from "sonner"
-import { useT } from "@/i18n"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient, getToken } from "@/lib/api";
+import { ImageUploader } from "@/components/shared/image-uploader";
+import { SearchInput } from "@/components/shared/search-input";
+import { Pagination } from "@/components/shared/pagination";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Trash2, ExternalLink, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
+import { useT } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 type Asset = {
-  id: string
-  url: string
-  key: string
-  alt?: Record<string, string>
-  filename: string
-  mimeType: string
-  size: number
-  createdAt: string
-}
+  id: string;
+  url: string;
+  key: string;
+  alt?: Record<string, string>;
+  filename: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+};
 
 type ListResponse = {
-  items: Asset[]
-  total: number
-  page: number
-  limit: number
-}
+  items: Asset[];
+  total: number;
+  page: number;
+  limit: number;
+};
 
 export default function UploadsPage() {
   const { t } = useT();
-  const token = getToken()
-  const queryClient = useQueryClient()
-  const [search, setSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const token = getToken();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["assets", search, page],
@@ -48,7 +48,7 @@ export default function UploadsPage() {
         params: { search: search || undefined, page, limit: 48 },
       }),
     select: (res) => res.data,
-  })
+  });
 
   const deleteMutation = useMutation({
     mutationFn: (asset: Asset) =>
@@ -58,22 +58,22 @@ export default function UploadsPage() {
         token,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] })
-      toast.success("Asset deleted")
-      setDeleteId(null)
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      toast.success("Đã xóa tài nguyên");
+      setDeleteId(null);
     },
     onError: (err: Error) => toast.error(err.message),
-  })
+  });
 
   const handleUploadComplete = () => {
-    queryClient.invalidateQueries({ queryKey: ["assets"] })
-  }
+    queryClient.invalidateQueries({ queryKey: ["assets"] });
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Assets</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Tài nguyên</h1>
           <p className="text-muted-foreground text-sm">
             Manage all uploaded images
           </p>
@@ -89,18 +89,16 @@ export default function UploadsPage() {
       <div className="flex items-center gap-4">
         <div className="max-w-sm">
           <SearchInput
-            placeholder="Search assets..."
+            placeholder="Tìm kiếm tài nguyên..."
             value={search}
             onChange={(v) => {
-              setSearch(v)
-              setPage(1)
+              setSearch(v);
+              setPage(1);
             }}
           />
         </div>
         {data && (
-          <p className="text-sm text-muted-foreground">
-            {data.total} asset(s)
-          </p>
+          <p className="text-sm text-muted-foreground">{data.total} asset(s)</p>
         )}
       </div>
 
@@ -113,7 +111,7 @@ export default function UploadsPage() {
       ) : data?.items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <ImageIcon className="h-12 w-12 mb-3" />
-          <p className="text-sm">No assets found</p>
+          <p className="text-sm">Không tìm thấy tài nguyên</p>
         </div>
       ) : (
         <>
@@ -145,7 +143,6 @@ export default function UploadsPage() {
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </button>
                 </div>
-
               </div>
             ))}
           </div>
@@ -165,13 +162,13 @@ export default function UploadsPage() {
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
         onConfirm={() => {
-          const asset = data?.items.find((a) => a.id === deleteId)
-          if (asset) deleteMutation.mutate(asset)
+          const asset = data?.items.find((a) => a.id === deleteId);
+          if (asset) deleteMutation.mutate(asset);
         }}
-        title="Delete Asset"
+        title="Xóa tài nguyên"
         description="This image will be permanently deleted."
         isLoading={deleteMutation.isPending}
       />
     </div>
-  )
+  );
 }

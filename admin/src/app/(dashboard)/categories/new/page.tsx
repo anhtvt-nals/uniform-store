@@ -25,8 +25,8 @@ export default function NewCategoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">New Category</h1>
-        <p className="text-muted-foreground text-sm">Create a new product category</p>
+        <h1 className="text-2xl font-bold tracking-tight">Thêm danh mục</h1>
+        <p className="text-muted-foreground text-sm">Tạo danh mục sản phẩm mới</p>
       </div>
       <CategoryForm
         onSubmit={(data) => mutation.mutate(data)}

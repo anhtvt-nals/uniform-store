@@ -23,8 +23,8 @@ export default function NewBrandPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">New Brand</h1>
-        <p className="text-muted-foreground text-sm">Create a new product brand</p>
+        <h1 className="text-2xl font-bold tracking-tight">Thêm thương hiệu</h1>
+        <p className="text-muted-foreground text-sm">Tạo thương hiệu sản phẩm mới</p>
       </div>
       <BrandForm onSubmit={(data) => mutation.mutate(data)} isSubmitting={mutation.isPending} />
     </div>

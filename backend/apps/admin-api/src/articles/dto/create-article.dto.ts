@@ -1,4 +1,4 @@
-import { IsString, IsObject, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsObject, IsOptional, IsBoolean, IsArray } from 'class-validator';
 
 export class CreateArticleDto {
   @IsObject()
@@ -22,4 +22,10 @@ export class CreateArticleDto {
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
+
+  /** Vietnamese tag labels entered by an administrator. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagNames?: string[];
 }

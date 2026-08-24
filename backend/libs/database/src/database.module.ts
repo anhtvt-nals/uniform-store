@@ -39,6 +39,7 @@ import {
   InquiryEntity,
   QuoteRequestEntity,
   CustomerContractEntity,
+  TestimonialEntity,
 } from './entities';
 
 @Module({
@@ -92,6 +93,7 @@ import {
             InquiryEntity,
             QuoteRequestEntity,
             CustomerContractEntity,
+            TestimonialEntity,
           ],
           synchronize: false,
           logging: process.env.DB_LOGGING === 'true',

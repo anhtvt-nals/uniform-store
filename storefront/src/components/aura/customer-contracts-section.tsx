@@ -8,7 +8,10 @@ interface CustomerContract {
     description: string;
 }
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
+const BACKEND_API_URL = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace(
+    /\/shop-api\/?$/,
+    '',
+);
 
 async function getContracts(): Promise<CustomerContract[]> {
     try {

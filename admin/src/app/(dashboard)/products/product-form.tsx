@@ -21,7 +21,6 @@ const CKEditor = dynamic(
   { ssr: false, loading: () => <Skeleton className="h-72 w-full" /> },
 )
 
-const locales = ["en", "vi", "de"] as const;
 const DEFAULT_LOCALE = "vi";
 
 type Category = { id: string; name: Record<string, string>; slug: string };
@@ -108,19 +107,13 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     select: (res) => res.data?.items || [],
   });
 
-  const [currentLocale, setCurrentLocale] = useState(DEFAULT_LOCALE);
-  const [showAllLocales, setShowAllLocales] = useState(false);
-
   const [name, setName] = useState<Record<string, string>>({});
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState<Record<string, string>>({});
-  const [sortDescription, setSortDescription] = useState<Record<string, string>>({});
   const [detail, setDetail] = useState<Record<string, string>>({});
   const [categoryId, setCategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
   const [basePrice, setBasePrice] = useState(0);
-  const [taxRate, setTaxRate] = useState(10);
-  const [weight, setWeight] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
@@ -136,13 +129,10 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       setName((defaultValues.name as Record<string, string>) || {});
       setSlug((defaultValues.slug as string) || "");
       setDescription((defaultValues.description as Record<string, string>) || {});
-      setSortDescription((defaultValues.sortDescription as Record<string, string>) || {});
       setDetail((defaultValues.detail as Record<string, string>) || {});
       setCategoryId((defaultValues.categoryId as string) || (defaultValues.category as { id: string })?.id || "");
       setBrandId((defaultValues.brandId as string) || (defaultValues.brand as { id: string })?.id || "");
       setBasePrice((defaultValues.basePrice as number) ?? 0);
-      setTaxRate((defaultValues.taxRate as number) ?? 10);
-      setWeight((defaultValues.weight as number) ?? 0);
       setIsActive(defaultValues.isActive !== undefined ? Boolean(defaultValues.isActive) : true);
       setIsFeatured(defaultValues.isFeatured !== undefined ? Boolean(defaultValues.isFeatured) : false);
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
@@ -154,7 +144,6 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     const setter: Record<string, React.Dispatch<React.SetStateAction<Record<string, string>>>> = {
       name: setName,
       description: setDescription,
-      sortDescription: setSortDescription,
       detail: setDetail,
       metaTitle: setMetaTitle,
       metaDesc: setMetaDesc,
@@ -163,12 +152,12 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
   }, []);
 
   const getField = useCallback((field: string, locale: string): string => {
-    const source: Record<string, Record<string, string>> = { name, description, sortDescription, detail, metaTitle, metaDesc };
+    const source: Record<string, Record<string, string>> = { name, description, detail, metaTitle, metaDesc };
     return source[field]?.[locale] || "";
   }, [name, description, detail, metaTitle, metaDesc]);
 
   function handleNameChange(value: string) {
-    setName((prev) => ({ ...prev, [currentLocale]: value }));
+    setName((prev) => ({ ...prev, [DEFAULT_LOCALE]: value }));
     if (!slugEdited.current) {
       setSlug(slugify(value));
     }
@@ -179,16 +168,16 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     setSlug(value);
   }
 
-  const activeLocales = showAllLocales ? [...locales] : [currentLocale];
+  const activeLocales = [DEFAULT_LOCALE];
   const thumbnailUrl = images?.find((img) => img.sortOrder === 0)?.url || images?.[0]?.url;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    if (!(name.vi || name.en)) newErrors.name = "Product name is required";
-    if (!slug.trim()) newErrors.slug = "Slug is required";
-    else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = "Invalid slug format (lowercase, numbers, hyphens only)";
-    if (!categoryId) newErrors.categoryId = "Category is required";
+    if (!name.vi) newErrors.name = "Vui lòng nhập tên sản phẩm";
+    if (!slug.trim()) newErrors.slug = "Vui lòng nhập slug";
+    else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = "Slug chỉ gồm chữ thường, số và dấu gạch ngang";
+    if (!categoryId) newErrors.categoryId = "Vui lòng chọn danh mục";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -200,13 +189,11 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       isActive,
       isFeatured,
       basePrice: Number(basePrice),
-      taxRate: Number(taxRate),
-      weight: Number(weight),
       detail,
     };
     if (brandId) data.brandId = brandId;
     if (Object.keys(description).length > 0) data.description = description;
-    if (Object.keys(sortDescription).length > 0) data.sortDescription = sortDescription;
+    if (Object.keys(description).length > 0) data.sortDescription = description;
     if (Object.keys(metaTitle).length > 0) data.metaTitle = metaTitle;
     if (Object.keys(metaDesc).length > 0) data.metaDesc = metaDesc;
 
@@ -219,30 +206,21 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Product Information</h3>
-                <button
-                  type="button"
-                  onClick={() => setShowAllLocales(!showAllLocales)}
-                  className="text-xs text-muted-foreground hover:text-foreground underline"
-                >
-                  {showAllLocales ? "Single language" : "All languages"}
-                </button>
-              </div>
+              <h3 className="text-sm font-medium">Thông tin sản phẩm</h3>
 
               {activeLocales.map((l) => (
                 <div key={`name-${l}`} className="space-y-1">
-                  {showAllLocales && <Label className="text-xs uppercase text-muted-foreground">Name ({l})</Label>}
+                  <Label className="text-xs text-muted-foreground">Tên sản phẩm</Label>
                   <Input
                     value={getField("name", l)}
                     onChange={(e) => {
-                      if (l === currentLocale) {
+                      if (l === DEFAULT_LOCALE) {
                         handleNameChange(e.target.value);
                       } else {
                         setField("name", l, e.target.value);
                       }
                     }}
-                    placeholder={`Product name${showAllLocales ? ` (${l})` : ""}`}
+                    placeholder="Tên sản phẩm"
                   />
                 </div>
               ))}
@@ -258,11 +236,10 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Detail</h3>
+              <h3 className="text-sm font-medium">Mô tả chi tiết</h3>
               <div className="min-h-[300px]">
                 {activeLocales.map((l) => (
-                  <div key={`detail-${l}`} className={l !== currentLocale && !showAllLocales ? "hidden" : ""}>
-                    {showAllLocales && <Label className="text-xs uppercase text-muted-foreground mb-1 block">{l}</Label>}
+                  <div key={`detail-${l}`}>
                     {showEditor && editorRef.current ? (
                       <CKEditor
                         key={`ck-${l}`}
@@ -290,14 +267,13 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Short Description</h3>
+              <h3 className="text-sm font-medium">Mô tả ngắn</h3>
               {activeLocales.map((l) => (
                 <div key={`desc-${l}`} className="space-y-1">
-                  {showAllLocales && <Label className="text-xs uppercase text-muted-foreground">{l}</Label>}
                   <textarea
                     value={getField("description", l)}
                     onChange={(e) => setField("description", l, e.target.value)}
-                    placeholder={`Short description${showAllLocales ? ` (${l})` : ""}`}
+                    placeholder="Mô tả ngắn hiển thị trên card sản phẩm"
                     rows={3}
                     className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
@@ -308,43 +284,25 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Sort Description (shown in product card)</h3>
-              {activeLocales.map((l) => (
-                <div key={`sort-desc-${l}`} className="space-y-1">
-                  {showAllLocales && <Label className="text-xs uppercase text-muted-foreground">{l}</Label>}
-                  <textarea
-                    value={getField("sortDescription", l)}
-                    onChange={(e) => setField("sortDescription", l, e.target.value)}
-                    placeholder={`Brief product summary for listings${showAllLocales ? ` (${l})` : ""}`}
-                    rows={2}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Categorization</h3>
+              <h3 className="text-sm font-medium">Phân loại</h3>
               <div className="space-y-1">
-                <Label htmlFor="categoryId">Category *</Label>
+                <Label htmlFor="categoryId">Danh mục *</Label>
                 <select id="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm">
-                  <option value="">Select category...</option>
+                  <option value="">Chọn danh mục...</option>
                   {(categories as Category[] | undefined)?.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name?.en || c.name?.vi || c.slug}</option>
+                    <option key={c.id} value={c.id}>{c.name?.vi || c.name?.en || c.slug}</option>
                   ))}
                 </select>
                 {errors.categoryId && <p className="text-xs text-destructive">{errors.categoryId}</p>}
               </div>
               <div className="space-y-1">
-                <Label htmlFor="brandId">Brand</Label>
+                <Label htmlFor="brandId">Thương hiệu</Label>
                 <select id="brandId" value={brandId} onChange={(e) => setBrandId(e.target.value)}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm">
-                  <option value="">No brand</option>
+                  <option value="">Không có thương hiệu</option>
                   {(brands as Brand[] | undefined)?.map((b) => (
-                    <option key={b.id} value={b.id}>{b.name?.en || b.name?.vi || b.slug}</option>
+                    <option key={b.id} value={b.id}>{b.name?.vi || b.name?.en || b.slug}</option>
                   ))}
                 </select>
               </div>
@@ -353,29 +311,21 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Pricing & Properties</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <h3 className="text-sm font-medium">Giá và trạng thái</h3>
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-1">
-                  <Label htmlFor="basePrice">Base Price (VND)</Label>
-                  <Input id="basePrice" type="number" min={0} value={basePrice} onChange={(e) => setBasePrice(Number(e.target.value))} />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="taxRate">Tax Rate (%)</Label>
-                  <Input id="taxRate" type="number" min={0} max={100} value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="weight">Weight (g)</Label>
-                  <Input id="weight" type="number" min={0} value={weight} onChange={(e) => setWeight(Number(e.target.value))} />
+                  <Label htmlFor="basePrice">Giá cơ bản (VNĐ)</Label>
+                  <Input id="basePrice" type="number" min={0} step={1000} value={basePrice} onChange={(e) => setBasePrice(Math.round(Number(e.target.value)))} />
                 </div>
               </div>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                   <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">Hiển thị</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch id="isFeatured" checked={isFeatured} onCheckedChange={setIsFeatured} />
-                  <Label htmlFor="isFeatured">Featured</Label>
+                  <Label htmlFor="isFeatured">Nổi bật</Label>
                 </div>
               </div>
             </CardContent>
@@ -383,19 +333,18 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">SEO (optional)</h3>
+              <h3 className="text-sm font-medium">SEO (không bắt buộc)</h3>
               {activeLocales.map((l) => (
                 <div key={`meta-${l}`} className="space-y-2">
-                  {showAllLocales && <Label className="text-xs uppercase text-muted-foreground">{l}</Label>}
                   <Input
                     value={getField("metaTitle", l)}
                     onChange={(e) => setField("metaTitle", l, e.target.value)}
-                    placeholder={`Meta title${showAllLocales ? ` (${l})` : ""}`}
+                    placeholder="Tiêu đề SEO"
                   />
                   <Input
                     value={getField("metaDesc", l)}
                     onChange={(e) => setField("metaDesc", l, e.target.value)}
-                    placeholder={`Meta description${showAllLocales ? ` (${l})` : ""}`}
+                    placeholder="Mô tả SEO"
                   />
                 </div>
               ))}
@@ -406,11 +355,11 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
         <div className="space-y-6">
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Thumbnail</h3>
-              <p className="text-xs text-muted-foreground">Main product image shown in listings</p>
+              <h3 className="text-sm font-medium">Ảnh đại diện</h3>
+              <p className="text-xs text-muted-foreground">Ảnh chính hiển thị trong danh sách sản phẩm</p>
               {thumbnailUrl ? (
                 <div className="relative inline-block group">
-                  <img src={thumbnailUrl} alt="Thumbnail" className="h-40 w-40 rounded-md border object-cover" />
+                  <img src={thumbnailUrl} alt="Ảnh đại diện" className="h-40 w-40 rounded-md border object-cover" />
                   {onDeleteImage && images?.[0] && (
                     <button
                       type="button"
@@ -438,7 +387,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
                   }}
                 />
                 <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setThumbAssetPickerOpen(true)}>
-                  <ImageIcon className="h-4 w-4" /> Browse Assets
+                  <ImageIcon className="h-4 w-4" /> Chọn từ assets
                 </Button>
                 <AssetPicker
                   open={thumbAssetPickerOpen}
@@ -454,8 +403,8 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Gallery Images</h3>
-              <p className="text-xs text-muted-foreground">Additional product detail images</p>
+              <h3 className="text-sm font-medium">Thư viện ảnh</h3>
+              <p className="text-xs text-muted-foreground">Các hình ảnh bổ sung cho sản phẩm</p>
 
               <ImageUploader
                 entityType="product"
@@ -468,7 +417,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
               />
 
               <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setGalleryPickerOpen(true)}>
-                <ImageIcon className="h-4 w-4" /> Browse Assets
+                <ImageIcon className="h-4 w-4" /> Chọn từ assets
               </Button>
               <AssetPicker
                 open={galleryPickerOpen}
@@ -505,9 +454,9 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {defaultValues ? "Update Product" : "Create Product"}
+          {defaultValues ? "Lưu sản phẩm" : "Tạo sản phẩm"}
         </Button>
-        <Button variant="outline" asChild><Link href="/products">Cancel</Link></Button>
+        <Button variant="outline" asChild><Link href="/products">Hủy</Link></Button>
       </div>
     </form>
   );

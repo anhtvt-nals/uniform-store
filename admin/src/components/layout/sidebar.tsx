@@ -12,15 +12,12 @@ import {
   Building2,
   FileText,
   Percent,
-  Truck,
-  CreditCard,
   Image,
   PanelsTopLeft,
   Activity,
   Settings,
   Shield,
-  MessageSquare,
-  BarChart3,
+  Star,
   ClipboardList,
   Handshake,
   ChevronLeft,
@@ -37,20 +34,17 @@ export function Sidebar() {
   const navItems = [
     { href: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
     { href: "/orders", label: t("nav.orders"), icon: ShoppingCart },
-    { href: "/inquiries", label: t("nav.inquiries"), icon: MessageSquare },
-    { href: "/quotes", label: t("nav.quotes"), icon: ClipboardList },
+    { href: "/quotes", label: "Báo giá", icon: ClipboardList },
     { href: "/contracts", label: t("nav.contracts"), icon: Handshake },
     { href: "/products", label: t("nav.products"), icon: Package },
     { href: "/categories", label: t("nav.categories"), icon: Tags },
     { href: "/brands", label: t("nav.brands"), icon: Building2 },
     { href: "/customers", label: t("nav.customers"), icon: Users },
-    { href: "/inventory", label: t("nav.inventory"), icon: BarChart3 },
     { href: "/articles", label: t("nav.articles"), icon: FileText },
     { href: "/promotions", label: t("nav.promotions"), icon: Percent },
-    { href: "/shipping", label: t("nav.shipping"), icon: Truck },
-    { href: "/payment-methods", label: t("nav.payment"), icon: CreditCard },
     { href: "/uploads", label: t("nav.uploads"), icon: Image },
     { href: "/hero-slides", label: "Hero Slider", icon: PanelsTopLeft },
+    { href: "/testimonials", label: "Khách hàng đánh giá", icon: Star },
     { href: "/activity-logs", label: t("nav.activityLogs"), icon: Activity },
     { href: "/settings", label: t("nav.settings"), icon: Settings },
     { href: "/permissions", label: t("nav.permissions"), icon: Shield },
@@ -80,7 +74,8 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+          const isQuoteModule = item.href === "/quotes" && (pathname === "/quotes" || pathname.startsWith("/quotes") || pathname === "/inquiries" || pathname.startsWith("/inquiries"))
+          const isActive = isQuoteModule || pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
           return (
             <Link
               key={item.href}

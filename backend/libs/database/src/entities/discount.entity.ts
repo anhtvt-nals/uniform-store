@@ -29,6 +29,9 @@ export class DiscountEntity {
   @Column({ name: 'max_discount', type: 'decimal', default: 0 })
   maxDiscount: number;
 
+  @Column({ name: 'min_quantity_per_product', type: 'int', default: 1 })
+  minQuantityPerProduct: number;
+
   @Column({ type: 'varchar', default: 'order' })
   target: string;
 
@@ -45,7 +48,7 @@ export class DiscountEntity {
   startsAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true, name: 'ends_at' })
-  endsAt: Date;
+  endsAt: Date | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;

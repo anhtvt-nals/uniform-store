@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
-import {Menu, Search, ShoppingBag, User, Package, MapPin} from 'lucide-react';
+import {Menu, Search, ShoppingBag} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {
@@ -88,6 +88,7 @@ export function MobileNav({collections}: MobileNavProps) {
                             {href: '/dich-vu', label: t('services')},
                             {href: '/ve-chung-toi', label: t('about')},
                             {href: '/tin-tuc', label: t('news')},
+                            {href: '/tra-cuu-don-hang', label: t('orderLookup')},
                         ].map((item) => (
                             <SheetClose
                                 key={item.href}
@@ -132,53 +133,6 @@ export function MobileNav({collections}: MobileNavProps) {
                         </div>
                     )}
 
-                    {/* Account links */}
-                    <div>
-                        <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                            {t('account')}
-                        </p>
-                        <nav className="flex flex-col gap-0.5">
-                            <SheetClose
-                                render={
-                                    <Link
-                                        href="/account/profile"
-                                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
-                                    />
-                                }
-                                nativeButton={false}
-                                onClick={handleLinkClick}
-                            >
-                                <User className="h-5 w-5" />
-                                {t('profile')}
-                            </SheetClose>
-                            <SheetClose
-                                render={
-                                    <Link
-                                        href="/account/orders"
-                                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
-                                    />
-                                }
-                                nativeButton={false}
-                                onClick={handleLinkClick}
-                            >
-                                <Package className="h-5 w-5" />
-                                {t('orders')}
-                            </SheetClose>
-                            <SheetClose
-                                render={
-                                    <Link
-                                        href="/account/addresses"
-                                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
-                                    />
-                                }
-                                nativeButton={false}
-                                onClick={handleLinkClick}
-                            >
-                                <MapPin className="h-5 w-5" />
-                                {t('addresses')}
-                            </SheetClose>
-                        </nav>
-                    </div>
                 </div>
             </SheetContent>
         </Sheet>

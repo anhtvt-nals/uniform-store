@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { PriceEstimateQueryDto } from './dto/price-estimate-query.dto';
 
 @ApiTags('Products')
 @Controller('api/v1/products')
@@ -21,6 +22,12 @@ export class ProductsController {
   @ApiQuery({ name: 'limit', required: false })
   findFeatured(@Query('limit') limit?: string) {
     return this.productsService.findFeatured(limit ? parseInt(limit, 10) : 8);
+  }
+
+  @Get('price-estimate')
+  @ApiOperation({ summary: 'Estimate active catalog price range for a category and quantity' })
+  estimatePrice(@Query() query: PriceEstimateQueryDto) {
+    return this.productsService.estimatePrice(query);
   }
 
   @Get(':slug')

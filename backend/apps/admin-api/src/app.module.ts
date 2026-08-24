@@ -25,6 +25,7 @@ import { SettingsModule } from './settings/settings.module';
 import {BannersModule} from './banners/banners.module';
 import { QuoteRequestsModule } from './quote-requests/quote-requests.module';
 import { CustomerContractsModule } from './customer-contracts/customer-contracts.module';
+import { TestimonialsModule } from './testimonials/testimonials.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CustomerContractsModule } from './customer-contracts/customer-contracts
     BannersModule,
     QuoteRequestsModule,
     CustomerContractsModule,
+    TestimonialsModule,
     HealthModule,
   ],
 })

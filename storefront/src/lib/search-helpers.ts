@@ -8,6 +8,8 @@ export interface SearchInputParams {
     facetValueFilters?: Array<{ and: string }>;
 }
 
+export const PRODUCT_LIST_PAGE_SIZE = 15;
+
 interface BuildSearchInputOptions {
     searchParams: { [key: string]: string | string[] | undefined };
     collectionSlug?: string;
@@ -15,7 +17,7 @@ interface BuildSearchInputOptions {
 
 export function buildSearchInput({ searchParams, collectionSlug }: BuildSearchInputOptions): SearchInputParams {
     const page = Number(searchParams.page) || 1;
-    const take = 12;
+    const take = PRODUCT_LIST_PAGE_SIZE;
     const skip = (page - 1) * take;
     const sort = (searchParams.sort as string) || 'name-asc';
     const searchTerm = searchParams.q as string;

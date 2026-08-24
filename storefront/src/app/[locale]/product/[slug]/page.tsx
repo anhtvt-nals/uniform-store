@@ -201,7 +201,7 @@ export default async function ProductDetailPage({params, searchParams}: PageProp
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(productJsonLd)}} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(breadcrumbJsonLd)}} />
-            <div className="container mx-auto px-4 py-8 mt-16">
+            <div className="container mx-auto px-4 py-8 mt-0">
                 {/* Breadcrumb Navigation */}
                 <Breadcrumb className="mb-6">
                     <BreadcrumbList>
@@ -239,13 +239,12 @@ export default async function ProductDetailPage({params, searchParams}: PageProp
             </div>
 
             {/* Product Detail — full-width rich content */}
-            {product.detail && (
-                <section className="py-12 mt-8">
-                    <div className="container mx-auto px-4 max-w-4xl">
-                        <h2 className="text-2xl font-bold mb-6">{t('detail')}</h2>
-                        <div
-                            className="prose prose-lg max-w-none text-muted-foreground"
-                            dangerouslySetInnerHTML={{__html: product.detail}}
+            {(product.detail || product.description) && (
+                <section className="mt-8 border-y border-border/50 py-10 md:py-14">
+                    <div className="container mx-auto px-4">
+                        <article
+                            className="prose prose-lg max-w-none text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
+                            dangerouslySetInnerHTML={{__html: product.detail || product.description}}
                         />
                     </div>
                 </section>

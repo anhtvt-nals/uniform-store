@@ -39,7 +39,7 @@ export async function Footer() {
                             alt="Minh An Uniform"
                             width={100}
                             height={28}
-                            className="h-7 w-auto object-contain mb-4"
+                            className="h-7 w-[100px] object-contain mb-4"
                         />
                         <p className="text-xs text-muted-foreground/70 leading-relaxed max-w-[220px]">
                             {t('description')}

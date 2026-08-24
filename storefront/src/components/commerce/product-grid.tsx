@@ -1,5 +1,6 @@
 import {ResultOf} from '@/graphql';
-import {ProductCard} from './product-card';
+import {PackageSearch} from 'lucide-react';
+import {ProductTile} from '@/components/aura/product-tile';
 import {Pagination} from '@/components/shared/pagination';
 import {SortDropdown} from './sort-dropdown';
 import {SearchProductsQuery} from "@/lib/vendure/queries";
@@ -25,8 +26,11 @@ export async function ProductGrid({productDataPromise, currentPage, take}: Produ
 
     if (!searchResult.items.length) {
         return (
-            <div className="text-center py-12">
-                <p className="text-muted-foreground">{t('noProductsFound')}</p>
+            <div className="flex min-h-[340px] w-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
+                <div className="mb-5 flex size-24 items-center justify-center rounded-3xl border border-primary/15 bg-primary/5 text-primary shadow-sm">
+                    <PackageSearch aria-hidden="true" className="size-11" strokeWidth={1.5} />
+                </div>
+                <p className="text-base font-semibold text-foreground">{t('noProductsFound')}</p>
             </div>
         );
     }
@@ -40,9 +44,9 @@ export async function ProductGrid({productDataPromise, currentPage, take}: Produ
                 <SortDropdown/>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
                 {searchResult.items.map((product, i) => (
-                    <ProductCard key={'product-grid-item' + i} product={product}/>
+                    <ProductTile key={'product-grid-item' + i} product={product} index={i} compact />
                 ))}
             </div>
 

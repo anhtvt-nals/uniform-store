@@ -63,7 +63,7 @@ export default function CategoriesPage() {
       apiClient(`/categories/${id}`, { method: "DELETE", token }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category deleted successfully");
+      toast.success("Đã xóa danh mục");
       setDeleteId(null);
     },
     onError: (err: Error) => {
@@ -76,7 +76,7 @@ export default function CategoriesPage() {
       apiClient(`/categories/${id}/restore`, { method: "PATCH", token }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category restored successfully");
+      toast.success("Đã khôi phục danh mục");
       setRestoreId(null);
     },
     onError: (err: Error) => {
@@ -88,8 +88,8 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
-          <p className="text-muted-foreground text-sm">Manage product categories</p>
+          <h1 className="text-2xl font-bold tracking-tight">Danh mục</h1>
+          <p className="text-muted-foreground text-sm">Quản lý danh mục sản phẩm</p>
         </div>
         <Button asChild>
           <Link href="/categories/new">
@@ -130,13 +130,13 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Parent</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sort Order</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead>Tên</TableHead>
+                  <TableHead>Đường dẫn</TableHead>
+                  <TableHead>Danh mục cha</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Thứ tự</TableHead>
+                  <TableHead>Ngày tạo</TableHead>
+                  <TableHead className="w-24">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -151,11 +151,11 @@ export default function CategoriesPage() {
                     </TableCell>
                     <TableCell>
                       {cat.deletedAt ? (
-                        <Badge variant="destructive">Deleted</Badge>
+                        <Badge variant="destructive">Đã xóa</Badge>
                       ) : cat.isActive ? (
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="success">Đang hoạt động</Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary">Đã tắt</Badge>
                       )}
                     </TableCell>
                     <TableCell>{cat.sortOrder}</TableCell>
@@ -195,7 +195,7 @@ export default function CategoriesPage() {
       ) : (
         <EmptyState
           title={t("categories.noCategories")}
-          description={search ? "Try a different search term." : "Create your first category to organize products."}
+          description={search ? "Hãy thử từ khóa tìm kiếm khác." : "Tạo danh mục đầu tiên để sắp xếp sản phẩm."}
           action={
             <Button asChild>
               <Link href="/categories/new">
@@ -211,7 +211,7 @@ export default function CategoriesPage() {
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
-        title="Delete Category"
+        title="Xóa danh mục"
         description="This category will be soft-deleted. You can restore it later."
         isLoading={deleteMutation.isPending}
       />
@@ -220,9 +220,9 @@ export default function CategoriesPage() {
         open={!!restoreId}
         onOpenChange={() => setRestoreId(null)}
         onConfirm={() => restoreId && restoreMutation.mutate(restoreId)}
-        title="Restore Category"
+        title="Khôi phục danh mục"
         description="This will restore the soft-deleted category."
-        confirmText="Restore"
+        confirmText="Khôi phục"
         isLoading={restoreMutation.isPending}
       />
     </div>

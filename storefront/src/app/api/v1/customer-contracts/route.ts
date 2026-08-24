@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
+const BACKEND_URL = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace(
+  /\/shop-api\/?$/,
+  '',
+);
 
 export async function GET() {
   try {

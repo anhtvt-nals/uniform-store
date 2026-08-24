@@ -89,6 +89,13 @@ Server Action / Component / Route Handler
 |-------|-----------|----------|-----------|
 | `GetOrderByCodeQuery` | `$code: String!` | `orderByCode {id, code, state, totalWithTax, currencyCode, lines[{id, productVariant{id, name, product{id, name, slug, featuredAsset{id, preview}}}, quantity, linePriceWithTax}], shippingAddress{fullName, streetLine1, streetLine2, city, province, postalCode, country}}` | order confirmation page |
 
+### 2e1. Public Order Lookup — `src/app/[locale]/tra-cuu-don-hang/order-lookup.tsx`
+
+| Endpoint | Query | Response | Call Site |
+|----------|-------|----------|-----------|
+| `GET /api/v1/orders/lookup` | `email`, `code` | `{code, status, createdAt, currencyCode, total, customerName, shippingAddress, items[]}` | order lookup page |
+| `GET /api/v1/products/price-estimate` | `categorySlug`, `quantity` | `{min, max, currencyCode, productCount}` | Hero configurator |
+
 ### 2f. Articles — `src/lib/graphql/articles.ts`
 
 | Query | Variables | Response | Call Site |
@@ -326,8 +333,7 @@ Server Action / Component / Route Handler
 | 20 | `src/app/[locale]/collection/[slug]/page.tsx:39` | collection products | `SearchProductsQuery` | `collection-${slug}-${locale}-${currency}` |
 | 21 | `src/app/[locale]/collection/[slug]/page.tsx:54` | collection metadata | `GetCollectionProductsQuery` | `collection-meta-${slug}-${locale}` |
 | 22 | `src/app/[locale]/search/search-results.tsx:23` | search results | `SearchProductsQuery` | — |
-| 23 | `src/app/[locale]/account/orders/page.tsx:40` | orders list | `GetCustomerOrdersQuery` | — |
-| 24 | `src/app/[locale]/account/orders/[code]/page.tsx:26` | order detail | `GetOrderDetailQuery` | — |
+| 23 | `src/app/[locale]/tra-cuu-don-hang/order-lookup.tsx` | public order lookup | `GET /api/v1/orders/lookup?email=&code=` | — |
 | 25 | `src/app/[locale]/account/addresses/page.tsx:20` | addresses list | `GetCustomerAddressesQuery` | — |
 | 26 | `src/app/[locale]/account/addresses/page.tsx:21` | countries list | `GetAvailableCountriesQuery` | — |
 | 27 | `src/app/[locale]/order-confirmation/[code]/order-confirmation.tsx:62` | order confirmation | `GetOrderByCodeQuery` | — |

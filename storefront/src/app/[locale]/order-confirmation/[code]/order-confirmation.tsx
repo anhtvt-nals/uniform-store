@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import {Separator} from '@/components/ui/separator';
 import {Price} from '@/components/commerce/price';
-import {notFound} from 'next/navigation';
 import {getRouteLocale} from '@/i18n/server';
 import {getTranslations} from 'next-intl/server';
 import {query} from '@/lib/vendure/api';
@@ -63,7 +62,28 @@ export async function OrderConfirmation({paramsPromise}: OrderConfirmationProps)
     const order = data.orderByCode;
 
     if (!order) {
-        notFound();
+        return (
+            <div className="container mx-auto px-4 py-16">
+                <div className="mx-auto max-w-xl text-center">
+                    <div className="mb-6 flex justify-center">
+                        <div className="rounded-full bg-primary p-5 shadow-lg shadow-primary/25">
+                            <Check className="h-10 w-10 text-primary-foreground" strokeWidth={3} />
+                        </div>
+                    </div>
+                    <h1 className="mb-2 text-3xl font-bold">{t('orderConfirmed')}</h1>
+                    <p className="text-muted-foreground">
+                        Đơn hàng <span className="font-semibold text-foreground">{code}</span> đã được tiếp nhận.
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Thông tin chi tiết đang được cập nhật. Bộ phận kinh doanh sẽ liên hệ với bạn sớm nhất.
+                    </p>
+                    <Button nativeButton={false} render={<Link href="/" />} className="mt-8" size="lg">
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        {t('continueShopping')}
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -156,7 +176,7 @@ export async function OrderConfirmation({paramsPromise}: OrderConfirmationProps)
                         <ShoppingBag className="mr-2 h-4 w-4" />
                         {t('continueShopping')}
                     </Button>
-                    <Button nativeButton={false} render={<Link href="/account/orders" />} variant="outline" className="flex-1" size="lg">
+                    <Button nativeButton={false} render={<Link href="/tra-cuu-don-hang" />} variant="outline" className="flex-1" size="lg">
                         <ClipboardList className="mr-2 h-4 w-4" />
                         {t('viewOrders')}
                     </Button>

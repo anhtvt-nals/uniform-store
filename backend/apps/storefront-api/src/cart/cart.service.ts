@@ -15,6 +15,8 @@ import {
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 
+const MAX_CART_ITEM_QUANTITY = 10000;
+
 @Injectable()
 export class CartService {
   constructor(
@@ -36,6 +38,9 @@ export class CartService {
   }
 
   async addItem(dto: AddItemDto, userId?: string, sessionId?: string) {
+    if (dto.quantity > MAX_CART_ITEM_QUANTITY) {
+      throw new BadRequestException(`Maximum quantity per product is ${MAX_CART_ITEM_QUANTITY}`);
+    }
     const variantId = await this.resolveVariantId(dto.productId, dto.variantId);
     const variant = await this.variantRepo.findOne({
       where: { id: variantId },
@@ -54,6 +59,9 @@ export class CartService {
 
     if (existingItem) {
       const newQty = existingItem.quantity + dto.quantity;
+      if (newQty > MAX_CART_ITEM_QUANTITY) {
+        throw new BadRequestException(`Maximum quantity per product is ${MAX_CART_ITEM_QUANTITY}`);
+      }
       await this.validateStock(variantId, newQty);
       await this.cartItemRepo.update(existingItem.id, {
         quantity: newQty,
@@ -86,6 +94,9 @@ export class CartService {
     }
 
     if (dto.quantity !== undefined) {
+      if (dto.quantity > MAX_CART_ITEM_QUANTITY) {
+        throw new BadRequestException(`Maximum quantity per product is ${MAX_CART_ITEM_QUANTITY}`);
+      }
       if (dto.quantity < 1) {
         await this.cartItemRepo.remove(item);
       } else {

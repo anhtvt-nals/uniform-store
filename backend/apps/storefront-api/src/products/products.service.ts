@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike, FindOptionsWhere, In, Raw, IsNull } from 'typeorm';
-import { ProductEntity, CategoryEntity, ProductImageEntity } from '@app/database';
+import { ProductEntity, CategoryEntity, ProductImageEntity, ProductVariantEntity, DiscountEntity } from '@app/database';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { PriceEstimateQueryDto } from './dto/price-estimate-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -13,7 +14,69 @@ export class ProductsService {
     private readonly categoryRepo: Repository<CategoryEntity>,
     @InjectRepository(ProductImageEntity)
     private readonly imageRepo: Repository<ProductImageEntity>,
+    @InjectRepository(ProductVariantEntity)
+    private readonly variantRepo: Repository<ProductVariantEntity>,
+    @InjectRepository(DiscountEntity)
+    private readonly discountRepo: Repository<DiscountEntity>,
   ) {}
+
+  async estimatePrice({ categorySlug, quantity }: PriceEstimateQueryDto) {
+    const category = await this.categoryRepo.findOne({ where: { slug: categorySlug, isActive: true } });
+    if (!category) return { min: null, max: null, currencyCode: 'VND', productCount: 0 };
+
+    const categoryIds = [category.id, ...(await this.getSubcategoryIds(category.id))];
+    const products = await this.productRepo
+      .createQueryBuilder('product')
+      .where('product.is_active = true')
+      .andWhere('product.deleted_at IS NULL')
+      .andWhere('product.category_id IN (:...categoryIds)', { categoryIds })
+      .getMany();
+    if (!products.length) return { min: null, max: null, currencyCode: 'VND', productCount: 0 };
+
+    const productIds = products.map((product) => product.id);
+    const variants = await this.variantRepo
+      .createQueryBuilder('variant')
+      .where('variant.is_active = true')
+      .andWhere('variant.deleted_at IS NULL')
+      .andWhere('variant.product_id IN (:...productIds)', { productIds })
+      .getMany();
+
+    const now = new Date();
+    const discounts = await this.discountRepo.find({ where: { isActive: true } });
+    const applicable = discounts.filter((discount) =>
+      discount.target === 'product' &&
+      (!discount.endsAt || discount.endsAt >= now) &&
+      quantity >= (discount.minQuantityPerProduct ?? 1),
+    );
+    const variantProductIds = new Set(variants.map((variant) => variant.productId));
+    const priceEntries = [
+      ...variants.map((variant) => ({ productId: variant.productId, price: Number(variant.price ?? 0) })),
+      ...products
+        .filter((product) => !variantProductIds.has(product.id))
+        .map((product) => ({ productId: product.id, price: Number(product.basePrice ?? 0) })),
+    ].filter((entry) => entry.price > 0);
+    if (!priceEntries.length) return { min: null, max: null, currencyCode: 'VND', productCount: products.length };
+
+    const prices = priceEntries.map((entry) => {
+      const original = entry.price;
+      const productDiscounts = applicable.filter((discount) => discount.targetIds.includes(entry.productId));
+      const finalPrice = productDiscounts.reduce((lowest, discount) => {
+        const value = Number(discount.value ?? 0);
+        const discounted = discount.type === 'percentage'
+          ? original * (1 - Math.min(value, 100) / 100)
+          : original - value;
+        return Math.min(lowest, Math.max(0, Math.round(discounted)));
+      }, original);
+      return finalPrice;
+    });
+
+    return {
+      min: Math.min(...prices),
+      max: Math.max(...prices),
+      currencyCode: 'VND',
+      productCount: products.length,
+    };
+  }
 
   async findAll(query: ProductQueryDto) {
     const {

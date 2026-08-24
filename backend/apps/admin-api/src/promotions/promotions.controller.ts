@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PromotionsService } from './promotions.service';
+import { CreateDiscountDto } from './dto/create-discount.dto';
 import { AdminAuthGuard } from '@app/common';
 
 @ApiTags('Admin Promotions')
@@ -25,16 +26,16 @@ export class PromotionsController {
   }
 
   @Post('discounts')
-  createDiscount(@Body() _body: Record<string, unknown>) {
-    return this.promotionsService.createDiscount(_body);
+  createDiscount(@Body() body: CreateDiscountDto) {
+    return this.promotionsService.createDiscount(body);
   }
 
   @Patch('discounts/:id')
   updateDiscount(
     @Param('id') _id: string,
-    @Body() _body: Record<string, unknown>,
+    @Body() body: CreateDiscountDto,
   ) {
-    return this.promotionsService.updateDiscount(_id, _body);
+    return this.promotionsService.updateDiscount(_id, body);
   }
 
   @Delete('discounts/:id')

@@ -1,19 +1,17 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react"
+import { createContext, useContext, useCallback, ReactNode } from "react"
 import vi from "./vi.json"
-import en from "./en.json"
 
-type Locale = "vi" | "en"
+type Locale = "vi"
 type Translations = typeof vi
 
 interface I18nContextValue {
   locale: Locale
-  setLocale: (locale: Locale) => void
   t: (key: string) => string
 }
 
-const translations: Record<Locale, Translations> = { vi, en }
+const translations: Record<Locale, Translations> = { vi }
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined)
 
@@ -22,27 +20,17 @@ function getNestedValue(obj: any, path: string): string {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("admin-locale") as Locale) || "vi"
-    }
-    return "vi"
-  })
-
-  const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale)
-    localStorage.setItem("admin-locale", newLocale)
-  }, [])
+  const locale: Locale = "vi"
 
   const t = useCallback(
     (key: string): string => {
       return getNestedValue(translations[locale], key)
     },
-    [locale]
+    []
   )
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, t }}>
       {children}
     </I18nContext.Provider>
   )

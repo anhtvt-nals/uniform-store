@@ -10,7 +10,9 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { PlaceOrderDto } from './dto/place-order.dto';
+import { CreateCartOrderDto } from './dto/create-cart-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
+import { LookupOrderDto } from './dto/lookup-order.dto';
 import { OptionalUserAuthGuard, CurrentUser, SessionId } from '@app/common';
 
 @ApiTags('Orders')
@@ -29,6 +31,17 @@ export class OrdersController {
     return this.ordersService.create(dto, user?.sub, sessionId);
   }
 
+  @Post('quote')
+  @UseGuards(OptionalUserAuthGuard)
+  @ApiOperation({ summary: 'Create an order from the cart for sales follow-up' })
+  createQuoteOrder(
+    @Body() dto: CreateCartOrderDto,
+    @CurrentUser() user?: any,
+    @SessionId() sessionId?: string,
+  ) {
+    return this.ordersService.createFromCartRequest(dto, user?.sub, sessionId);
+  }
+
   @Get()
   @UseGuards(OptionalUserAuthGuard)
   @ApiOperation({ summary: 'List my orders' })
@@ -38,6 +51,12 @@ export class OrdersController {
     @Query() query: OrderQueryDto,
   ) {
     return this.ordersService.findMyOrders(user.sub, query);
+  }
+
+  @Get('lookup')
+  @ApiOperation({ summary: 'Look up an order by its code and customer email' })
+  lookup(@Query() query: LookupOrderDto) {
+    return this.ordersService.findOrderByCodeAndEmail(query.code, query.email);
   }
 
   @Get(':code')

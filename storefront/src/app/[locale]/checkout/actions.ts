@@ -13,6 +13,7 @@ import {
 import {revalidatePath, updateTag} from 'next/cache';
 import {redirect} from '@/i18n/navigation';
 import {getLocale} from 'next-intl/server';
+import {clearCartSessionId} from '@/lib/auth';
 
 interface AddressInput {
     fullName: string;
@@ -141,6 +142,9 @@ export async function placeOrder(paymentMethodCode: string) {
     updateTag('active-order');
 
     const locale = await getLocale();
+    await clearCartSessionId();
+    revalidatePath(`/${locale}/cart`);
+    revalidatePath(`/${locale}`);
     redirect({href: `/order-confirmation/${orderCode}`, locale});
 }
 

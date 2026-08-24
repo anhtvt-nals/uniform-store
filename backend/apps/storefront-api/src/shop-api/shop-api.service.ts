@@ -15,6 +15,7 @@ import { ProductVariantEntity, CountryEntity, AddressEntity } from '@app/databas
 
 interface ExecuteOptions {
   token?: string;
+  sessionId?: string;
   languageCode?: string;
   currencyCode?: string;
   channelToken?: string;
@@ -678,11 +679,11 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return { data: { activeOrder: null } };
     }
     try {
-      const cart = await this.cartService.getCart(userId);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       return { data: { activeOrder: this.mapCartToOrder(cart) } };
     } catch {
       this.logger.warn('GetActiveOrder failed');
@@ -694,11 +695,11 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return { data: { activeOrder: null } };
     }
     try {
-      const cart = await this.cartService.getCart(userId);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       const order = this.mapCartToOrder(cart);
       return {
         data: {
@@ -722,8 +723,8 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
-      return { data: { addItemToOrder: null } };
+    if (!userId && !options.sessionId) {
+      return this.errorResult('addItemToOrder', 'NOT_AUTHENTICATED', 'Cart session is missing');
     }
     const variantId = variables.variantId as string;
     const quantity = (variables.quantity ?? 1) as number;
@@ -740,7 +741,8 @@ export class ShopApiService {
     try {
       const cart = await this.cartService.addItem(
         { variantId, quantity, productId: variant.productId },
-        userId,
+        userId ?? undefined,
+        options.sessionId,
       );
       return { data: { addItemToOrder: this.mapCartToOrder(cart) } };
     } catch (e: any) {
@@ -756,12 +758,12 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return this.errorResult('removeOrderLine', 'NOT_AUTHENTICATED', 'Not authenticated');
     }
     const lineId = variables.lineId as string;
     try {
-      const cart = await this.cartService.removeItem(lineId, userId);
+      const cart = await this.cartService.removeItem(lineId, userId ?? undefined, options.sessionId);
       return { data: { removeOrderLine: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       if (e.name === 'NotFoundException') {
@@ -776,13 +778,13 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return this.errorResult('adjustOrderLine', 'NOT_AUTHENTICATED', 'Not authenticated');
     }
     const lineId = variables.lineId as string;
     const quantity = variables.quantity as number;
     try {
-      const cart = await this.cartService.updateItem(lineId, { quantity }, userId);
+      const cart = await this.cartService.updateItem(lineId, { quantity }, userId ?? undefined, options.sessionId);
       return { data: { adjustOrderLine: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       if (e.name === 'NotFoundException') {
@@ -797,12 +799,12 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return this.errorResult('applyCouponCode', 'NOT_AUTHENTICATED', 'Not authenticated');
     }
     const couponCode = variables.couponCode as string;
     try {
-      const cart = await this.cartService.addCoupon(couponCode, userId);
+      const cart = await this.cartService.addCoupon(couponCode, userId ?? undefined, options.sessionId);
       return { data: { applyCouponCode: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       this.logger.warn(`applyCouponCode failed: ${e.message}`);
@@ -815,12 +817,12 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    if (!userId) {
+    if (!userId && !options.sessionId) {
       return this.errorResult('removeCouponCode', 'NOT_AUTHENTICATED', 'Not authenticated');
     }
     const couponCode = variables.couponCode as string;
     try {
-      const cart = await this.cartService.removeCoupon(couponCode, userId);
+      const cart = await this.cartService.removeCoupon(couponCode, userId ?? undefined, options.sessionId);
       return { data: { removeCouponCode: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       this.logger.warn(`removeCouponCode failed: ${e.message}`);
@@ -872,7 +874,10 @@ export class ShopApiService {
       __typename: 'Order',
       id: cart.id,
       code: cart.id?.substring(0, 8)?.toUpperCase() ?? '',
-      state: 'Active',
+      // Match the Vendure state expected by the storefront checkout flow.
+      // Using "Active" made checkout redirect to order confirmation with the
+      // cart id before an order had been created.
+      state: 'AddingItems',
       totalQuantity: lines.reduce((s: number, l: any) => s + l.quantity, 0),
       subTotal: totals.subtotal,
       subTotalWithTax: totals.subtotal,
@@ -937,8 +942,9 @@ export class ShopApiService {
       await this.checkoutService.setShippingAddress(
         this.mapAddressInput(input),
         userId ?? undefined,
+        options.sessionId,
       );
-      const cart = await this.cartService.getCart(userId ?? undefined);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       return {
         data: {
           setOrderShippingAddress: {
@@ -964,8 +970,9 @@ export class ShopApiService {
       await this.checkoutService.setBillingAddress(
         this.mapAddressInput(input),
         userId ?? undefined,
+        options.sessionId,
       );
-      const cart = await this.cartService.getCart(userId ?? undefined);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       return {
         data: {
           setOrderBillingAddress: {
@@ -989,8 +996,8 @@ export class ShopApiService {
     const methodIds = variables.shippingMethodId as string[] ?? [];
     const code = methodIds[0] ?? 'standard';
     try {
-      await this.checkoutService.setShippingMethod(code, userId ?? undefined);
-      const cart = await this.cartService.getCart(userId ?? undefined);
+      await this.checkoutService.setShippingMethod(code, userId ?? undefined, options.sessionId);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       return {
         data: {
           setOrderShippingMethod: {
@@ -1024,6 +1031,7 @@ export class ShopApiService {
           phone: (input.phoneNumber ?? '') as string,
         },
         userId ?? undefined,
+        options.sessionId,
       );
       return {
         data: {
@@ -1054,7 +1062,7 @@ export class ShopApiService {
     const state = variables.state as string;
     const userId = await this.resolveUserId(options.token);
     try {
-      const cart = await this.cartService.getCart(userId ?? undefined);
+      const cart = await this.cartService.getCart(userId ?? undefined, options.sessionId);
       const order = this.mapCartToOrder(cart);
       return {
         data: {
@@ -1087,8 +1095,8 @@ export class ShopApiService {
     const input = (variables.input ?? {}) as Record<string, unknown>;
     const method = (input.method ?? 'cod') as string;
     try {
-      await this.checkoutService.setPayment(method, userId ?? undefined);
-      const order = await this.checkoutService.confirm(userId ?? undefined);
+      await this.checkoutService.setPayment(method, userId ?? undefined, options.sessionId);
+      const order = await this.checkoutService.confirm(userId ?? undefined, options.sessionId);
       return { data: { addPaymentToOrder: this.mapOrderToGraphQL(order) } };
     } catch (e: any) {
       return {
@@ -1149,12 +1157,14 @@ export class ShopApiService {
 
   private async handleGetOrderByCode(
     variables: Record<string, unknown>,
-    options: ExecuteOptions,
+    _options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const code = variables.code as string;
-    const userId = await this.resolveUserId(options.token) ?? undefined;
     try {
-      const order = await this.ordersService.findOrderByCode(code, userId);
+      // Order confirmation is reached by its unique order code. Do not apply a
+      // stale customer token here: guest orders have no userId and would be
+      // incorrectly reported as missing after checkout.
+      const order = await this.ordersService.findOrderByCode(code);
       return { data: { orderByCode: this.mapOrderToGraphQL(order) } };
     } catch (e: any) {
       this.logger.warn(`getOrderByCode failed: ${e.message}`);
@@ -1216,7 +1226,7 @@ export class ShopApiService {
       id: order.id,
       code: order.code,
       state: order.status,
-      totalWithTax: order.grandTotal ?? 0,
+      totalWithTax: Number(order.grandTotal ?? 0),
       currencyCode: order.currencyCode ?? 'VND',
       createdAt: order.createdAt?.toISOString() ?? '',
       updatedAt: order.updatedAt?.toISOString() ?? '',
@@ -1247,8 +1257,10 @@ export class ShopApiService {
           },
         },
         quantity: item.quantity ?? 0,
-        unitPriceWithTax: item.unitPrice ?? 0,
-        linePriceWithTax: item.linePrice ?? (item.unitPrice ?? 0) * (item.quantity ?? 0),
+        unitPriceWithTax: Number(item.unitPrice ?? 0),
+        linePriceWithTax: Number(
+          item.linePrice ?? Number(item.unitPrice ?? 0) * (item.quantity ?? 0),
+        ),
       };
     });
 
@@ -1264,12 +1276,12 @@ export class ShopApiService {
       createdAt: order.createdAt?.toISOString() ?? '',
       updatedAt: order.updatedAt?.toISOString() ?? '',
       totalQuantity: lines.reduce((s: number, l: any) => s + l.quantity, 0),
-      subTotal: order.subtotal ?? 0,
-      subTotalWithTax: order.subtotal ?? 0,
-      shipping: order.shippingTotal ?? 0,
-      shippingWithTax: order.shippingTotal ?? 0,
-      total: order.grandTotal ?? 0,
-      totalWithTax: order.grandTotal ?? 0,
+      subTotal: Number(order.subtotal ?? 0),
+      subTotalWithTax: Number(order.subtotal ?? 0),
+      shipping: Number(order.shippingTotal ?? 0),
+      shippingWithTax: Number(order.shippingTotal ?? 0),
+      total: Number(order.grandTotal ?? 0),
+      totalWithTax: Number(order.grandTotal ?? 0),
       currencyCode: order.currencyCode ?? 'VND',
       customer: order.userId ? {
         id: order.userId,
@@ -1286,11 +1298,7 @@ export class ShopApiService {
         city: shippingAddr.city ?? '',
         province: shippingAddr.province ?? '',
         postalCode: shippingAddr.postalCode ?? '',
-        country: shippingAddr.countryCode ? {
-          id: shippingAddr.countryCode,
-          code: shippingAddr.countryCode,
-          name: shippingAddr.countryCode,
-        } : null,
+        country: shippingAddr.countryCode ?? '',
         phoneNumber: shippingAddr.phone ?? '',
       } : undefined,
       billingAddress: billingAddr ? {
@@ -1301,11 +1309,7 @@ export class ShopApiService {
         city: billingAddr.city ?? '',
         province: billingAddr.province ?? '',
         postalCode: billingAddr.postalCode ?? '',
-        country: billingAddr.countryCode ? {
-          id: billingAddr.countryCode,
-          code: billingAddr.countryCode,
-          name: billingAddr.countryCode,
-        } : null,
+        country: billingAddr.countryCode ?? '',
         phoneNumber: billingAddr.phone ?? '',
       } : undefined,
       shippingLines: [{
@@ -1314,12 +1318,12 @@ export class ShopApiService {
           name: order.shippingMethod ?? 'Standard Shipping',
           description: '',
         },
-        priceWithTax: order.shippingTotal ?? 0,
+        priceWithTax: Number(order.shippingTotal ?? 0),
       }],
       payments: (order.payments ?? []).map((p: any) => ({
         id: p.id,
         method: p.method,
-        amount: p.amount,
+        amount: Number(p.amount ?? 0),
         state: p.state ?? 'settled',
         transactionId: p.transactionId ?? '',
         createdAt: p.createdAt?.toISOString() ?? '',

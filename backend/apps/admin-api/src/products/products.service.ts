@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, FindOptionsWhere, In } from 'typeorm';
+import { Repository, FindOptionsWhere, In, Raw } from 'typeorm';
 import {
   ProductEntity,
   ProductVariantEntity,
@@ -66,7 +66,11 @@ export class ProductsService {
     if (brandId) where.brandId = brandId;
 
     if (search) {
-      where.name = ILike(`%${search}%`);
+      // Product names are localized JSONB values. PostgreSQL cannot apply
+      // ILIKE directly to jsonb, so query the Vietnamese value as text.
+      where.name = Raw((column) => `(${column} ->> 'vi') ILIKE :search`, {
+        search: `%${search}%`,
+      });
     }
 
     const order = this.parseSort(sort);
@@ -76,7 +80,7 @@ export class ProductsService {
       order,
       skip: (page - 1) * limit,
       take: limit,
-      relations: ['category', 'brand'],
+      relations: ['category', 'brand', 'images'],
       withDeleted: includeDeleted ?? false,
     });
 
@@ -230,9 +234,7 @@ export class ProductsService {
 
     const saved = await this.variantRepo.save(variant);
 
-    await this.inventoryRepo.save(
-      this.inventoryRepo.create({ variantId: saved.id }),
-    );
+    await this.inventoryRepo.save(this.inventoryRepo.create({ variantId: saved.id }));
 
     if (dto.optionIds?.length) {
       const options = await this.optionRepo.findBy({
@@ -253,11 +255,7 @@ export class ProductsService {
     });
   }
 
-  async updateVariant(
-    productId: string,
-    variantId: string,
-    dto: UpdateVariantDto,
-  ) {
+  async updateVariant(productId: string, variantId: string, dto: UpdateVariantDto) {
     const variant = await this.variantRepo.findOne({
       where: { id: variantId, productId },
     });
@@ -279,8 +277,7 @@ export class ProductsService {
     if (dto.sku !== undefined) variant.sku = dto.sku;
     if (dto.barcode !== undefined) variant.barcode = dto.barcode;
     if (dto.price !== undefined) variant.price = dto.price;
-    if (dto.comparePrice !== undefined)
-      variant.comparePrice = dto.comparePrice;
+    if (dto.comparePrice !== undefined) variant.comparePrice = dto.comparePrice;
     if (dto.taxRate !== undefined) variant.taxRate = dto.taxRate;
     if (dto.weight !== undefined) variant.weight = dto.weight;
     if (dto.isActive !== undefined) variant.isActive = dto.isActive;
@@ -303,11 +300,7 @@ export class ProductsService {
     return { message: 'Variant deleted successfully' };
   }
 
-  async assignVariantOptions(
-    productId: string,
-    variantId: string,
-    dto: AssignOptionsDto,
-  ) {
+  async assignVariantOptions(productId: string, variantId: string, dto: AssignOptionsDto) {
     const variant = await this.variantRepo.findOne({
       where: { id: variantId, productId },
     });
@@ -367,11 +360,7 @@ export class ProductsService {
     return inventory;
   }
 
-  async updateVariantInventory(
-    productId: string,
-    variantId: string,
-    dto: UpdateInventoryDto,
-  ) {
+  async updateVariantInventory(productId: string, variantId: string, dto: UpdateInventoryDto) {
     const variant = await this.variantRepo.findOne({
       where: { id: variantId, productId },
     });
@@ -389,12 +378,9 @@ export class ProductsService {
 
     if (dto.quantity !== undefined) inventory.quantity = dto.quantity;
     if (dto.reserved !== undefined) inventory.reserved = dto.reserved;
-    if (dto.lowStockLevel !== undefined)
-      inventory.lowStockLevel = dto.lowStockLevel;
-    if (dto.trackInventory !== undefined)
-      inventory.trackInventory = dto.trackInventory;
-    if (dto.allowBackorder !== undefined)
-      inventory.allowBackorder = dto.allowBackorder;
+    if (dto.lowStockLevel !== undefined) inventory.lowStockLevel = dto.lowStockLevel;
+    if (dto.trackInventory !== undefined) inventory.trackInventory = dto.trackInventory;
+    if (dto.allowBackorder !== undefined) inventory.allowBackorder = dto.allowBackorder;
 
     return this.inventoryRepo.save(inventory);
   }
@@ -446,11 +432,7 @@ export class ProductsService {
     return this.optionGroupRepo.save(group);
   }
 
-  async updateOptionGroup(
-    productId: string,
-    groupId: string,
-    dto: UpdateOptionGroupDto,
-  ) {
+  async updateOptionGroup(productId: string, groupId: string, dto: UpdateOptionGroupDto) {
     const group = await this.optionGroupRepo.findOne({
       where: { id: groupId, productId },
     });

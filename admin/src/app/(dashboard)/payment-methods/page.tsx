@@ -20,13 +20,13 @@ export default function PaymentMethodsPage() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-bold tracking-tight">Payment Methods</h1><p className="text-muted-foreground text-sm">Configure payment options</p></div>
+      <div><h1 className="text-2xl font-bold tracking-tight">Phương thức thanh toán</h1><p className="text-muted-foreground text-sm">Cấu hình lựa chọn thanh toán</p></div>
       <Card>
         <CardContent className="p-0">
           {isLoading ? <div className="p-4 space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
           : data && data.length > 0 ? (
             <Table>
-              <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Code</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Tên</TableHead><TableHead>Mã</TableHead></TableRow></TableHeader>
               <TableBody>{data.map((m) => (
                 <TableRow key={m.id}><TableCell className="font-medium">{m.name?.en || m.code}</TableCell><TableCell className="text-muted-foreground">{m.code}</TableCell></TableRow>
               ))}</TableBody>

@@ -42,12 +42,12 @@ export function AssetPicker({ open, onOpenChange, onSelect }: AssetPickerProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogHeader>
-        <DialogTitle>Select Asset</DialogTitle>
-        <DialogDescription>Choose an image from uploaded assets</DialogDescription>
+        <DialogTitle>Chọn tài nguyên</DialogTitle>
+        <DialogDescription>Chọn hình ảnh từ danh sách tài nguyên đã tải lên</DialogDescription>
       </DialogHeader>
       <div className="space-y-4">
         <SearchInput
-          placeholder="Search assets..."
+          placeholder="Tìm kiếm tài nguyên..."
           value={search}
           onChange={(v) => { setSearch(v); setPage(1) }}
         />
@@ -58,7 +58,7 @@ export function AssetPicker({ open, onOpenChange, onSelect }: AssetPickerProps) 
         ) : data?.items.length === 0 ? (
           <div className="flex flex-col items-center py-8 text-muted-foreground">
             <ImageIcon className="h-8 w-8 mb-2" />
-            <p className="text-sm">No assets found</p>
+            <p className="text-sm">Không tìm thấy tài nguyên</p>
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-2 max-h-80 overflow-y-auto p-1">

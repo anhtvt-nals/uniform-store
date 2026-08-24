@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Button} from '@/components/ui/button';
@@ -14,6 +14,8 @@ interface QuoteRequestModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     source?: string;
+    initialProductType?: string;
+    initialQuantity?: string;
 }
 
 interface FormState {
@@ -30,7 +32,7 @@ interface FormErrors {
     [key: string]: string;
 }
 
-export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModalProps) {
+export function QuoteRequestModal({open, onOpenChange, source, initialProductType, initialQuantity}: QuoteRequestModalProps) {
     const t = useTranslations('Home');
     const [form, setForm] = useState<FormState>({
         customerName: '',
@@ -44,6 +46,15 @@ export function QuoteRequestModal({open, onOpenChange, source}: QuoteRequestModa
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!open) return;
+        setForm((previous) => ({
+            ...previous,
+            productType: initialProductType ?? previous.productType,
+            quantity: initialQuantity ?? previous.quantity,
+        }));
+    }, [open, initialProductType, initialQuantity]);
 
     const validate = (): boolean => {
         const newErrors: FormErrors = {};

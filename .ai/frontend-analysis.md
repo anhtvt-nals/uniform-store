@@ -587,6 +587,7 @@ The frontend uses `next/cache` with these patterns:
 | POST | `/api/v1/checkout/transition` | Bearer | Transition order state |
 | POST | `/api/v1/checkout/payment` | Bearer | Add payment |
 | GET | `/api/v1/orders/:code` | Bearer | Get order by code |
+| GET | `/api/v1/orders/lookup?email=&code=` | No | Minimal public order detail when email and code match |
 | GET | `/api/v1/countries` | No | Available countries |
 | GET | `/api/v1/channel` | No | Active channel (currencies, langs) |
 | GET | `/api/v1/articles` | No | Article list (skip, take, search, category, tag) |

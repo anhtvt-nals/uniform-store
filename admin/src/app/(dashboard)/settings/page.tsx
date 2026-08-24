@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useT } from "@/i18n"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiClient, getToken } from "@/lib/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { toast } from "sonner"
+import { useT } from "@/i18n";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient, getToken } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type Setting = {
   id: string;
@@ -43,10 +43,10 @@ export default function SettingsPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("Setting updated");
+      toast.success("Đã cập nhật cài đặt");
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to update setting");
+      toast.error(err.message || "Không thể cập nhật cài đặt");
     },
   });
 
@@ -85,16 +85,20 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground text-sm">System configuration</p>
+        <h1 className="text-2xl font-bold tracking-tight">Cài đặt</h1>
+        <p className="text-muted-foreground text-sm">Cấu hình hệ thống</p>
       </div>
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
-              <CardHeader><Skeleton className="h-5 w-32" /></CardHeader>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+              </CardHeader>
               <CardContent className="space-y-3">
-                {Array.from({ length: 3 }).map((_, j) => <Skeleton key={j} className="h-10 w-full" />)}
+                {Array.from({ length: 3 }).map((_, j) => (
+                  <Skeleton key={j} className="h-10 w-full" />
+                ))}
               </CardContent>
             </Card>
           ))}
@@ -112,15 +116,22 @@ export default function SettingsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{setting.key}</p>
                       {setting.description && (
-                        <p className="text-xs text-muted-foreground">{setting.description}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {setting.description}
+                        </p>
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0 max-w-[400px]">
                       {isEditing(setting.key) ? (
                         <Input
-                          defaultValue={editValues[setting.key] ?? displayValue(setting)}
+                          defaultValue={
+                            editValues[setting.key] ?? displayValue(setting)
+                          }
                           onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, [setting.key]: e.target.value }))
+                            setEditValues((prev) => ({
+                              ...prev,
+                              [setting.key]: e.target.value,
+                            }))
                           }
                           className="h-9 text-sm"
                           autoFocus
@@ -159,7 +170,10 @@ export default function SettingsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            setEditValues((prev) => ({ ...prev, [setting.key]: displayValue(setting) }))
+                            setEditValues((prev) => ({
+                              ...prev,
+                              [setting.key]: displayValue(setting),
+                            }))
                           }
                         >
                           {t("edit")}
@@ -173,7 +187,9 @@ export default function SettingsPage() {
           </Card>
         ))
       ) : (
-        <p className="text-sm text-muted-foreground text-center py-8">No settings configured.</p>
+        <p className="text-sm text-muted-foreground text-center py-8">
+          No settings configured.
+        </p>
       )}
     </div>
   );

@@ -14,20 +14,20 @@ export async function WhyChooseUsSection() {
     ];
 
     return (
-        <div className="md:col-span-12 py-12">
-            <div className="text-center mb-10">
+        <div className="md:col-span-12 py-8 md:py-12">
+            <div className="text-center mb-6 md:mb-10">
                 <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-4">{t('whyShopWithUs')}</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">{t('whyShopWithUsDesc')}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
                 {features.map((item, idx) => (
-                    <div key={idx} className="bg-background rounded-[24px] p-8 border border-border shadow-sm hover:shadow-md transition-shadow text-center flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-6">
+                    <div key={idx} className="bg-background rounded-[20px] sm:rounded-[24px] p-4 sm:p-8 border border-border shadow-sm hover:shadow-md transition-shadow text-center flex flex-col items-center">
+                        <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-primary/5 flex items-center justify-center mb-3 sm:mb-6 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-8 sm:[&>svg]:h-8">
                             {item.icon}
                         </div>
-                        <h3 className="font-bold text-foreground mb-3">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                        <h3 className="text-sm sm:text-base font-bold text-foreground mb-2 sm:mb-3">{item.title}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                     </div>
                 ))}
             </div>

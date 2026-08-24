@@ -13,6 +13,8 @@ import {
   OrderDiscountEntity,
   OrderStatusHistoryEntity,
   InventoryEntity,
+  ProductVariantEntity,
+  UserEntity,
 } from '@app/database';
 
 @Module({
@@ -28,6 +30,8 @@ import {
       OrderDiscountEntity,
       OrderStatusHistoryEntity,
       InventoryEntity,
+      ProductVariantEntity,
+      UserEntity,
     ]),
   ],
   controllers: [OrdersController],

@@ -44,9 +44,9 @@ export function HeroSlider({
     if (count === 0) return null;
 
     return (
-        <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[700px] md:min-h-[520px] rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-end p-4 md:p-6 lg:p-10">
+        <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[500px] md:min-h-[520px] rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-start md:justify-end px-4 pb-4 pt-8 md:p-6 lg:p-10">
             {/* Slide images (crossfade) */}
-            <div className="absolute right-[-40px] md:right-[-40px] top-10 md:top-auto md:bottom-10 w-64 md:w-80 h-[400px] md:h-[500px] rounded-2xl transform rotate-6 border-8 border-background shadow-2xl overflow-hidden z-0">
+            <div className="absolute right-[-20px] bottom-[-24px] md:right-[-40px] md:bottom-10 w-48 md:w-80 h-64 md:h-[500px] rounded-2xl transform rotate-6 border-8 border-background shadow-2xl overflow-hidden z-0">
                 {slides.map((s, i) => (
                     <img
                         key={i}
@@ -58,7 +58,7 @@ export function HeroSlider({
                 ))}
             </div>
 
-            <div className="relative z-20 w-full max-w-2xl flex flex-col justify-end h-full">
+            <div className="relative z-20 w-full max-w-2xl flex flex-col justify-start md:justify-end h-full">
                 {/* Slide content (crossfade) */}
                 {slides.map((s, i) => (
                     <div
@@ -78,7 +78,7 @@ export function HeroSlider({
                             </div>
                         )}
 
-                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[1] mb-6 whitespace-pre-line">
+                        <h1 className="py-1 text-4xl md:text-5xl lg:text-7xl font-black italic tracking-[-0.06em] leading-[1.12] mb-6 whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm">
                             {s.title.replace(/\\n/g, '\n')}
                             {s.titleHighlight && <><span>{"\n"}</span><span className="text-primary">{s.titleHighlight}</span></>}
                         </h1>
@@ -86,32 +86,32 @@ export function HeroSlider({
                             {s.desc}
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-4 mb-8 text-xs font-bold text-foreground">
-                            <div className="flex items-center gap-1.5 bg-background/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
-                                <CheckCircle2 className="w-4 h-4 text-primary" /> {badgeCustomers}
+                        <div className="grid grid-cols-2 gap-2 mb-5 text-[10px] font-bold text-foreground sm:flex sm:flex-wrap sm:items-center sm:gap-4 sm:mb-8 sm:text-xs">
+                            <div className="flex items-center gap-1 bg-background/50 backdrop-blur-sm px-2 py-1 rounded-full border border-border sm:gap-1.5 sm:px-3 sm:py-1.5">
+                                <CheckCircle2 className="w-3 h-3 text-primary sm:w-4 sm:h-4" /> {badgeCustomers}
                             </div>
-                            <div className="flex items-center gap-1.5 bg-background/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
-                                <CheckCircle2 className="w-4 h-4 text-primary" /> {badgeProducts}
+                            <div className="flex items-center gap-1 bg-background/50 backdrop-blur-sm px-2 py-1 rounded-full border border-border sm:gap-1.5 sm:px-3 sm:py-1.5">
+                                <CheckCircle2 className="w-3 h-3 text-primary sm:w-4 sm:h-4" /> {badgeProducts}
                             </div>
-                            <div className="flex items-center gap-1.5 bg-background/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
-                                <CheckCircle2 className="w-4 h-4 text-primary" /> {badgeExperience}
+                            <div className="flex items-center gap-1 bg-background/50 backdrop-blur-sm px-2 py-1 rounded-full border border-border sm:col-span-2 sm:gap-1.5 sm:px-3 sm:py-1.5">
+                                <CheckCircle2 className="w-3 h-3 text-primary sm:w-4 sm:h-4" /> {badgeExperience}
                             </div>
                         </div>
                     </div>
                 ))}
 
-                <div className="flex flex-wrap items-center gap-4 mb-8 pointer-events-auto">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-5 sm:mb-8 pointer-events-auto">
                     <Link
                         href="/search"
-                        className="bg-primary text-primary-foreground rounded-full px-10 py-5 text-sm font-black uppercase tracking-widest hover:bg-foreground transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 group"
+                        className="bg-primary text-primary-foreground rounded-full px-5 py-3 text-[11px] font-black uppercase tracking-wider hover:bg-foreground transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-1.5 group sm:px-10 sm:py-5 sm:text-sm sm:tracking-widest sm:gap-2"
                     >
-                        {ctaShopNow} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        {ctaShopNow} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform sm:w-5 sm:h-5" />
                     </Link>
                     <Link
                         href="/search"
-                        className="bg-background text-foreground border-2 border-foreground rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-muted transition shadow-sm flex items-center gap-2"
+                        className="bg-background text-foreground border-2 border-foreground rounded-full px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider hover:bg-muted transition shadow-sm flex items-center gap-1.5 sm:px-8 sm:py-4 sm:text-sm sm:tracking-widest sm:gap-2"
                     >
-                        <FileText className="w-4 h-4" /> {ctaViewCollections}
+                        <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {ctaViewCollections}
                     </Link>
 
                     {count > 1 && (
@@ -119,16 +119,16 @@ export function HeroSlider({
                             <button
                                 onClick={prev}
                                 aria-label="Previous slide"
-                                className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition shadow-sm text-foreground z-30 relative"
+                                className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition shadow-sm text-foreground z-30 relative"
                             >
-                                <ChevronLeft className="w-6 h-6" />
+                                <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                             </button>
                             <button
                                 onClick={next}
                                 aria-label="Next slide"
-                                className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition shadow-sm text-foreground z-30 relative"
+                                className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition shadow-sm text-foreground z-30 relative"
                             >
-                                <ChevronRight className="w-6 h-6" />
+                                <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                             </button>
                         </div>
                     )}

@@ -16,8 +16,11 @@ import {
   OrderDiscountEntity,
   OrderStatusHistoryEntity,
   InventoryEntity,
+  ProductVariantEntity,
+  UserEntity,
 } from '@app/database';
 import { PlaceOrderDto } from './dto/place-order.dto';
+import { CreateCartOrderDto } from './dto/create-cart-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
 
 @Injectable()
@@ -45,6 +48,10 @@ export class OrdersService {
     private readonly orderStatusHistoryRepo: Repository<OrderStatusHistoryEntity>,
     @InjectRepository(InventoryEntity)
     private readonly inventoryRepo: Repository<InventoryEntity>,
+    @InjectRepository(ProductVariantEntity)
+    private readonly productVariantRepo: Repository<ProductVariantEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
   ) {}
 
   async create(
@@ -77,6 +84,12 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
+      const customerId = userId ?? await this.syncCustomer(
+        dto.email,
+        dto.shippingAddress.fullName,
+        dto.shippingAddress.phone ?? '',
+        queryRunner.manager.getRepository(UserEntity),
+      );
       const subtotal = items.reduce(
         (sum, i) => sum + i.unitPrice * i.quantity,
         0,
@@ -90,7 +103,8 @@ export class OrdersService {
       const grandTotal = subtotal - discountTotal + shippingTotal + taxTotal;
 
       const order = queryRunner.manager.create(OrderEntity, {
-        userId: userId,
+        code: this.createOrderCode(),
+        userId: customerId,
         email: dto.email,
         status: 'pending',
         currencyCode: 'VND',
@@ -179,10 +193,16 @@ export class OrdersService {
       });
       await queryRunner.manager.save(history);
 
+      // Keep the completed cart empty even if an older cached response or a
+      // duplicated active-cart record is read after checkout.
+      await queryRunner.manager.delete(CartItemEntity, { cartId: cart.id });
+      await queryRunner.manager.delete(CartCouponEntity, { cartId: cart.id });
       await queryRunner.manager.update(
         CartEntity,
         cart.id,
-        { status: 'ordered' },
+        // The database constraint uses the lifecycle values active, converted
+        // and abandoned. A successfully created order converts this cart.
+        { status: 'converted' },
       );
 
       await queryRunner.commitTransaction();
@@ -194,6 +214,40 @@ export class OrdersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async createFromCartRequest(
+    dto: CreateCartOrderDto,
+    userId?: string,
+    sessionId?: string,
+  ) {
+    const address = dto.address?.trim() || 'Chưa cung cấp';
+    const region = dto.region?.trim() || 'Chưa xác định';
+
+    return this.create(
+      {
+        email: dto.email?.trim() || '',
+        shippingAddress: {
+          fullName: dto.customerName.trim(),
+          streetLine1: address,
+          city: region,
+          countryCode: 'VN',
+          phone: dto.phone.trim(),
+        },
+        billingAddress: {
+          fullName: dto.customerName.trim(),
+          streetLine1: address,
+          city: region,
+          countryCode: 'VN',
+          phone: dto.phone.trim(),
+        },
+        shippingMethod: 'sales_follow_up',
+        paymentMethod: 'quote',
+        notes: dto.productType?.trim() || '',
+      },
+      userId,
+      sessionId,
+    );
   }
 
   async findMyOrders(userId: string, query: OrderQueryDto) {
@@ -221,6 +275,47 @@ export class OrdersService {
     };
   }
 
+  private async syncCustomer(
+    email: string,
+    fullName: string,
+    phone: string,
+    repo: Repository<UserEntity> = this.userRepo,
+  ): Promise<string | undefined> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.replace(/[\s.()-]/g, '');
+    if (!normalizedEmail && !normalizedPhone) return undefined;
+
+    const existing = await repo
+      .createQueryBuilder('user')
+      .where(normalizedEmail ? 'LOWER(user.email) = :email' : '1 = 0', { email: normalizedEmail })
+      .orWhere(normalizedPhone ? 'user.phone = :phone' : '1 = 0', { phone: normalizedPhone })
+      .getOne();
+    const [firstName = '', ...lastNameParts] = fullName.trim().split(/\s+/);
+    if (existing) {
+      existing.firstName = firstName || existing.firstName;
+      existing.lastName = lastNameParts.join(' ') || existing.lastName;
+      existing.phone = normalizedPhone || existing.phone;
+      await repo.save(existing);
+      return existing.id;
+    }
+    if (!normalizedEmail) return undefined;
+    const customer = repo.create({
+      id: crypto.randomUUID(),
+      email: normalizedEmail,
+      firstName,
+      lastName: lastNameParts.join(' '),
+      phone: normalizedPhone,
+      isActive: true,
+    });
+    return (await repo.save(customer)).id;
+  }
+
+  private createOrderCode(): string {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+    return `MA-${date}-${suffix}`;
+  }
+
   async findOrderByCode(code: string, userId?: string) {
     const where: any = { code };
     if (userId) {
@@ -243,6 +338,67 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  async findOrderByCodeAndEmail(code: string, email: string) {
+    const order = await this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('order.addresses', 'addresses')
+      .where('UPPER(order.code) = UPPER(:code)', { code: code.trim() })
+      .andWhere('LOWER(order.email) = LOWER(:email)', { email: email.trim() })
+      .getOne();
+
+    if (!order) {
+      throw new NotFoundException('Không tìm thấy đơn hàng phù hợp');
+    }
+
+    const shippingAddress = order.addresses?.find(
+      (address) => address.type === 'shipping',
+    );
+    const variantIds = order.items?.map((item) => item.variantId) ?? [];
+    const variants = variantIds.length
+      ? await this.productVariantRepo.find({
+          where: variantIds.map((id) => ({ id })),
+          relations: ['product', 'product.images'],
+        })
+      : [];
+    const thumbnailByVariantId = new Map(
+      variants.map((variant) => {
+        const images = variant.product?.images ?? [];
+        const thumbnail =
+          images.find((image) => image.variantId === variant.id)?.url ??
+          images[0]?.url ??
+          null;
+        return [variant.id, thumbnail];
+      }),
+    );
+
+    return {
+      code: order.code,
+      status: order.status,
+      createdAt: order.createdAt,
+      currencyCode: order.currencyCode,
+      total: Number(order.grandTotal ?? 0),
+      customerName: shippingAddress?.fullName ?? '',
+      shippingAddress: shippingAddress
+        ? {
+            streetLine1: shippingAddress.streetLine1,
+            streetLine2: shippingAddress.streetLine2,
+            city: shippingAddress.city,
+            province: shippingAddress.province,
+            postalCode: shippingAddress.postalCode,
+          }
+        : null,
+      items: (order.items ?? []).map((item) => ({
+        id: item.id,
+        productName: item.productName?.vi ?? item.productName?.en ?? '',
+        variantName: item.variantName?.vi ?? item.variantName?.en ?? '',
+        quantity: item.quantity,
+        linePrice: Number(item.linePrice ?? 0),
+        thumbnailUrl: thumbnailByVariantId.get(item.variantId) ?? null,
+      })),
+    };
   }
 
   private async findOrderById(id: string) {

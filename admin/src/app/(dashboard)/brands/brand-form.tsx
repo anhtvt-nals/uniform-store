@@ -1,15 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
-import Link from "next/link"
-
-const locales = ["en", "vi", "de"] as const;
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 type BrandFormProps = {
   defaultValues?: Record<string, unknown>;
@@ -17,139 +15,139 @@ type BrandFormProps = {
   isSubmitting: boolean;
 };
 
-export function BrandForm({ defaultValues, onSubmit, isSubmitting }: BrandFormProps) {
-  const [nameEn, setNameEn] = useState("");
-  const [nameVi, setNameVi] = useState("");
-  const [nameDe, setNameDe] = useState("");
+export function BrandForm({
+  defaultValues,
+  onSubmit,
+  isSubmitting,
+}: BrandFormProps) {
+  const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [descEn, setDescEn] = useState("");
-  const [descVi, setDescVi] = useState("");
-  const [descDe, setDescDe] = useState("");
+  const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [sortOrder, setSortOrder] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   useEffect(() => {
-    if (defaultValues) {
-      const name = defaultValues.name as Record<string, string> | undefined;
-      setNameEn(name?.en || "");
-      setNameVi(name?.vi || "");
-      setNameDe(name?.de || "");
-      setSlug((defaultValues.slug as string) || "");
-      const desc = defaultValues.description as Record<string, string> | undefined;
-      setDescEn(desc?.en || "");
-      setDescVi(desc?.vi || "");
-      setDescDe(desc?.de || "");
-      setLogoUrl((defaultValues.logoUrl as string) || "");
-      setWebsiteUrl((defaultValues.websiteUrl as string) || "");
-      setIsActive(defaultValues.isActive !== undefined ? Boolean(defaultValues.isActive) : true);
-      setSortOrder((defaultValues.sortOrder as number) ?? 0);
-    }
+    const value = defaultValues ?? {};
+    const names = value.name as Record<string, string> | undefined;
+    const descriptions = value.description as
+      | Record<string, string>
+      | undefined;
+    setName(names?.vi ?? "");
+    setSlug((value.slug as string) ?? "");
+    setDescription(descriptions?.vi ?? "");
+    setLogoUrl((value.logoUrl as string) ?? "");
+    setWebsiteUrl((value.websiteUrl as string) ?? "");
+    setIsActive(value.isActive === undefined ? true : Boolean(value.isActive));
+    setSortOrder((value.sortOrder as number) ?? 0);
   }, [defaultValues]);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const newErrors: Record<string, string> = {};
-
-    if (!nameEn.trim()) newErrors.nameEn = "English name is required";
-    if (!nameVi.trim()) newErrors.nameVi = "Vietnamese name is required";
-    if (!nameDe.trim()) newErrors.nameDe = "German name is required";
-    if (!slug.trim()) newErrors.slug = "Slug is required";
-    else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = "Slug must be lowercase alphanumeric with hyphens";
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    const data: Record<string, unknown> = {
-      name: { en: nameEn, vi: nameVi, de: nameDe },
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const next: Record<string, string> = {};
+    if (!name.trim()) next.name = "Vui lòng nhập tên thương hiệu";
+    if (!slug.trim()) next.slug = "Vui lòng nhập đường dẫn";
+    else if (!/^[a-z0-9-]+$/.test(slug))
+      next.slug = "Đường dẫn chỉ gồm chữ thường, số và dấu gạch ngang";
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    onSubmit({
+      name: { vi: name.trim() },
       slug,
+      description: { vi: description.trim() },
+      logoUrl,
+      websiteUrl,
       isActive,
       sortOrder,
-    };
-    if (descEn || descVi || descDe) data.description = { en: descEn, vi: descVi, de: descDe };
-    if (logoUrl) data.logoUrl = logoUrl;
-    if (websiteUrl) data.websiteUrl = websiteUrl;
-
-    onSubmit(data);
+    });
   }
-
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form onSubmit={submit} className="max-w-2xl space-y-6">
       <Card>
-        <CardContent className="pt-6 space-y-4">
-          <h3 className="text-sm font-medium">Name (required)</h3>
-          {locales.map((locale) => {
-            const key = `name${locale.charAt(0).toUpperCase() + locale.slice(1)}` as "nameEn" | "nameVi" | "nameDe";
-            const val = key === "nameEn" ? nameEn : key === "nameVi" ? nameVi : nameDe;
-            const setter = key === "nameEn" ? setNameEn : key === "nameVi" ? setNameVi : setNameDe;
-            return (
-              <div key={locale} className="space-y-1">
-                <Label htmlFor={`name-${locale}`} className="text-xs uppercase text-muted-foreground">{locale}</Label>
-                <Input id={`name-${locale}`} value={val} onChange={(e) => setter(e.target.value)} placeholder={`Brand name (${locale})`} />
-                {errors[key] && <p className="text-xs text-destructive">{errors[key]}</p>}
-              </div>
-            );
-          })}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="space-y-1">
-            <Label htmlFor="slug">Slug</Label>
-            <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="brand-slug" />
-            {errors.slug && <p className="text-xs text-destructive">{errors.slug}</p>}
+            <Label htmlFor="brand-name">Tên thương hiệu</Label>
+            <Input
+              id="brand-name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Tên thương hiệu"
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="slug">Đường dẫn (slug)</Label>
+            <Input
+              id="slug"
+              value={slug}
+              onChange={(event) => setSlug(event.target.value)}
+              placeholder="ten-thuong-hieu"
+            />
+            {errors.slug && (
+              <p className="text-xs text-destructive">{errors.slug}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="description">Mô tả</Label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Mô tả thương hiệu"
+              className="flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+            />
           </div>
         </CardContent>
       </Card>
-
       <Card>
-        <CardContent className="pt-6 space-y-4">
-          <h3 className="text-sm font-medium">Description (optional)</h3>
-          {locales.map((locale) => {
-            const key = `desc${locale.charAt(0).toUpperCase() + locale.slice(1)}` as "descEn" | "descVi" | "descDe";
-            const val = key === "descEn" ? descEn : key === "descVi" ? descVi : descDe;
-            const setter = key === "descEn" ? setDescEn : key === "descVi" ? setDescVi : setDescDe;
-            return (
-              <div key={locale} className="space-y-1">
-                <Label htmlFor={`desc-${locale}`} className="text-xs uppercase text-muted-foreground">{locale}</Label>
-                <textarea id={`desc-${locale}`} value={val} onChange={(e) => setter(e.target.value)} placeholder={`Description (${locale})`} className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
-              </div>
-            );
-          })}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="space-y-1">
-            <Label htmlFor="logoUrl">Logo URL</Label>
-            <Input id="logoUrl" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." />
+            <Label htmlFor="logoUrl">URL logo</Label>
+            <Input
+              id="logoUrl"
+              value={logoUrl}
+              onChange={(event) => setLogoUrl(event.target.value)}
+              placeholder="https://..."
+            />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="websiteUrl">Website URL</Label>
-            <Input id="websiteUrl" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://..." />
+            <Label htmlFor="websiteUrl">Website</Label>
+            <Input
+              id="websiteUrl"
+              value={websiteUrl}
+              onChange={(event) => setWebsiteUrl(event.target.value)}
+              placeholder="https://..."
+            />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="sortOrder">Sort Order</Label>
-            <Input id="sortOrder" type="number" min={0} value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
+            <Label htmlFor="sortOrder">Thứ tự hiển thị</Label>
+            <Input
+              id="sortOrder"
+              type="number"
+              min={0}
+              value={sortOrder}
+              onChange={(event) => setSortOrder(Number(event.target.value))}
+            />
           </div>
           <div className="flex items-center gap-2">
-            <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-            <Label htmlFor="isActive">Active</Label>
+            <Switch
+              id="isActive"
+              checked={isActive}
+              onCheckedChange={setIsActive}
+            />
+            <Label htmlFor="isActive">Đang hoạt động</Label>
           </div>
         </CardContent>
       </Card>
-
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {defaultValues ? "Update Brand" : "Create Brand"}
+          {defaultValues ? "Lưu thay đổi" : "Tạo thương hiệu"}
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/brands">Cancel</Link>
+          <Link href="/brands">Hủy</Link>
         </Button>
       </div>
     </form>

@@ -6,9 +6,11 @@ import {QuoteRequestModal} from './quote-request-modal';
 
 interface QuoteButtonProps {
     variant?: 'navbar' | 'hero' | 'floating' | 'mobile-sticky' | 'inline';
+    prefill?: { productType: string; quantity: string };
+    compact?: boolean;
 }
 
-export function QuoteButton({variant = 'inline'}: QuoteButtonProps) {
+export function QuoteButton({variant = 'inline', prefill, compact = false}: QuoteButtonProps) {
     const [open, setOpen] = useState(false);
     const t = useTranslations('Home');
 
@@ -48,11 +50,11 @@ export function QuoteButton({variant = 'inline'}: QuoteButtonProps) {
             <>
                 <button
                     onClick={() => setOpen(true)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-foreground px-8 py-4 text-sm font-bold uppercase tracking-widest text-primary shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-foreground/90 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-foreground/50"
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-foreground px-6 font-bold uppercase tracking-widest text-primary shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-foreground/90 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-foreground/50 ${compact ? 'py-2.5 text-[11px]' : 'px-8 py-4 text-sm'}`}
                 >
                     {t('quoteBtn')}
                 </button>
-                <QuoteRequestModal open={open} onOpenChange={setOpen} source="hero" />
+                <QuoteRequestModal open={open} onOpenChange={setOpen} source="hero" initialProductType={prefill?.productType} initialQuantity={prefill?.quantity} />
             </>
         );
     }

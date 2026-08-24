@@ -27,7 +27,7 @@ export default function NewProductPage() {
         }
       }
 
-      toast.success("Product created successfully");
+      toast.success("Đã tạo sản phẩm");
       router.push(`/products/${newId}`);
     },
     onError: (err: Error) => toast.error(err.message),
@@ -45,8 +45,8 @@ export default function NewProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">New Product</h1>
-        <p className="text-muted-foreground text-sm">Create a new product</p>
+        <h1 className="text-2xl font-bold tracking-tight">Tạo sản phẩm</h1>
+        <p className="text-muted-foreground text-sm">Thêm sản phẩm mới vào danh mục</p>
       </div>
       <ProductForm
         onSubmit={(data) => mutation.mutate(data)}

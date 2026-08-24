@@ -52,13 +52,13 @@ export function ImageUploader({
     },
     onSuccess: (res, file) => {
       setPreviews((p) => p.filter((u) => u !== URL.createObjectURL(file)))
-      toast.success(`Uploaded ${file.name}`)
+      toast.success(`Đã tải lên ${file.name}`)
       onUploadComplete?.(res.data)
       if (queryKey) queryClient.invalidateQueries({ queryKey })
     },
     onError: (err: Error, file) => {
       setPreviews((p) => p.filter((u) => u !== URL.createObjectURL(file)))
-      toast.error(`Failed to upload ${file.name}: ${err.message}`)
+      toast.error(`Không thể tải lên ${file.name}: ${err.message}`)
     },
   })
 
@@ -68,7 +68,7 @@ export function ImageUploader({
         f.type.startsWith("image/"),
       )
       if (imageFiles.length === 0) {
-        toast.error("Only image files are allowed")
+        toast.error("Chỉ hỗ trợ tệp hình ảnh")
         return
       }
       for (const file of imageFiles) {
@@ -121,11 +121,11 @@ export function ImageUploader({
         )}
         <p className="text-sm font-medium">
           {uploadMutation.isPending
-            ? "Uploading..."
-            : "Drop images here or click to browse"}
+            ? "Đang tải ảnh..."
+            : "Kéo thả ảnh vào đây hoặc bấm để chọn"}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          PNG, JPG, WebP, GIF, AVIF up to 10MB
+          PNG, JPG, WebP, GIF, AVIF tối đa 10MB
         </p>
         <input
           ref={inputRef}
@@ -145,7 +145,7 @@ export function ImageUploader({
             <div key={preview} className="group relative h-16 w-16 overflow-hidden rounded-md border">
               <img
                 src={preview}
-                alt="Preview"
+                alt="Xem trước"
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity">

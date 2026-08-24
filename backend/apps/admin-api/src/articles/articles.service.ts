@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ArticleEntity, ArticleCategoryEntity, ArticleTagEntity } from '@app/database';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -21,6 +21,7 @@ export class ArticlesService {
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: 'DESC' },
+      relations: { tags: true },
     });
 
     return {
@@ -33,7 +34,7 @@ export class ArticlesService {
   }
 
   async findOneArticle(id: string) {
-    const article = await this.articleRepo.findOne({ where: { id } });
+    const article = await this.articleRepo.findOne({ where: { id }, relations: { tags: true } });
     if (!article) {
       throw new NotFoundException(`Article not found: ${id}`);
     }
@@ -57,13 +58,14 @@ export class ArticlesService {
       imageUrl: dto.imageUrl ?? '',
       isPublished: dto.isPublished ?? false,
       publishedAt: dto.isPublished ? new Date() : undefined,
+      tags: await this.resolveTags(dto.tagNames),
     });
 
     return this.articleRepo.save(article);
   }
 
   async updateArticle(id: string, dto: UpdateArticleDto) {
-    const article = await this.articleRepo.findOne({ where: { id } });
+    const article = await this.articleRepo.findOne({ where: { id }, relations: { tags: true } });
     if (!article) {
       throw new NotFoundException(`Article not found: ${id}`);
     }
@@ -89,6 +91,7 @@ export class ArticlesService {
         article.publishedAt = new Date();
       }
     }
+    if (dto.tagNames !== undefined) article.tags = await this.resolveTags(dto.tagNames);
 
     return this.articleRepo.save(article);
   }
@@ -139,5 +142,47 @@ export class ArticlesService {
     if (!tag) throw new NotFoundException(`Tag not found: ${id}`);
     await this.tagRepo.remove(tag);
     return { message: 'Tag deleted successfully' };
+  }
+
+  private async resolveTags(tagNames?: string[]): Promise<ArticleTagEntity[]> {
+    if (!tagNames?.length) return [];
+
+    const normalizedNames = [...new Set(tagNames.map((name) => name.trim()).filter(Boolean))];
+    const existingTags = await this.tagRepo.find();
+    const tags: ArticleTagEntity[] = [];
+
+    for (const name of normalizedNames) {
+      const known = existingTags.find(
+        (tag) => tag.name.vi?.toLocaleLowerCase() === name.toLocaleLowerCase(),
+      );
+      if (known) {
+        tags.push(known);
+        continue;
+      }
+
+      const slug = this.slugify(name);
+      const sameSlug = existingTags.find((tag) => tag.slug === slug);
+      if (sameSlug) {
+        tags.push(sameSlug);
+        continue;
+      }
+
+      const tag = await this.tagRepo.save(this.tagRepo.create({ slug, name: { vi: name } }));
+      existingTags.push(tag);
+      tags.push(tag);
+    }
+
+    return tags;
+  }
+
+  private slugify(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }

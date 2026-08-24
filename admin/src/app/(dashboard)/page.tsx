@@ -75,12 +75,12 @@ export default function DashboardPage() {
   });
 
   const statCards = stats ? [
-    { title: t("dashboard.totalRevenue"), value: formatCurrency(stats.totalRevenue ?? 0), icon: DollarSign, trend: "+12.5%", trendUp: true },
-    { title: t("dashboard.totalOrders"), value: (stats.totalOrders ?? 0).toLocaleString(), icon: ShoppingCart, trend: "+8.2%", trendUp: true },
-    { title: t("dashboard.totalCustomers"), value: (stats.totalCustomers ?? 0).toLocaleString(), icon: Users, trend: "+5.1%", trendUp: true },
-    { title: t("dashboard.totalProducts"), value: (stats.totalProducts ?? 0).toLocaleString(), icon: Package, trend: "+3.4%", trendUp: true },
-    { title: t("dashboard.avgOrderValue"), value: formatCurrency(stats.averageOrderValue ?? 0), icon: DollarSign, trend: "-2.1%", trendUp: false },
-    { title: t("dashboard.pendingOrders"), value: (stats.pendingOrders ?? 0).toString(), icon: ShoppingCart, trend: "", trendUp: true },
+    { id: "revenue", title: t("dashboard.totalRevenue"), value: formatCurrency(stats.totalRevenue ?? 0), icon: DollarSign, trend: "+12.5%", trendUp: true },
+    { id: "orders", title: t("dashboard.totalOrders"), value: (stats.totalOrders ?? 0).toLocaleString(), icon: ShoppingCart, trend: "+8.2%", trendUp: true },
+    { id: "customers", title: t("dashboard.totalCustomers"), value: (stats.totalCustomers ?? 0).toLocaleString(), icon: Users, trend: "+5.1%", trendUp: true },
+    { id: "products", title: t("dashboard.totalProducts"), value: (stats.totalProducts ?? 0).toLocaleString(), icon: Package, trend: "+3.4%", trendUp: true },
+    { id: "average-order", title: t("dashboard.avgOrderValue"), value: formatCurrency(stats.averageOrderValue ?? 0), icon: DollarSign, trend: "-2.1%", trendUp: false },
+    { id: "pending-orders", title: t("dashboard.pendingOrders"), value: (stats.pendingOrders ?? 0).toString(), icon: ShoppingCart, trend: "", trendUp: true },
   ] : [];
 
   const orderStatusEntries = orderStats
@@ -112,7 +112,7 @@ export default function DashboardPage() {
           : statCards.map((card) => {
               const Icon = card.icon;
               return (
-                <Card key={card.title}>
+                <Card key={card.id} className="min-w-0 overflow-hidden">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs font-medium text-muted-foreground">
                       {card.title}
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{card.value}</div>
+                    <div className="break-words text-xl font-bold leading-tight tracking-tight xl:text-2xl">{card.value}</div>
                     {card.trend && (
                       <p className={cn("text-xs flex items-center gap-1 mt-1", card.trendUp ? "text-emerald-600" : "text-red-600")}>
                         {card.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   />
                   <YAxis className="text-xs text-muted-foreground" />
                   <Tooltip
-                    formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
+                    formatter={(value) => [formatCurrency(Number(value)), "Doanh thu"]}
                     labelFormatter={(label) => `Date: ${label}`}
                   />
                   <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />

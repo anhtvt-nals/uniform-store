@@ -32,6 +32,7 @@ export class ShopApiController {
     @Body() body: GraphQLRequest,
     @Res() res: Response,
     @Headers('authorization') auth?: string,
+    @Headers('x-session-id') sessionId?: string,
     @Headers('vendure-token') channelToken?: string,
     @Query('languageCode') languageCode?: string,
     @Query('currencyCode') currencyCode?: string,
@@ -40,7 +41,7 @@ export class ShopApiController {
     const result = await this.shopApiService.execute(
       body.query,
       body.variables || {},
-      { token, languageCode, currencyCode, channelToken },
+      { token, sessionId, languageCode, currencyCode, channelToken },
     );
 
     if (result.headers) {

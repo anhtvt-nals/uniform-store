@@ -17,7 +17,7 @@ export function FAQSection() {
     ];
 
     return (
-        <div className="md:col-span-12 py-12">
+        <div className="md:col-span-12 py-8 md:py-12">
             <div className="flex flex-col md:flex-row gap-12">
                 <div className="md:w-1/3">
                     <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-4">{t('faqTitle')}</h2>

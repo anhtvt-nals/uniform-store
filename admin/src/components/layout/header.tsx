@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
-import { LanguagePicker } from "./language-picker"
 import { useT } from "@/i18n"
 import Link from "next/link"
 
@@ -26,7 +25,6 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <div className="flex-1" />
-      <LanguagePicker />
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 rounded-md p-1 hover:bg-accent">
           <Avatar className="h-8 w-8">

@@ -17,9 +17,9 @@ export function ConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
-  title = "Are you sure?",
-  description = "This action cannot be undone.",
-  confirmText = "Delete",
+  title = "Bạn có chắc chắn?",
+  description = "Thao tác này không thể hoàn tác.",
+  confirmText = "Xóa",
   isLoading = false,
 }: ConfirmDialogProps) {
   return (
@@ -30,10 +30,10 @@ export function ConfirmDialog({
       </DialogHeader>
       <DialogFooter>
         <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-          Cancel
+          Hủy
         </Button>
         <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
-          {isLoading ? "Deleting..." : confirmText}
+          {isLoading ? "Đang xóa..." : confirmText}
         </Button>
       </DialogFooter>
     </Dialog>

@@ -39,8 +39,8 @@ export default function EditBrandPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edit Brand</h1>
-        <p className="text-muted-foreground text-sm">Update brand details</p>
+        <h1 className="text-2xl font-bold tracking-tight">Chỉnh sửa thương hiệu</h1>
+        <p className="text-muted-foreground text-sm">Cập nhật thông tin thương hiệu</p>
       </div>
       <BrandForm defaultValues={data} onSubmit={(formData) => mutation.mutate(formData)} isSubmitting={mutation.isPending} />
     </div>

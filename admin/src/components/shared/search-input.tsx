@@ -9,7 +9,7 @@ interface SearchInputProps {
   placeholder?: string;
 }
 
-export function SearchInput({ value, onChange, placeholder = "Search..." }: SearchInputProps) {
+export function SearchInput({ value, onChange, placeholder = "Tìm kiếm..." }: SearchInputProps) {
   return (
     <div className="relative">
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

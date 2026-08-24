@@ -58,7 +58,6 @@ export async function FeaturedCategoryTabs() {
                     categories={showcaseCategories}
                     locale={locale}
                     currencyCode={currencyCode}
-                    headingLabel={t('featuredProducts')}
                     noProductsLabel={t('noProductsFound')}
                 />
             </Suspense>
@@ -70,19 +69,17 @@ async function FeaturedCategoryTabsInner({
     categories,
     locale,
     currencyCode,
-    headingLabel,
     noProductsLabel,
 }: {
     categories: CollectionItem[];
     locale: string;
     currencyCode: string;
-    headingLabel: string;
     noProductsLabel: string;
 }) {
     const allProducts = await Promise.all(
         categories.map(async (cat) => {
-            const items = await getCollectionProducts(locale, currencyCode, cat.slug, 6);
-            return { slug: cat.slug, products: items.slice(0, 6) };
+            const items = await getCollectionProducts(locale, currencyCode, cat.slug, 10);
+            return { slug: cat.slug, products: items.slice(0, 10) };
         }),
     );
 
@@ -101,7 +98,6 @@ async function FeaturedCategoryTabsInner({
                 imageUrl: c.featuredAsset?.preview,
             }))}
             productsMap={productsMap}
-            headingLabel={headingLabel}
             noProductsLabel={noProductsLabel}
         />
     );

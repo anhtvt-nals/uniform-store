@@ -53,13 +53,13 @@ export default function ActivityLogsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Activity Logs</h1>
-        <p className="text-muted-foreground text-sm">Audit trail of all admin actions</p>
+        <h1 className="text-2xl font-bold tracking-tight">Nhật ký hoạt động</h1>
+        <p className="text-muted-foreground text-sm">Theo dõi các thao tác trong trang quản trị</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <SelectNative options={[{ value: "", label: "All Actions" }, ...((actionsData as string[] | undefined)?.map(a => ({ value: a, label: a })) || [])]} value={action} onChange={(e) => { setAction(e.target.value); setPage(1); }} />
-        <SelectNative options={[{ value: "", label: "All Entity Types" }, ...((entityTypes as string[] | undefined)?.map(t => ({ value: t, label: t })) || [])]} value={entityType} onChange={(e) => { setEntityType(e.target.value); setPage(1); }} />
+        <SelectNative options={[{ value: "", label: "Tất cả thao tác" }, ...((actionsData as string[] | undefined)?.map(a => ({ value: a, label: a })) || [])]} value={action} onChange={(e) => { setAction(e.target.value); setPage(1); }} />
+        <SelectNative options={[{ value: "", label: "Tất cả loại dữ liệu" }, ...((entityTypes as string[] | undefined)?.map(t => ({ value: t, label: t })) || [])]} value={entityType} onChange={(e) => { setEntityType(e.target.value); setPage(1); }} />
       </div>
 
       <Card>
@@ -70,10 +70,10 @@ export default function ActivityLogsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>User ID</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Thao tác</TableHead>
+                  <TableHead>Dữ liệu</TableHead>
+                  <TableHead>Mã người dùng</TableHead>
+                  <TableHead>Thời gian</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -88,7 +88,7 @@ export default function ActivityLogsPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">No activity logs yet.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">Chưa có nhật ký hoạt động.</p>
           )}
         </CardContent>
       </Card>

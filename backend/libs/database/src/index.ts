@@ -38,3 +38,4 @@ export * from './entities/article-tag.entity';
 export * from './entities/inquiry.entity';
 export * from './entities/quote-request.entity';
 export * from './entities/customer-contract.entity';
+export * from './entities/testimonial.entity';

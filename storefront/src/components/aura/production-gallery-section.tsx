@@ -21,7 +21,7 @@ export async function ProductionGallerySection() {
     const t = await getTranslations({locale, namespace: 'Home'});
 
     return (
-        <div className="md:col-span-12 py-12 border-t border-border mt-8">
+        <div className="md:col-span-12 py-8 md:py-12 border-t border-border mt-4 md:mt-8">
             <div className="text-center mb-8">
                 <h2 className="font-category-title text-3xl tracking-tighter text-foreground mb-4">{t('galleryTitle')}</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">{t('galleryDesc')}</p>

@@ -1,6 +1,5 @@
 import {CartItems} from "@/app/[locale]/cart/cart-items";
-import {OrderSummary} from "@/app/[locale]/cart/order-summary";
-import {PromotionCode} from "@/app/[locale]/cart/promotion-code";
+import {CartCheckoutContent} from "@/app/[locale]/cart/cart-checkout-content";
 import {getRouteLocale} from "@/i18n/server";
 import {getActiveCurrencyCode} from "@/lib/currency-server";
 import {query} from "@/lib/vendure/api";
@@ -24,13 +23,6 @@ export async function Cart() {
     }
 
     return (
-        <div className="grid lg:grid-cols-3 gap-8">
-            <CartItems activeOrder={activeOrder}/>
-
-            <div className="lg:col-span-1">
-                <OrderSummary activeOrder={activeOrder}/>
-                <PromotionCode activeOrder={activeOrder}/>
-            </div>
-        </div>
+        <CartCheckoutContent activeOrder={activeOrder}/>
     )
 }
