@@ -22,6 +22,28 @@ type MultipartStart = {
   parts: Array<{partNumber: number; uploadUrl: string}>;
 };
 
+async function uploadPart(uploadUrl: string, body: Blob, partNumber: number): Promise<{partNumber: number; etag: string}> {
+  let response: Response;
+  try {
+    response = await fetch(uploadUrl, {method: 'PUT', body});
+  } catch {
+    throw new Error(
+      `Không thể kết nối R2 để tải phần ${partNumber}. Kiểm tra CORS của bucket: origin Admin phải được phép PUT.`,
+    );
+  }
+
+  if (!response.ok) {
+    const details = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 240);
+    throw new Error(`R2 từ chối phần ${partNumber} (HTTP ${response.status})${details ? `: ${details}` : ''}`);
+  }
+
+  const etag = response.headers.get('etag');
+  if (!etag) {
+    throw new Error(`R2 đã nhận phần ${partNumber} nhưng không trả ETag. Thêm ETag vào ExposeHeaders của CORS bucket.`);
+  }
+  return {partNumber, etag};
+}
+
 export async function uploadImage(file: File, token: string | null, metadata: UploadMetadata = {}): Promise<UploadedImage> {
   if (file.size > MAX_IMAGE_SIZE) {
     throw new Error('Ảnh tối đa 10 MB');
@@ -47,13 +69,9 @@ export async function uploadImage(file: File, token: string | null, metadata: Up
   const {key, uploadId, partSize, parts} = start.data;
 
   try {
-    const completedParts = await Promise.all(parts.map(async ({partNumber, uploadUrl}) => {
+    const completedParts = await Promise.all(parts.map(({partNumber, uploadUrl}) => {
       const offset = (partNumber - 1) * partSize;
-      const response = await fetch(uploadUrl, {method: 'PUT', body: file.slice(offset, Math.min(offset + partSize, file.size))});
-      if (!response.ok) throw new Error(`Không thể tải phần ${partNumber} của ảnh lên R2`);
-      const etag = response.headers.get('etag');
-      if (!etag) throw new Error('R2 không trả về ETag. Hãy cấu hình CORS để expose header ETag.');
-      return {partNumber, etag};
+      return uploadPart(uploadUrl, file.slice(offset, Math.min(offset + partSize, file.size)), partNumber);
     }));
 
     const complete = await apiClient<UploadedImage>('/uploads/multipart/complete', {
@@ -62,8 +80,10 @@ export async function uploadImage(file: File, token: string | null, metadata: Up
       body: {...metadata, key, uploadId, parts: completedParts, filename: file.name, contentType: file.type, size: file.size},
     });
     return complete.data;
-  } catch (error) {
+  } catch (error: unknown) {
+    // Cleanup must never replace the actual R2/complete failure shown to the user.
     await apiClient('/uploads/multipart/abort', {method: 'POST', token, body: {key, uploadId}}).catch(() => undefined);
-    throw error;
+    const message = error instanceof Error ? error.message : 'Không thể hoàn tất multipart upload.';
+    throw new Error(message);
   }
 }
