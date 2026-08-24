@@ -708,3 +708,7 @@ git push → main
 
 - Hero configurator calls `GET /api/v1/products/price-estimate?categorySlug=&quantity=` and displays min/max active variant pricing after eligible product promotions; it shows a contact prompt instead of a fabricated fallback range.
 - Guest order and quote submissions upsert customer contacts from normalized email/phone. Orders link the contact as `user_id` where an email allows creating or matching the record.
+
+### Expanded R2 Demo Catalog (2026-08-24)
+
+- `npm run seed:expanded-demo-catalog` adds ten products to each of the three primary uniform categories, randomizes all existing active catalog prices to 200.000–500.000 VND, and uploads two Unsplash gallery images to Cloudflare R2 before each product is saved and linked.

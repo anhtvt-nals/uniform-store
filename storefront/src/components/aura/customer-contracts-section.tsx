@@ -1,6 +1,7 @@
 import {getTranslations} from 'next-intl/server';
+import {CustomerContractsClient} from './customer-contracts-client';
 
-interface CustomerContract {
+interface CustomerContractResponse {
     id: string;
     name: string;
     logoUrl: string;
@@ -13,7 +14,7 @@ const BACKEND_API_URL = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3
     '',
 );
 
-async function getContracts(): Promise<CustomerContract[]> {
+async function getContracts(): Promise<CustomerContractResponse[]> {
     try {
         const res = await fetch(`${BACKEND_API_URL}/api/v1/customer-contracts`, {
             next: {revalidate: 60, tags: ['customer-contracts']},
@@ -40,46 +41,7 @@ export async function CustomerContractsSection({locale}: {locale: string}) {
                     <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">{t('customerContractsDesc') || 'Hàng trăm doanh nghiệp đã tin tưởng và hợp tác cùng chúng tôi'}</p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                    {contracts.map((contract) => (
-                        <div
-                            key={contract.id}
-                            className="group bg-background rounded-xl border border-border overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200"
-                        >
-                            <div className="aspect-[3/4] relative bg-muted flex items-center justify-center p-3">
-                                {contract.contractImageUrl ? (
-                                    <img
-                                        src={contract.contractImageUrl}
-                                        alt={contract.name}
-                                        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                ) : contract.logoUrl ? (
-                                    <img
-                                        src={contract.logoUrl}
-                                        alt={contract.name}
-                                        className="max-w-[80%] max-h-[80%] object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
-                                    />
-                                ) : (
-                                    <span className="text-sm font-semibold text-muted-foreground text-center">{contract.name}</span>
-                                )}
-
-                                {contract.logoUrl && contract.contractImageUrl && (
-                                    <div className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-background/90 border border-border flex items-center justify-center p-1 shadow-sm">
-                                        <img
-                                            src={contract.logoUrl}
-                                            alt=""
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-2.5 text-center">
-                                <p className="text-xs font-semibold truncate">{contract.name}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <CustomerContractsClient contracts={contracts} />
             </div>
         </section>
     );

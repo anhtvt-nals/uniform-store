@@ -339,7 +339,7 @@ export function ProductQuickView({
               {product.variants.length > 0 && (
                 <div className="mb-6 space-y-2">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Quy cách
+                    Mã sản phẩm
                   </h3>
                   <div className="space-y-2">
                     {product.variants.map((variant) => {

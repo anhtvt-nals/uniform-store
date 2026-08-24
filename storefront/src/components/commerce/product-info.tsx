@@ -225,7 +225,7 @@ export function ProductInfo({
       {product.variants.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Quy cách
+            Mã sản phẩm
           </h3>
           <div className="space-y-2">
             {product.variants.map((variant) => {
