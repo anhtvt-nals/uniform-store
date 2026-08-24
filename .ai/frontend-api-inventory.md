@@ -209,6 +209,17 @@ Server Action / Component / Route Handler
 
 ## 5. Server Actions by Page
 
+### Admin direct R2 multipart uploads
+
+| Consumer | Endpoint | Request / response contract |
+| --- | --- | --- |
+| `admin/src/lib/image-upload.ts` (used by ImageUploader and CKEditor adapters) | `POST /api/v1/admin/uploads/multipart` | For image files over 5 MB: `{ filename, contentType, size, entityType?, entityId? }` → `{ key, uploadId, partSize, parts: [{ partNumber, uploadUrl }] }` |
+| Same helper | signed R2 `PUT` URLs | Upload each `File.slice()` part in parallel; read the `ETag` response header for each part. |
+| Same helper | `POST /api/v1/admin/uploads/multipart/complete` | `{ key, uploadId, filename, contentType, size, entityType?, entityId?, variantId?, parts: [{ partNumber, etag }] }` → existing upload response `{ url, key, ... }`. |
+| Same helper | `POST /api/v1/admin/uploads/multipart/abort` | Best-effort cleanup of `{ key, uploadId }` when a part or completion fails. |
+
+Files at or below 5 MB retain the existing `POST /uploads/upload` multipart form upload. The 10 MB image limit remains unchanged.
+
 ### Cart — `src/app/[locale]/cart/actions.ts`
 | Action | Mutation | Notes |
 |--------|----------|-------|

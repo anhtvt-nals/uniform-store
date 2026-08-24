@@ -712,3 +712,7 @@ git push → main
 ### Expanded R2 Demo Catalog (2026-08-24)
 
 - `npm run seed:expanded-demo-catalog` adds ten products to each of the three primary uniform categories, randomizes all existing active catalog prices to 200.000–500.000 VND, and uploads two Unsplash gallery images to Cloudflare R2 before each product is saved and linked.
+
+### Admin R2 Multipart Uploads (2026-08-24)
+
+- Admin image uploads over 5 MB now use browser-to-R2 multipart uploads with signed part URLs and parallel parts; successful completion creates the same `assets` and optional product/category/brand association as the former API upload. Images up to 5 MB keep the API upload path, and the maximum image size remains 10 MB.

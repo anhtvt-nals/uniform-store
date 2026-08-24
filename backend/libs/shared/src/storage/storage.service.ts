@@ -5,6 +5,11 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+  CompletedPart,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -85,6 +90,67 @@ export class StorageService {
     return getSignedUrl(this.s3, command, {
       expiresIn: expiresIn || 3600,
     });
+  }
+
+  async createMultipartUpload(
+    bucket: string,
+    key: string,
+    contentType: string,
+  ): Promise<string> {
+    const result = await this.s3.send(
+      new CreateMultipartUploadCommand({
+        Bucket: bucket || this.defaultBucket,
+        Key: key,
+        ContentType: contentType,
+      }),
+    );
+    if (!result.UploadId) throw new Error('Storage did not return a multipart upload ID');
+    return result.UploadId;
+  }
+
+  async getPresignedUploadPartUrl(
+    bucket: string,
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    expiresIn = 3600,
+  ): Promise<string> {
+    return getSignedUrl(
+      this.s3,
+      new UploadPartCommand({
+        Bucket: bucket || this.defaultBucket,
+        Key: key,
+        UploadId: uploadId,
+        PartNumber: partNumber,
+      }),
+      { expiresIn },
+    );
+  }
+
+  async completeMultipartUpload(
+    bucket: string,
+    key: string,
+    uploadId: string,
+    parts: CompletedPart[],
+  ): Promise<void> {
+    await this.s3.send(
+      new CompleteMultipartUploadCommand({
+        Bucket: bucket || this.defaultBucket,
+        Key: key,
+        UploadId: uploadId,
+        MultipartUpload: { Parts: parts },
+      }),
+    );
+  }
+
+  async abortMultipartUpload(bucket: string, key: string, uploadId: string): Promise<void> {
+    await this.s3.send(
+      new AbortMultipartUploadCommand({
+        Bucket: bucket || this.defaultBucket,
+        Key: key,
+        UploadId: uploadId,
+      }),
+    );
   }
 
   buildPublicUrl(key: string): string {

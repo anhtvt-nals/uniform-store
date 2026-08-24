@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import dynamic from "next/dynamic"
 import { apiClient, getToken } from "@/lib/api"
+import { uploadImage } from '@/lib/image-upload'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,18 +43,9 @@ function MyCustomUploadAdapterPlugin(editor: any) {
     return {
       upload: async () => {
         const file = await loader.file;
-        const formData = new FormData();
-        formData.append("file", file);
         const token = getToken();
-        const baseUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL || "http://localhost:3002/api/v1/admin";
-        const res = await fetch(`${baseUrl}/uploads/upload`, {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: formData,
-        });
-        const json = await res.json();
-        if (!json.success) throw new Error(json.error?.message || "Upload failed");
-        return { default: json.data.url };
+        const image = await uploadImage(file, token);
+        return { default: image.url };
       },
     };
   };

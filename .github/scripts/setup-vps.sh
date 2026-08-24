@@ -10,6 +10,7 @@ APP_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
 DEPLOY_USER="$(id -un)"
 DEPLOY_HOME="${HOME}"
+NGINX_CLIENT_MAX_BODY_SIZE="12m"
 
 if [[ "${EUID}" -eq 0 ]]; then
     echo "Run this script as the deployment user (for example, ubuntu), not as root."
@@ -49,6 +50,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${DOMAIN};
+    client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
     location / {
         proxy_pass http://127.0.0.1:3001;
@@ -66,6 +68,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name admin.${DOMAIN};
+    client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
     location /api/ {
         proxy_pass http://127.0.0.1:3002;

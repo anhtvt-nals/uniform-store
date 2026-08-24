@@ -20,6 +20,11 @@ import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 import { DeleteFileDto } from './dto/delete-file.dto';
 import { ListAssetsDto } from './dto/list-assets.dto';
 import { UploadOptions } from './dto/upload-options.dto';
+import {
+  AbortMultipartUploadDto,
+  CompleteMultipartUploadDto,
+  StartMultipartUploadDto,
+} from './dto/multipart-upload.dto';
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -34,6 +39,9 @@ const SIZE_LIMITS: Record<string, number> = {
   category: 2 * 1024 * 1024,
   brand: 2 * 1024 * 1024,
 };
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
+const MULTIPART_THRESHOLD = 5 * 1024 * 1024;
+const MULTIPART_PART_SIZE = 5 * 1024 * 1024;
 
 @Injectable()
 export class UploadsService {
@@ -52,31 +60,8 @@ export class UploadsService {
   ) {}
 
   async getSignedUploadUrl(dto: SignedUrlDto) {
-    if (!ALLOWED_MIME_TYPES.includes(dto.contentType)) {
-      throw new BadRequestException(
-        `Content type not allowed: ${dto.contentType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`,
-      );
-    }
-
-    const ext = path.extname(dto.filename).toLowerCase();
-    const typeExts: Record<string, string[]> = {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp'],
-      'image/gif': ['.gif'],
-      'image/avif': ['.avif'],
-    };
-    if (!typeExts[dto.contentType]?.includes(ext)) {
-      throw new BadRequestException(
-        `Extension ${ext} does not match content type ${dto.contentType}`,
-      );
-    }
-
-    const uuid = randomUUID();
-    const sanitized = dto.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = dto.entityType
-      ? `${dto.entityType}s/${dto.entityId || 'unknown'}/${uuid}-${sanitized}`
-      : `uploads/${uuid}-${sanitized}`;
+    this.validateImage(dto.filename, dto.contentType);
+    const key = this.createKey(dto.filename, dto.entityType, dto.entityId);
 
     const maxSize = dto.entityType
       ? SIZE_LIMITS[dto.entityType] || SIZE_LIMITS.product
@@ -93,6 +78,52 @@ export class UploadsService {
     const publicUrl = this.storageService.buildPublicUrl(key);
 
     return { uploadUrl, publicUrl, key };
+  }
+
+  async startMultipartUpload(dto: StartMultipartUploadDto) {
+    this.validateImage(dto.filename, dto.contentType);
+    if (dto.size <= MULTIPART_THRESHOLD || dto.size > MAX_UPLOAD_SIZE) {
+      throw new BadRequestException('Multipart upload only supports images larger than 5 MB and up to 10 MB.');
+    }
+
+    const key = this.createKey(dto.filename, dto.entityType, dto.entityId);
+    const uploadId = await this.storageService.createMultipartUpload('', key, dto.contentType);
+    const partCount = Math.ceil(dto.size / MULTIPART_PART_SIZE);
+    const parts = await Promise.all(
+      Array.from({length: partCount}, async (_, index) => ({
+        partNumber: index + 1,
+        uploadUrl: await this.storageService.getPresignedUploadPartUrl('', key, uploadId, index + 1),
+      })),
+    );
+
+    return {key, uploadId, partSize: MULTIPART_PART_SIZE, parts};
+  }
+
+  async completeMultipartUpload(dto: CompleteMultipartUploadDto) {
+    this.validateImage(dto.filename, dto.contentType);
+    if (dto.size <= MULTIPART_THRESHOLD || dto.size > MAX_UPLOAD_SIZE) {
+      throw new BadRequestException('Invalid multipart upload size.');
+    }
+    const expectedParts = Math.ceil(dto.size / MULTIPART_PART_SIZE);
+    if (dto.parts.length !== expectedParts || dto.parts.some((part, index) => part.partNumber !== index + 1)) {
+      throw new BadRequestException('Multipart upload parts are incomplete.');
+    }
+
+    await this.storageService.completeMultipartUpload('', dto.key, dto.uploadId, dto.parts.map((part) => ({PartNumber: part.partNumber, ETag: part.etag})));
+    return this.persistUploadedAsset({
+      key: dto.key,
+      filename: dto.filename,
+      mimetype: dto.contentType,
+      size: dto.size,
+      entityType: dto.entityType,
+      entityId: dto.entityId,
+      variantId: dto.variantId,
+    });
+  }
+
+  async abortMultipartUpload(dto: AbortMultipartUploadDto) {
+    await this.storageService.abortMultipartUpload('', dto.key, dto.uploadId);
+    return {message: 'Multipart upload aborted'};
   }
 
   async confirmUpload(dto: ConfirmUploadDto) {
@@ -232,24 +263,47 @@ export class UploadsService {
   }
 
   async uploadFile(file: { buffer: Buffer; originalname: string; mimetype: string }, options: UploadOptions) {
-    const { entityType, entityId, alt, variantId } = options;
-
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uuid = randomUUID();
-    const sanitized = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = entityType
-      ? `${entityType}s/${entityId || 'unknown'}/${uuid}-${sanitized}`
-      : `uploads/${uuid}-${sanitized}`;
+    const key = this.createKey(file.originalname, options.entityType, options.entityId);
 
     await this.storageService.upload('', key, file.buffer, file.mimetype);
+    return this.persistUploadedAsset({
+      key,
+      filename: file.originalname,
+      mimetype: file.mimetype,
+      size: file.buffer.length,
+      ...options,
+    });
+  }
+
+  private validateImage(filename: string, contentType: string) {
+    if (!ALLOWED_MIME_TYPES.includes(contentType)) {
+      throw new BadRequestException(`Content type not allowed: ${contentType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`);
+    }
+    const typeExts: Record<string, string[]> = {
+      'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'], 'image/gif': ['.gif'], 'image/avif': ['.avif'],
+    };
+    if (!typeExts[contentType]?.includes(path.extname(filename).toLowerCase())) {
+      throw new BadRequestException(`Extension does not match content type ${contentType}`);
+    }
+  }
+
+  private createKey(filename: string, entityType?: string, entityId?: string) {
+    const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    return entityType ? `${entityType}s/${entityId || 'unknown'}/${randomUUID()}-${sanitized}` : `uploads/${randomUUID()}-${sanitized}`;
+  }
+
+  private async persistUploadedAsset(input: {
+    key: string; filename: string; mimetype: string; size: number; entityType?: string; entityId?: string; alt?: Record<string, string>; variantId?: string;
+  }) {
+    const {key, filename, mimetype, size, entityType, entityId, alt, variantId} = input;
     const publicUrl = this.storageService.buildPublicUrl(key);
 
     const asset = this.assetRepo.create({
       url: publicUrl,
       key,
-      filename: file.originalname,
-      mimeType: file.mimetype,
-      size: file.buffer.length,
+      filename,
+      mimeType: mimetype,
+      size,
       alt: alt ?? {},
     });
     await this.assetRepo.save(asset);

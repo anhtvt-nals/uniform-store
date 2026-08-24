@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { getToken } from "@/lib/api";
+import { uploadImage } from '@/lib/image-upload';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,21 +34,9 @@ function MyCustomUploadAdapterPlugin(editor: any) {
   editor.plugins.get("FileRepository").createUploadAdapter = (loader: any) => ({
     upload: async () => {
       const file = await loader.file;
-      const formData = new FormData();
-      formData.append("file", file);
       const token = getToken();
-      const baseUrl =
-        process.env.NEXT_PUBLIC_ADMIN_API_URL ||
-        "http://localhost:3002/api/v1/admin";
-      const res = await fetch(`${baseUrl}/uploads/upload`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      const json = await res.json();
-      if (!json.success)
-        throw new Error(json.error?.message || "Không thể tải ảnh lên");
-      return { default: json.data.url };
+      const image = await uploadImage(file, token);
+      return { default: image.url };
     },
   });
 }

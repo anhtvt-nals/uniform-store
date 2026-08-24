@@ -214,3 +214,10 @@
 **Context**: Admin needs order and quote contacts to appear in Customers even when the buyer has not registered.
 **Decision**: Order and quote submission normalizes email/phone and upserts a `users` contact record, updating name and phone if an existing email or phone is found. Orders link the resulting customer ID when available.
 **Consequences**: An email is required to create a brand-new customer because `users.email` is unique; phone-only submissions remain stored in their order/quote but cannot create a separate user record.
+
+## ADR-029: Direct R2 Multipart Uploads for Large Admin Images
+
+**Status**: Accepted
+**Context**: Sending images larger than 5 MB through the Admin API is slower and needlessly consumes VPS bandwidth. Nginx also rejects oversized proxied request bodies before the API can process them.
+**Decision**: Files above 5 MB and up to the existing 10 MB image limit use the R2 S3 multipart protocol. The Admin API validates metadata, initiates the upload and signs every part; the browser uploads parts directly to R2 in parallel, submits their ETags for completion, then the API persists the normal asset/entity association. Smaller files retain the existing API form upload.
+**Consequences**: The R2 bucket CORS policy must allow the Admin origin to `PUT` and expose the `ETag` response header. The browser never receives R2 credentials, and failed multipart uploads are explicitly aborted.

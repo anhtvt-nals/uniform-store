@@ -21,6 +21,7 @@ import { SignedUrlDto } from './dto/signed-url.dto';
 import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 import { DeleteFileDto } from './dto/delete-file.dto';
 import { ListAssetsDto } from './dto/list-assets.dto';
+import {AbortMultipartUploadDto, CompleteMultipartUploadDto, StartMultipartUploadDto} from './dto/multipart-upload.dto';
 import { AdminAuthGuard, RolesGuard, Roles } from '@app/common';
 
 @ApiTags('Admin Uploads')
@@ -35,6 +36,27 @@ export class UploadsController {
   @ApiOperation({ summary: 'Get a presigned upload URL for direct S3 upload' })
   getSignedUploadUrl(@Body() dto: SignedUrlDto) {
     return this.uploadsService.getSignedUploadUrl(dto);
+  }
+
+  @Post('multipart')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({summary: 'Start a direct R2 multipart image upload for files larger than 5 MB'})
+  startMultipartUpload(@Body() dto: StartMultipartUploadDto) {
+    return this.uploadsService.startMultipartUpload(dto);
+  }
+
+  @Post('multipart/complete')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({summary: 'Complete a direct R2 multipart image upload and save its asset record'})
+  completeMultipartUpload(@Body() dto: CompleteMultipartUploadDto) {
+    return this.uploadsService.completeMultipartUpload(dto);
+  }
+
+  @Post('multipart/abort')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({summary: 'Abort an incomplete direct R2 multipart upload'})
+  abortMultipartUpload(@Body() dto: AbortMultipartUploadDto) {
+    return this.uploadsService.abortMultipartUpload(dto);
   }
 
   @Post('confirm')

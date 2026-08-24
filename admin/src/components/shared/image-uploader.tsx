@@ -2,16 +2,11 @@
 
 import { useCallback, useState, useRef } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiClient, getToken } from "@/lib/api"
+import { getToken } from "@/lib/api"
+import { uploadImage, type UploadedImage } from "@/lib/image-upload"
 import { cn } from "@/lib/utils"
 import { Upload, X, Loader2, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
-
-type UploadedImage = {
-  id?: string
-  url: string
-  key?: string
-}
 
 type ImageUploaderProps = {
   onUploadComplete?: (image: UploadedImage) => void
@@ -38,22 +33,12 @@ export function ImageUploader({
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData()
-      formData.append("file", file)
-      if (entityType) formData.append("entityType", entityType)
-      if (entityId) formData.append("entityId", entityId)
-
-      return apiClient<UploadedImage>("/uploads/upload", {
-        method: "POST",
-        body: formData,
-        token,
-        formData: true,
-      })
+      return uploadImage(file, token, { entityType, entityId })
     },
     onSuccess: (res, file) => {
       setPreviews((p) => p.filter((u) => u !== URL.createObjectURL(file)))
       toast.success(`Đã tải lên ${file.name}`)
-      onUploadComplete?.(res.data)
+      onUploadComplete?.(res)
       if (queryKey) queryClient.invalidateQueries({ queryKey })
     },
     onError: (err: Error, file) => {
