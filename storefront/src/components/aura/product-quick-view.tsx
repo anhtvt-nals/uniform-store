@@ -39,6 +39,14 @@ interface QuickViewProduct {
   }>;
 }
 
+function normalizeDescription(value?: string) {
+  return (value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function ProductQuickView({
   slug,
   onClose,
@@ -178,6 +186,11 @@ export function ProductQuickView({
     : product
       ? [{ id: "placeholder", preview: "", source: "" }]
       : [];
+  const hasDistinctDescription = Boolean(
+    product?.description &&
+      normalizeDescription(product.description) !==
+        normalizeDescription(product.sortDescription),
+  );
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -207,7 +220,7 @@ export function ProductQuickView({
       onClick={onClose}
     >
       <div
-        className="bg-background rounded-[32px] w-full max-w-4xl shadow-2xl grid grid-cols-1 md:grid-cols-2 relative h-[80vh] overflow-hidden"
+        className="bg-background rounded-[32px] w-full max-w-4xl shadow-2xl grid grid-cols-1 grid-rows-[minmax(12rem,32vh)_minmax(0,1fr)] md:grid-cols-2 md:grid-rows-1 relative h-[80dvh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -240,7 +253,7 @@ export function ProductQuickView({
         ) : (
           <>
             {/* Image gallery */}
-            <div className="relative h-64 md:h-full bg-muted group min-h-0 rounded-l-[32px] overflow-hidden">
+            <div className="relative h-full bg-muted group min-h-0 md:rounded-l-[32px] overflow-hidden">
               {images[currentImage]?.source ? (
                 <img
                   src={images[currentImage].source}
@@ -280,7 +293,7 @@ export function ProductQuickView({
             </div>
 
             {/* Info */}
-            <div className="p-8 lg:p-12 flex flex-col justify-start overflow-y-auto relative bg-background">
+            <div className="min-h-0 p-6 md:p-8 lg:p-12 flex flex-col justify-start overflow-y-auto overscroll-contain relative bg-background">
               <div className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-4">
                 {product.optionGroups[0]?.name ||
                   t("sku", { sku: product.variants[0]?.sku || "" })}
@@ -385,7 +398,7 @@ export function ProductQuickView({
               )}
 
               {/* Description */}
-              {product.description && (
+              {hasDistinctDescription && product.description && (
                 <div
                   className="text-muted-foreground mb-8 leading-relaxed text-sm prose prose-sm max-w-none line-clamp-4"
                   dangerouslySetInnerHTML={{ __html: product.description }}
