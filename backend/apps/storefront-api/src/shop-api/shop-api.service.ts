@@ -486,6 +486,7 @@ export class ShopApiService {
       const skip = Number(input.skip) || 0;
       const take = Number(input.take) || 12;
       const products = await this.productsService.findAll({
+        search: (input.term ?? input.search) as string,
         categorySlug: slug,
         page: Math.floor(skip / take) + 1,
         limit: take,
@@ -525,7 +526,8 @@ export class ShopApiService {
       const skip = Number(input.skip) || 0;
       const take = Number(input.take) || 12;
       const products = await this.productsService.findAll({
-        search: input.search as string,
+        // Vendure SearchInput uses `term`; `search` remains supported for legacy callers.
+        search: (input.term ?? input.search) as string,
         categorySlug: (input.collectionSlug ?? input.categorySlug) as string,
         brandSlug: input.brandSlug as string,
         minPrice: input.minPrice as number,
