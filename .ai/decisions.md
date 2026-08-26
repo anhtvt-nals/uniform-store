@@ -221,3 +221,6 @@
 **Context**: Sending images larger than 5 MB through the Admin API is slower and needlessly consumes VPS bandwidth. Nginx also rejects oversized proxied request bodies before the API can process them.
 **Decision**: Files above 5 MB and up to the existing 10 MB image limit use the R2 S3 multipart protocol. The Admin API validates metadata, initiates the upload and signs every part; the browser uploads parts directly to R2 in parallel, submits their ETags for completion, then the API persists the normal asset/entity association. Smaller files retain the existing API form upload.
 **Consequences**: The R2 bucket CORS policy must allow the Admin origin to `PUT` and expose the `ETag` response header. The browser never receives R2 credentials, and failed multipart uploads are explicitly aborted.
+# Product size contract (2026-08-26)
+
+Product size is a shared catalog record (`sizes`) assigned many-to-many to products. Public `GET /api/v1/products/:slug` now includes active `sizes` and `sizeGuideImageUrl`; `POST /api/v1/cart/items` accepts optional `sizeId` and requires it when a product has configured sizes. Cart and order line responses preserve `sizeName` as a historical snapshot. The storefront's legacy Vendure-compatible GraphQL product shape cannot safely add custom fields, so size metadata is loaded from the existing REST product-detail endpoint.

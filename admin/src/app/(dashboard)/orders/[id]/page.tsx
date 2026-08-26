@@ -62,6 +62,7 @@ type OrderDetail = {
     quantity: number;
     unitPrice: number;
     linePrice: number;
+    sizeName?: string;
   }[];
   shippingAddress?: {
     fullName: string;
@@ -209,6 +210,7 @@ export default function OrderDetailPage() {
                   <TableHead>Sản phẩm</TableHead>
                   <TableHead>Biến thể</TableHead>
                   <TableHead>SKU</TableHead>
+                  <TableHead>Size</TableHead>
                   <TableHead className="text-right">Số lượng</TableHead>
                   <TableHead className="text-right">Đơn giá</TableHead>
                   <TableHead className="text-right">Thành tiền</TableHead>
@@ -226,6 +228,7 @@ export default function OrderDetailPage() {
                     <TableCell className="text-muted-foreground">
                       {item.sku}
                     </TableCell>
+                    <TableCell>{item.sizeName || "—"}</TableCell>
                     <TableCell className="text-right">
                       {item.quantity}
                     </TableCell>

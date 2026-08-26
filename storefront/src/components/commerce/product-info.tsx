@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useEffect, useState, useMemo, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { addToCart } from "@/app/[locale]/product/[slug]/actions";
 interface ProductInfoProps {
   product: {
     id: string;
+    slug: string;
     name: string;
     description: string;
     sortDescription?: string | null;
@@ -65,6 +66,17 @@ export function ProductInfo({
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     product.variants[0]?.id ?? null,
   );
+  const [sizes, setSizes] = useState<Array<{id: string; code: string; weightRange: string}>>([]);
+  const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
+  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/v1/products/${product.slug}`).then((response) => response.ok ? response.json() : null).then((data) => {
+      if (!data) return;
+      setSizes(data.sizes || []);
+      setSizeGuideImageUrl(data.sizeGuideImageUrl || "");
+    }).catch(() => undefined);
+  }, [product.slug]);
 
   // Initialize selected options from URL
   const [selectedOptions, setSelectedOptions] = useState<
@@ -148,9 +160,13 @@ export function ProductInfo({
       toast.error(t("selectOptions"));
       return;
     }
+    if (sizes.length && !selectedSizeId) {
+      toast.error("Vui lòng chọn size sản phẩm");
+      return;
+    }
 
     startAddingToCart(async () => {
-      const result = await addToCart(selectedVariant.id, quantity);
+      const result = await addToCart(selectedVariant.id, quantity, selectedSizeId || undefined);
       if (!result.success) {
         toast.error(result.error || t("errorAddToCart"));
         return;
@@ -251,6 +267,18 @@ export function ProductInfo({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {sizes.length > 0 && (
+        <div className="space-y-3">
+          <Label className="text-base font-semibold">Kích thước</Label>
+          <div className="flex flex-wrap gap-2">
+            {sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/60"}`}>
+              {size.code}{size.weightRange ? <span className="ml-1 text-xs font-normal opacity-80">({size.weightRange})</span> : null}
+            </button>)}
+          </div>
+          {sizeGuideImageUrl ? <a href={sizeGuideImageUrl} target="_blank" rel="noreferrer" className="inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">Xem bảng hướng dẫn chọn size</a> : null}
         </div>
       )}
 

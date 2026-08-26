@@ -42,6 +42,12 @@ export class CreateQuoteRequestDto {
   @Min(1)
   quantity?: number;
 
+  @ApiProperty({ description: 'Requested size', required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  sizeName?: string;
+
   @ApiProperty({ description: 'Source page', required: false })
   @IsOptional()
   @IsString()

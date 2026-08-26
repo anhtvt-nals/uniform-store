@@ -20,6 +20,7 @@ import {
   Star,
   ClipboardList,
   Handshake,
+  Ruler,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -37,6 +38,7 @@ export function Sidebar() {
     { href: "/quotes", label: "Báo giá", icon: ClipboardList },
     { href: "/contracts", label: t("nav.contracts"), icon: Handshake },
     { href: "/products", label: t("nav.products"), icon: Package },
+    { href: "/sizes", label: "Kích thước", icon: Ruler },
     { href: "/categories", label: t("nav.categories"), icon: Tags },
     { href: "/brands", label: t("nav.brands"), icon: Building2 },
     { href: "/customers", label: t("nav.customers"), icon: Users },

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike, FindOptionsWhere, In, Raw, IsNull } from 'typeorm';
-import { ProductEntity, CategoryEntity, ProductImageEntity, ProductVariantEntity, DiscountEntity } from '@app/database';
+import { ProductEntity, CategoryEntity, ProductImageEntity, ProductVariantEntity, DiscountEntity, ProductSizeEntity } from '@app/database';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { PriceEstimateQueryDto } from './dto/price-estimate-query.dto';
 
@@ -18,6 +18,8 @@ export class ProductsService {
     private readonly variantRepo: Repository<ProductVariantEntity>,
     @InjectRepository(DiscountEntity)
     private readonly discountRepo: Repository<DiscountEntity>,
+    @InjectRepository(ProductSizeEntity)
+    private readonly productSizeRepo: Repository<ProductSizeEntity>,
   ) {}
 
   async estimatePrice({ categorySlug, quantity }: PriceEstimateQueryDto) {
@@ -197,8 +199,13 @@ export class ProductsService {
       throw new NotFoundException(`Product not found: ${slug}`);
     }
 
+    const sizeLinks = await this.productSizeRepo.find({
+      where: { productId: product.id }, relations: ['size'],
+      order: { size: { sortOrder: 'ASC', code: 'ASC' } },
+    });
     return {
       ...product,
+      sizes: sizeLinks.map((link) => link.size).filter((size) => size?.isActive),
       variants: product.variants
         ?.filter((v) => v.isActive && !v.deletedAt)
         .sort((a, b) => a.sortOrder - b.sortOrder) ?? [],

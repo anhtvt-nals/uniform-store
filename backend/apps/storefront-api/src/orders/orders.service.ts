@@ -133,6 +133,8 @@ export class OrdersService {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           linePrice,
+          sizeId: item.sizeId,
+          sizeName: item.sizeName,
         });
         await queryRunner.manager.save(orderItem);
       }
@@ -397,6 +399,7 @@ export class OrdersService {
         quantity: item.quantity,
         linePrice: Number(item.linePrice ?? 0),
         thumbnailUrl: thumbnailByVariantId.get(item.variantId) ?? null,
+        sizeName: item.sizeName,
       })),
     };
   }

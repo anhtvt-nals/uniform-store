@@ -36,6 +36,12 @@ export class InquiryEntity {
   @Column({ type: 'text', default: '' })
   notes: string;
 
+  @Column({name: 'size_id', type: 'uuid', nullable: true})
+  sizeId: string | null;
+
+  @Column({name: 'size_name', type: 'varchar', default: ''})
+  sizeName: string;
+
   @Column({ type: 'varchar', default: 'pending' })
   status: string;
 

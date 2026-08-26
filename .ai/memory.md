@@ -205,6 +205,12 @@ backend/
 
 ## Recent Changes
 
+### Product Size Management (2026-08-26)
+
+- Added migration `044_add_product_sizes.sql`: shared `sizes` catalog, product-to-size assignment, optional size-guide image, and immutable size snapshots on cart lines, order lines, inquiries, and quote requests.
+- Admin has a new **Kích thước** module and product form controls to select multiple available sizes and upload/select a size guide image.
+- Storefront product detail and quick preview load active sizes from the REST product-detail endpoint, require size selection for products that have sizes configured, and retain the selected size when the cart becomes an order.
+
 ### Admin Vietnamese UI Sweep (2026-08-23)
 - Translated the remaining customer-facing Admin UI across login, orders, customers, promotions, inquiries, quotes, contracts, assets, settings, inventory, activity logs, permissions, categories, brands, and product detail actions.
 - Brand and Category forms now accept only Vietnamese localized content. The Product list invalidates and refetches its API query when returning from a product edit page, preserving fresh list data.
@@ -711,7 +717,7 @@ git push → main
 
 ### Expanded R2 Demo Catalog (2026-08-24)
 
-- `npm run seed:expanded-demo-catalog` adds ten products to each of the three primary uniform categories, randomizes all existing active catalog prices to 200.000–500.000 VND, and uploads two Unsplash gallery images to Cloudflare R2 before each product is saved and linked.
+- `npm run seed:expanded-demo-catalog` adds ten products to each of the three primary uniform categories, randomizes active `base_price` values to 200.000–500.000 VND without changing existing variant prices, and uploads two Unsplash gallery images to Cloudflare R2 before each product is saved and linked.
 
 ### Admin R2 Multipart Uploads (2026-08-24)
 

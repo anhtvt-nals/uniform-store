@@ -27,6 +27,7 @@ const DEFAULT_LOCALE = "vi";
 type Category = { id: string; name: Record<string, string>; slug: string };
 type Brand = { id: string; name: Record<string, string>; slug: string };
 type Image = { id: string; url: string; sortOrder: number };
+type Size = { id: string; code: string; weightRange: string; isActive: boolean };
 
 type ProductFormProps = {
   defaultValues?: Record<string, unknown>;
@@ -98,6 +99,11 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     queryFn: () => apiClient<{ items: Brand[] }>("/brands", { params: { limit: 200 }, token }),
     select: (res) => res.data?.items || [],
   });
+  const { data: sizes = [] } = useQuery({
+    queryKey: ["sizes", "product-form"],
+    queryFn: () => apiClient<Size[]>("/sizes", { token }),
+    select: (res) => (res.data || []).filter((size) => size.isActive),
+  });
 
   const [name, setName] = useState<Record<string, string>>({});
   const [slug, setSlug] = useState("");
@@ -105,16 +111,18 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
   const [detail, setDetail] = useState<Record<string, string>>({});
   const [categoryId, setCategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
-  const [basePrice, setBasePrice] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
   const [metaDesc, setMetaDesc] = useState<Record<string, string>>({});
+  const [sizeIds, setSizeIds] = useState<string[]>([]);
+  const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [showEditor, setShowEditor] = useState(false);
   const [thumbAssetPickerOpen, setThumbAssetPickerOpen] = useState(false);
   const [galleryPickerOpen, setGalleryPickerOpen] = useState(false);
+  const [sizeGuidePickerOpen, setSizeGuidePickerOpen] = useState(false);
 
   useEffect(() => {
     if (defaultValues) {
@@ -124,11 +132,12 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       setDetail((defaultValues.detail as Record<string, string>) || {});
       setCategoryId((defaultValues.categoryId as string) || (defaultValues.category as { id: string })?.id || "");
       setBrandId((defaultValues.brandId as string) || (defaultValues.brand as { id: string })?.id || "");
-      setBasePrice((defaultValues.basePrice as number) ?? 0);
       setIsActive(defaultValues.isActive !== undefined ? Boolean(defaultValues.isActive) : true);
       setIsFeatured(defaultValues.isFeatured !== undefined ? Boolean(defaultValues.isFeatured) : false);
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
       setMetaDesc((defaultValues.metaDesc as Record<string, string>) || {});
+      setSizeIds(((defaultValues.sizes as Size[] | undefined) || []).map((size) => size.id));
+      setSizeGuideImageUrl((defaultValues.sizeGuideImageUrl as string) || "");
     }
   }, [defaultValues]);
 
@@ -180,8 +189,9 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       categoryId,
       isActive,
       isFeatured,
-      basePrice: Number(basePrice),
       detail,
+      sizeIds,
+      sizeGuideImageUrl,
     };
     if (brandId) data.brandId = brandId;
     if (Object.keys(description).length > 0) data.description = description;
@@ -222,6 +232,34 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
                 <Label htmlFor="slug">Slug</Label>
                 <Input id="slug" value={slug} onChange={(e) => handleSlugChange(e.target.value)} placeholder="product-slug" />
                 {errors.slug && <p className="text-xs text-destructive">{errors.slug}</p>}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div>
+                <h3 className="text-sm font-medium">Kích thước sản phẩm</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Chọn các size khách hàng có thể đặt cho sản phẩm này.</p>
+              </div>
+              {sizes.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((size) => {
+                    const checked = sizeIds.includes(size.id);
+                    return <label key={size.id} className={`cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors ${checked ? "border-primary bg-primary/10 text-primary" : "border-input hover:border-primary/50"}`}>
+                      <input className="sr-only" type="checkbox" checked={checked} onChange={() => setSizeIds((current) => checked ? current.filter((id) => id !== size.id) : [...current, size.id])} />
+                      <span className="font-semibold">{size.code}</span>{size.weightRange ? <span className="ml-1 text-muted-foreground">({size.weightRange})</span> : null}
+                    </label>;
+                  })}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">Chưa có size. Hãy tạo size trong mục Kích thước trước.</p>}
+              <div className="space-y-2 border-t pt-4">
+                <Label>Ảnh hướng dẫn chọn size</Label>
+                {sizeGuideImageUrl ? <img src={sizeGuideImageUrl} alt="Bảng hướng dẫn size" className="max-h-48 rounded-md border object-contain" /> : null}
+                <ImageUploader entityType="product-size-guide" entityId={productId} onUploadComplete={(image) => image?.url && setSizeGuideImageUrl(image.url)} />
+                <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setSizeGuidePickerOpen(true)}><ImageIcon className="size-4" /> Chọn từ assets</Button>
+                <AssetPicker open={sizeGuidePickerOpen} onOpenChange={setSizeGuidePickerOpen} onSelect={(url) => { setSizeGuideImageUrl(url); setSizeGuidePickerOpen(false); }} />
+                {sizeGuideImageUrl ? <Button type="button" variant="ghost" size="sm" onClick={() => setSizeGuideImageUrl("")}>Xóa ảnh hướng dẫn</Button> : null}
               </div>
             </CardContent>
           </Card>
@@ -303,13 +341,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
 
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <h3 className="text-sm font-medium">Giá và trạng thái</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="basePrice">Giá cơ bản (VNĐ)</Label>
-                  <Input id="basePrice" type="number" min={0} step={1000} value={basePrice} onChange={(e) => setBasePrice(Math.round(Number(e.target.value)))} />
-                </div>
-              </div>
+              <h3 className="text-sm font-medium">Trạng thái hiển thị</h3>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                   <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />

@@ -32,6 +32,9 @@ export class QuoteRequestEntity {
   @Column({ type: 'int', default: 1 })
   quantity: number;
 
+  @Column({name: 'size_name', type: 'varchar', default: ''})
+  sizeName: string;
+
   @Column({ type: 'varchar', default: 'NEW' })
   status: string;
 

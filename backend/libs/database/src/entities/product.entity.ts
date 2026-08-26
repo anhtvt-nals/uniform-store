@@ -65,6 +65,9 @@ export class ProductEntity {
   @Column({ name: 'meta_desc', type: 'jsonb', default: {} })
   metaDesc: Record<string, string>;
 
+  @Column({name: 'size_guide_image_url', type: 'text', default: ''})
+  sizeGuideImageUrl: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

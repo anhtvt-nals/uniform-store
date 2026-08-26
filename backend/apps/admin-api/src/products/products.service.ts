@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, In, Raw } from 'typeorm';
+import {randomUUID} from 'crypto';
 import {
   ProductEntity,
   ProductVariantEntity,
@@ -14,6 +15,7 @@ import {
   ProductOptionEntity,
   ProductVariantOptionEntity,
   InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -43,6 +45,8 @@ export class ProductsService {
     private readonly variantOptionRepo: Repository<ProductVariantOptionEntity>,
     @InjectRepository(InventoryEntity)
     private readonly inventoryRepo: Repository<InventoryEntity>,
+    @InjectRepository(ProductSizeEntity)
+    private readonly productSizeRepo: Repository<ProductSizeEntity>,
   ) {}
 
   async findAll(query: ProductQueryDto) {
@@ -113,21 +117,20 @@ export class ProductsService {
       throw new NotFoundException(`Product not found: ${id}`);
     }
 
-    return product;
+    const sizeLinks = await this.productSizeRepo.find({
+      where: { productId: id },
+      relations: ['size'],
+      order: { size: { sortOrder: 'ASC', code: 'ASC' } },
+    });
+    return { ...product, sizes: sizeLinks.map((link) => link.size).filter(Boolean) };
   }
 
   async create(dto: CreateProductDto) {
-    const existing = await this.productRepo.findOne({
-      where: { slug: dto.slug },
-      withDeleted: true,
-    });
-    if (existing) {
-      throw new ConflictException(`Slug already exists: ${dto.slug}`);
-    }
+    const slug = await this.resolveUniqueSlug(dto.slug);
 
     const product = this.productRepo.create({
       name: dto.name,
-      slug: dto.slug,
+      slug,
       categoryId: dto.categoryId,
       brandId: dto.brandId ?? null,
       description: dto.description ?? {},
@@ -140,9 +143,12 @@ export class ProductsService {
       weight: dto.weight ?? 0,
       metaTitle: dto.metaTitle ?? {},
       metaDesc: dto.metaDesc ?? {},
+      sizeGuideImageUrl: dto.sizeGuideImageUrl ?? '',
     });
 
-    return this.productRepo.save(product);
+    const saved = await this.productRepo.save(product);
+    await this.replaceSizes(saved.id, dto.sizeIds);
+    return saved;
   }
 
   async update(id: string, dto: UpdateProductDto) {
@@ -151,18 +157,10 @@ export class ProductsService {
       throw new NotFoundException(`Product not found: ${id}`);
     }
 
-    if (dto.slug && dto.slug !== product.slug) {
-      const existing = await this.productRepo.findOne({
-        where: { slug: dto.slug },
-        withDeleted: true,
-      });
-      if (existing) {
-        throw new ConflictException(`Slug already exists: ${dto.slug}`);
-      }
-    }
-
     if (dto.name !== undefined) product.name = dto.name;
-    if (dto.slug !== undefined) product.slug = dto.slug;
+    if (dto.slug !== undefined && dto.slug !== product.slug) {
+      product.slug = await this.resolveUniqueSlug(dto.slug, product.id);
+    }
     if (dto.categoryId !== undefined) product.categoryId = dto.categoryId;
     if (dto.brandId !== undefined) product.brandId = dto.brandId;
     if (dto.description !== undefined) product.description = dto.description;
@@ -175,8 +173,27 @@ export class ProductsService {
     if (dto.metaTitle !== undefined) product.metaTitle = dto.metaTitle;
     if (dto.detail !== undefined) product.detail = dto.detail;
     if (dto.metaDesc !== undefined) product.metaDesc = dto.metaDesc;
+    if (dto.sizeGuideImageUrl !== undefined) product.sizeGuideImageUrl = dto.sizeGuideImageUrl;
 
-    return this.productRepo.save(product);
+    const saved = await this.productRepo.save(product);
+    if (dto.sizeIds !== undefined) await this.replaceSizes(saved.id, dto.sizeIds);
+    return saved;
+  }
+
+  private async replaceSizes(productId: string, sizeIds: string[] = []) {
+    await this.productSizeRepo.delete({productId});
+    if (sizeIds.length) await this.productSizeRepo.save(sizeIds.map((sizeId) => this.productSizeRepo.create({productId, sizeId})));
+  }
+
+  private async resolveUniqueSlug(requestedSlug: string, excludeProductId?: string): Promise<string> {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const slug = attempt === 0
+        ? requestedSlug
+        : `${requestedSlug}-${randomUUID().replace(/-/g, '').slice(0, 8)}`;
+      const existing = await this.productRepo.findOne({where: {slug}, withDeleted: true});
+      if (!existing || existing.id === excludeProductId) return slug;
+    }
+    throw new ConflictException('Không thể tạo slug duy nhất. Vui lòng thử lại.');
   }
 
   async remove(id: string) {

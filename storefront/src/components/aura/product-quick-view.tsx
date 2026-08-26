@@ -37,6 +37,8 @@ interface QuickViewProduct {
     name: string;
     options: Array<{ id: string; code: string; name: string }>;
   }>;
+  sizes?: Array<{id: string; code: string; weightRange: string}>;
+  sizeGuideImageUrl?: string;
 }
 
 function normalizeDescription(value?: string) {
@@ -65,6 +67,7 @@ export function ProductQuickView({
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null,
   );
+  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,12 +142,16 @@ export function ProductQuickView({
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (product?.sizes?.length && !selectedSizeId) {
+      toast.error("Vui lòng chọn size sản phẩm");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/v1/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product?.id, ...formData }),
+        body: JSON.stringify({ productId: product?.id, sizeId: selectedSizeId || undefined, ...formData }),
       });
       if (res.ok) {
         setIsSubmitted(true);
@@ -396,6 +403,8 @@ export function ProductQuickView({
                   </div>
                 </div>
               )}
+
+              {product.sizes?.length ? <div className="mb-6 space-y-2"><h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kích thước</h3><div className="flex flex-wrap gap-2">{product.sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{size.code}{size.weightRange ? ` (${size.weightRange})` : ""}</button>)}</div>{product.sizeGuideImageUrl ? <a className="text-xs font-medium text-primary hover:underline" href={product.sizeGuideImageUrl} target="_blank" rel="noreferrer">Xem bảng hướng dẫn chọn size</a> : null}</div> : null}
 
               {/* Description */}
               {hasDistinctDescription && product.description && (

@@ -39,3 +39,5 @@ export * from './entities/inquiry.entity';
 export * from './entities/quote-request.entity';
 export * from './entities/customer-contract.entity';
 export * from './entities/testimonial.entity';
+export * from './entities/size.entity';
+export * from './entities/product-size.entity';

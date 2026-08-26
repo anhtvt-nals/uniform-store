@@ -38,6 +38,7 @@ type QuoteRequest = {
   address: string;
   productType: string;
   quantity: number;
+  sizeName?: string;
   status: string;
   salesNote: string;
   source: string;
@@ -294,6 +295,10 @@ export default function QuotesPage() {
                 <div>
                   <p className="text-muted-foreground text-xs">Số lượng</p>
                   <p className="font-medium">{selected.quantity}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Size</p>
+                  <p className="font-medium">{selected.sizeName || "—"}</p>
                 </div>
               </div>
               {selected.address && (

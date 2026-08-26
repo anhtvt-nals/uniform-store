@@ -25,6 +25,7 @@ export class QuoteRequestsService {
       address: dto.address ?? '',
       productType: dto.productType ?? '',
       quantity: dto.quantity ?? 1,
+      sizeName: dto.sizeName ?? '',
       source: dto.source ?? '',
       status: 'NEW',
     });

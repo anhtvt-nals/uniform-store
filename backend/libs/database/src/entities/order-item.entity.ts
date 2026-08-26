@@ -37,6 +37,12 @@ export class OrderItemEntity {
   @Column({ name: 'line_price', type: 'decimal' })
   linePrice: number;
 
+  @Column({name: 'size_id', type: 'uuid', nullable: true})
+  sizeId: string | null;
+
+  @Column({name: 'size_name', type: 'varchar', default: ''})
+  sizeName: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

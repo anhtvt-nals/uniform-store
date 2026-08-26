@@ -56,9 +56,8 @@ async function main() {
   const db = new Client({ connectionString: process.env.DATABASE_URL, ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined });
   await db.connect();
   try {
-    // Existing catalog prices are randomized first; every matching variant gets the same real display price.
+    // Base product prices are randomized independently; existing variant prices remain untouched.
     await db.query(`UPDATE products SET base_price = FLOOR(200000 + random() * 300001)::BIGINT, updated_at = now() WHERE deleted_at IS NULL`);
-    await db.query(`UPDATE product_variants v SET price = p.base_price, updated_at = now() FROM products p WHERE p.id = v.product_id AND p.deleted_at IS NULL AND v.deleted_at IS NULL`);
 
     let seeded = 0;
     for (const [categoryIndex, category] of categories.entries()) {
@@ -81,7 +80,6 @@ async function main() {
              RETURNING id`, [categoryId, name, product.slug, description, sku, price],
           );
           const productId = productResult.rows[0].id;
-          await db.query(`UPDATE product_variants SET price = $1, is_active = true, deleted_at = NULL, updated_at = now() WHERE product_id = $2`, [price, productId]);
           await db.query(`INSERT INTO product_variants (product_id, name, sku, barcode, price, tax_rate, weight, is_active, sort_order)
             SELECT $1, $2, $3, '', $4, 0, 300, true, 0 WHERE NOT EXISTS (SELECT 1 FROM product_variants WHERE product_id = $1 AND deleted_at IS NULL)`, [productId, name, `${sku}-STD`, price]);
           for (const [imageIndex, upload] of uploads.entries()) {

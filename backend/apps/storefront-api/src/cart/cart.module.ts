@@ -8,6 +8,7 @@ import {
   CartCouponEntity,
   ProductVariantEntity,
   InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 
 @Module({
@@ -18,6 +19,7 @@ import {
       CartCouponEntity,
       ProductVariantEntity,
       InventoryEntity,
+      ProductSizeEntity,
     ]),
   ],
   controllers: [CartController],

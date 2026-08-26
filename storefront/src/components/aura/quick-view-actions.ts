@@ -17,8 +17,14 @@ export async function getProductForQuickView(slug: string) {
     const result = await query(GetProductDetailQuery, {slug}, {languageCode: locale, currencyCode});
     const product = result.data.product as ProductDetail | null | undefined;
     if (!product) return null;
+    const shopApiUrl = process.env.VENDURE_SHOP_API_URL || process.env.NEXT_PUBLIC_VENDURE_SHOP_API_URL;
+    const sizeData = shopApiUrl
+        ? await fetch(new URL(`/api/v1/products/${slug}`, shopApiUrl), {next: {revalidate: 60}}).then((response) => response.ok ? response.json() : null).catch(() => null)
+        : null;
     return {
         ...product,
+        sizes: sizeData?.sizes || [],
+        sizeGuideImageUrl: sizeData?.sizeGuideImageUrl || "",
         optionGroups: getDisplayOptionGroups(product),
     };
 }

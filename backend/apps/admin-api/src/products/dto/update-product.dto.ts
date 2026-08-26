@@ -7,6 +7,8 @@ import {
   IsInt,
   Min,
   IsNumber,
+  IsArray,
+  IsUUID,
 } from 'class-validator';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -73,4 +75,10 @@ export class UpdateProductDto {
   @IsOptional()
   @IsObject()
   metaDesc?: Record<string, string>;
+
+  @IsOptional() @IsArray() @IsUUID('4', {each: true})
+  sizeIds?: string[];
+
+  @IsOptional() @IsString()
+  sizeGuideImageUrl?: string;
 }

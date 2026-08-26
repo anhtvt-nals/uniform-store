@@ -9,6 +9,7 @@ import {
   ProductOptionEntity,
   ProductVariantOptionEntity,
   InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 import {
   BadRequestException,
@@ -31,6 +32,7 @@ describe('ProductsService (admin)', () => {
   let mockOptionRepo: ReturnType<typeof createMockRepo>;
   let mockVariantOptionRepo: ReturnType<typeof createMockRepo>;
   let mockInventoryRepo: ReturnType<typeof createMockRepo>;
+  let mockProductSizeRepo: ReturnType<typeof createMockRepo>;
 
   beforeEach(async () => {
     mockProductRepo = createMockRepo(['findAndCount', 'findOne', 'create', 'save', 'softRemove', 'restore']);
@@ -40,6 +42,8 @@ describe('ProductsService (admin)', () => {
     mockOptionRepo = createMockRepo(['findBy']);
     mockVariantOptionRepo = createMockRepo(['find', 'findOne', 'create', 'save', 'delete']);
     mockInventoryRepo = createMockRepo(['findOne', 'create', 'save', 'delete']);
+    mockProductSizeRepo = createMockRepo(['find', 'create', 'save', 'delete']);
+    mockProductSizeRepo.find.mockResolvedValue([]);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +55,7 @@ describe('ProductsService (admin)', () => {
         { provide: getRepositoryToken(ProductOptionEntity), useValue: mockOptionRepo },
         { provide: getRepositoryToken(ProductVariantOptionEntity), useValue: mockVariantOptionRepo },
         { provide: getRepositoryToken(InventoryEntity), useValue: mockInventoryRepo },
+        { provide: getRepositoryToken(ProductSizeEntity), useValue: mockProductSizeRepo },
       ],
     }).compile();
 
@@ -81,6 +86,24 @@ describe('ProductsService (admin)', () => {
       });
       const result = await service.findOne('p-1');
       expect(result.id).toBe('p-1');
+    });
+  });
+
+  describe('create', () => {
+    it('should append a random suffix instead of rejecting a duplicate slug', async () => {
+      mockProductRepo.findOne
+        .mockResolvedValueOnce({id: 'existing-product'})
+        .mockResolvedValueOnce(null);
+      mockProductRepo.create.mockImplementation((input) => input);
+      mockProductRepo.save.mockImplementation(async (input) => input);
+
+      const result = await service.create({
+        name: {vi: 'Áo polo'},
+        slug: 'ao-polo',
+        categoryId: 'f4335894-9c32-4dd4-bd98-ace2734a6152',
+      });
+
+      expect(result.slug).toMatch(/^ao-polo-[a-f0-9]{8}$/);
     });
   });
 

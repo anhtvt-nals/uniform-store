@@ -4,6 +4,10 @@ export class CreateInquiryDto {
   @IsUUID()
   productId: string;
 
+  @IsOptional()
+  @IsUUID()
+  sizeId?: string;
+
   @IsString()
   fullName: string;
 

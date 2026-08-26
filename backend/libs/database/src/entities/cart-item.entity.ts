@@ -27,6 +27,12 @@ export class CartItemEntity {
   @Column({ name: 'unit_price', type: 'decimal', default: 0 })
   unitPrice: number;
 
+  @Column({name: 'size_id', type: 'uuid', nullable: true})
+  sizeId: string | null;
+
+  @Column({name: 'size_name', type: 'varchar', default: ''})
+  sizeName: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

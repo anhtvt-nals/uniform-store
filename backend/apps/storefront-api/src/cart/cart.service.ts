@@ -11,6 +11,7 @@ import {
   CartCouponEntity,
   ProductVariantEntity,
   InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -30,6 +31,8 @@ export class CartService {
     private readonly variantRepo: Repository<ProductVariantEntity>,
     @InjectRepository(InventoryEntity)
     private readonly inventoryRepo: Repository<InventoryEntity>,
+    @InjectRepository(ProductSizeEntity)
+    private readonly productSizeRepo: Repository<ProductSizeEntity>,
   ) {}
 
   async getCart(userId?: string, sessionId?: string) {
@@ -52,10 +55,17 @@ export class CartService {
 
     await this.validateStock(variantId, dto.quantity);
 
+    const links = await this.productSizeRepo.find({where: {productId: variant.productId}, relations: ['size']});
+    const activeSizes = links.map((link) => link.size).filter((size): size is NonNullable<typeof size> => Boolean(size?.isActive));
+    const selectedSize = dto.sizeId ? activeSizes.find((size) => size.id === dto.sizeId) : undefined;
+    if (activeSizes.length && !selectedSize) throw new BadRequestException('Vui lòng chọn size sản phẩm');
+    if (dto.sizeId && !selectedSize) throw new BadRequestException('Size sản phẩm không hợp lệ');
+
     const cart = await this.findOrCreateCart(userId, sessionId);
-    const existingItem = await this.cartItemRepo.findOne({
-      where: { cartId: cart.id, variantId },
-    });
+    const existingItem = await this.cartItemRepo.createQueryBuilder('item')
+      .where('item.cart_id = :cartId AND item.variant_id = :variantId', {cartId: cart.id, variantId})
+      .andWhere(selectedSize ? 'item.size_id = :sizeId' : 'item.size_id IS NULL', {sizeId: selectedSize?.id})
+      .getOne();
 
     if (existingItem) {
       const newQty = existingItem.quantity + dto.quantity;
@@ -72,6 +82,8 @@ export class CartService {
         variantId,
         quantity: dto.quantity,
         unitPrice: variant.price,
+        sizeId: selectedSize?.id ?? null,
+        sizeName: selectedSize?.code ?? '',
       });
       await this.cartItemRepo.save(item);
     }
@@ -171,7 +183,7 @@ export class CartService {
 
     for (const sessionItem of sessionCart.items) {
       const existing = target.items?.find(
-        (i) => i.variantId === sessionItem.variantId,
+        (i) => i.variantId === sessionItem.variantId && i.sizeId === sessionItem.sizeId,
       );
       if (existing) {
         await this.cartItemRepo.update(existing.id, {
@@ -184,6 +196,8 @@ export class CartService {
             variantId: sessionItem.variantId,
             quantity: sessionItem.quantity,
             unitPrice: sessionItem.unitPrice,
+            sizeId: sessionItem.sizeId,
+            sizeName: sessionItem.sizeName,
           }),
         );
       }
@@ -279,6 +293,8 @@ export class CartService {
         productSlug: product?.slug ?? '',
         variantName: item.variant?.name ?? {},
         sku: item.variant?.sku ?? '',
+        sizeId: item.sizeId,
+        sizeName: item.sizeName,
         image: images[0]?.url ?? '',
         quantity: item.quantity,
         unitPrice: item.unitPrice,

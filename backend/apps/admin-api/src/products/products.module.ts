@@ -10,6 +10,7 @@ import {
   ProductOptionEntity,
   ProductVariantOptionEntity,
   InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 
 @Module({
@@ -22,6 +23,7 @@ import {
       ProductOptionEntity,
       ProductVariantOptionEntity,
       InventoryEntity,
+      ProductSizeEntity,
     ]),
   ],
   controllers: [ProductsController],
