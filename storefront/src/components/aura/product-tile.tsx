@@ -9,7 +9,7 @@ import {Price} from '@/components/commerce/price';
 import {Eye} from 'lucide-react';
 import {ProductQuickView} from './product-quick-view';
 
-export function ProductTile({product: productProp, index, compact = false}: {product: FragmentOf<typeof ProductCardFragment>; index: number; compact?: boolean}) {
+export function ProductTile({product: productProp, index, compact = false, quickView = true}: {product: FragmentOf<typeof ProductCardFragment>; index: number; compact?: boolean; quickView?: boolean}) {
     const t = useTranslations('Product');
     const [quickViewOpen, setQuickViewOpen] = useState(false);
     const [previewSide, setPreviewSide] = useState<'left' | 'right'>('right');
@@ -66,6 +66,7 @@ export function ProductTile({product: productProp, index, compact = false}: {pro
                     <div
                         className="absolute inset-0 bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]"
                         onClick={(e) => {
+                            if (!quickView) return;
                             // Prevent card link navigation; open quick view instead
                             e.preventDefault();
                             e.stopPropagation();
@@ -75,6 +76,7 @@ export function ProductTile({product: productProp, index, compact = false}: {pro
                         <button
                             type="button"
                             onClick={(e) => {
+                                if (!quickView) return;
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setQuickViewOpen(true);
@@ -101,7 +103,7 @@ export function ProductTile({product: productProp, index, compact = false}: {pro
                 </div>
             </Link>
 
-            {quickViewOpen && (
+            {quickView && quickViewOpen && (
                 <ProductQuickView slug={product.slug} onClose={() => setQuickViewOpen(false)} />
             )}
         </>

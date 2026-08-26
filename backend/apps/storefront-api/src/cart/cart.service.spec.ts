@@ -6,7 +6,7 @@ import {
   CartItemEntity,
   CartCouponEntity,
   ProductVariantEntity,
-  InventoryEntity,
+  ProductSizeEntity,
 } from '@app/database';
 import {
   NotFoundException,
@@ -27,18 +27,22 @@ describe('CartService', () => {
   let mockCartItemRepo: ReturnType<typeof createMockRepo>;
   let mockCartCouponRepo: ReturnType<typeof createMockRepo>;
   let mockVariantRepo: ReturnType<typeof createMockRepo>;
-  let mockInventoryRepo: ReturnType<typeof createMockRepo>;
+  let mockProductSizeRepo: ReturnType<typeof createMockRepo>;
 
   beforeEach(async () => {
     mockCartRepo = createMockRepo(['findOne', 'create', 'save', 'update']);
     mockCartItemRepo = createMockRepo([
-      'findOne', 'find', 'create', 'save', 'update', 'remove',
+      'findOne', 'find', 'create', 'save', 'update', 'remove', 'createQueryBuilder',
     ]);
     mockCartCouponRepo = createMockRepo([
       'findOne', 'find', 'create', 'save', 'remove',
     ]);
     mockVariantRepo = createMockRepo(['findOne']);
-    mockInventoryRepo = createMockRepo(['findOne']);
+    mockProductSizeRepo = createMockRepo(['find']);
+    mockProductSizeRepo.find.mockResolvedValue([]);
+    mockCartItemRepo.createQueryBuilder.mockImplementation(() => ({
+      where: () => ({andWhere: () => ({getOne: () => Promise.resolve(null)})}),
+    }));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,7 +51,7 @@ describe('CartService', () => {
         { provide: getRepositoryToken(CartItemEntity), useValue: mockCartItemRepo },
         { provide: getRepositoryToken(CartCouponEntity), useValue: mockCartCouponRepo },
         { provide: getRepositoryToken(ProductVariantEntity), useValue: mockVariantRepo },
-        { provide: getRepositoryToken(InventoryEntity), useValue: mockInventoryRepo },
+        { provide: getRepositoryToken(ProductSizeEntity), useValue: mockProductSizeRepo },
       ],
     }).compile();
 
@@ -128,7 +132,6 @@ describe('CartService', () => {
         price: 150000,
         isActive: true,
       });
-      mockInventoryRepo.findOne.mockResolvedValue(null);
       mockCartRepo.findOne.mockResolvedValue({ id: 'cart-1' });
       mockCartItemRepo.findOne.mockResolvedValue(null);
       mockCartItemRepo.create.mockReturnValue({});
@@ -158,7 +161,6 @@ describe('CartService', () => {
         price: 150000,
         isActive: true,
       });
-      mockInventoryRepo.findOne.mockResolvedValue(null);
       mockCartRepo.findOne.mockResolvedValue({ id: 'cart-1' });
       mockCartItemRepo.findOne.mockResolvedValue({
         id: 'item-1',
@@ -166,6 +168,11 @@ describe('CartService', () => {
         variantId: 'v-1',
         quantity: 2,
       });
+      mockCartItemRepo.createQueryBuilder.mockImplementation(() => ({
+        where: () => ({andWhere: () => ({getOne: () => Promise.resolve({
+          id: 'item-1', cartId: 'cart-1', variantId: 'v-1', quantity: 2,
+        })})}),
+      }));
       mockCartItemRepo.update.mockResolvedValue({});
       mockCartItemRepo.find.mockResolvedValue(sampleItems);
       mockCartCouponRepo.find.mockResolvedValue([]);
@@ -193,7 +200,6 @@ describe('CartService', () => {
         isActive: true,
         product: { id: 'p-1' },
       });
-      mockInventoryRepo.findOne.mockResolvedValue(null);
       mockCartRepo.findOne.mockResolvedValue({ id: 'cart-1' });
       mockCartItemRepo.findOne.mockResolvedValue(null);
       mockCartItemRepo.create.mockReturnValue({});
@@ -218,27 +224,14 @@ describe('CartService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should throw if insufficient stock', async () => {
-      mockVariantRepo.findOne.mockResolvedValue({
-        id: 'v-1',
-        productId: 'p-1',
-        price: 150000,
-        isActive: true,
-      });
-      mockInventoryRepo.findOne.mockResolvedValue({
-        variantId: 'v-1',
-        quantity: 5,
-        reserved: 3,
-        trackInventory: true,
-        allowBackorder: false,
-      });
-
-      await expect(
-        service.addItem(
-          { productId: 'p-1', variantId: 'v-1', quantity: 5 },
-          'user-1',
-        ),
-      ).rejects.toThrow(BadRequestException);
+    it('should allow made-to-order items regardless of tracked stock', async () => {
+      mockVariantRepo.findOne.mockResolvedValue({id: 'v-1', productId: 'p-1', price: 150000, isActive: true});
+      mockCartRepo.findOne.mockResolvedValue({id: 'cart-1'});
+      mockCartItemRepo.create.mockReturnValue({});
+      mockCartItemRepo.save.mockResolvedValue({});
+      mockCartItemRepo.find.mockResolvedValue([]);
+      mockCartCouponRepo.find.mockResolvedValue([]);
+      await expect(service.addItem({productId: 'p-1', variantId: 'v-1', quantity: 5}, 'user-1')).resolves.toBeDefined();
     });
   });
 
@@ -251,7 +244,6 @@ describe('CartService', () => {
         variantId: 'v-1',
         quantity: 2,
       });
-      mockInventoryRepo.findOne.mockResolvedValue(null);
       mockCartItemRepo.update.mockResolvedValue({});
       mockCartItemRepo.find.mockResolvedValue(sampleItems);
       mockCartCouponRepo.find.mockResolvedValue([]);

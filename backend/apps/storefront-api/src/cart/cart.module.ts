@@ -7,7 +7,6 @@ import {
   CartItemEntity,
   CartCouponEntity,
   ProductVariantEntity,
-  InventoryEntity,
   ProductSizeEntity,
 } from '@app/database';
 
@@ -18,7 +17,6 @@ import {
       CartItemEntity,
       CartCouponEntity,
       ProductVariantEntity,
-      InventoryEntity,
       ProductSizeEntity,
     ]),
   ],

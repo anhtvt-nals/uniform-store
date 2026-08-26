@@ -107,7 +107,7 @@ export function ProductInfo({
     }
 
     // Default to the first purchasable variant until the buyer selects options.
-    if (Object.keys(selectedOptions).length !== product.optionGroups.length) {
+    if (product.optionGroups.length === 0 || Object.keys(selectedOptions).length !== product.optionGroups.length) {
       return product.variants.find((variant) => variant.id === selectedVariantId) ?? product.variants[0];
     }
 
@@ -174,7 +174,6 @@ export function ProductInfo({
       }
 
       toast.success(t("addedToCartDescription", { name: product.name }));
-      router.refresh();
     });
   };
 

@@ -5,6 +5,10 @@ import {Button} from '@/components/ui/button';
 import {Price} from '@/components/commerce/price';
 import {useTranslations} from 'next-intl';
 import Image from 'next/image';
+import {useRouter} from 'next/navigation';
+import {useTransition} from 'react';
+import {Trash2} from 'lucide-react';
+import {removeFromCart} from './actions';
 
 type ActiveOrder = {
     id: string;
@@ -33,9 +37,17 @@ type ActiveOrder = {
 
 export function OrderSummary({activeOrder, isSubmitting}: { activeOrder: ActiveOrder; isSubmitting: boolean }) {
     const t = useTranslations('Cart');
+    const router = useRouter();
+    const [isClearing, startClearing] = useTransition();
+    const handleRemoveItem = (lineId: string) => {
+        startClearing(async () => {
+            await removeFromCart(lineId);
+            router.refresh();
+        });
+    };
     return (
         <div className="border rounded-xl p-6 bg-card sticky top-24 shadow-sm">
-            <h2 className="text-xl font-bold mb-4">{t('orderSummary')}</h2>
+            <h2 className="mb-4 text-xl font-bold">{t('orderSummary')}</h2>
 
             <div className="mb-5 space-y-3 border-b border-border pb-5">
                 {activeOrder.lines.map((line) => (
@@ -58,7 +70,7 @@ export function OrderSummary({activeOrder, isSubmitting}: { activeOrder: ActiveO
                             )}
                             <p className="mt-0.5 text-xs text-muted-foreground">SL: {line.quantity}</p>
                         </div>
-                        <Price value={line.linePriceWithTax} currencyCode={activeOrder.currencyCode}/>
+                        <div className="flex shrink-0 items-start gap-1"><Price value={line.linePriceWithTax} currencyCode={activeOrder.currencyCode}/><Button type="button" variant="ghost" size="icon" className="-mt-1 size-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label={`Xóa ${line.productVariant.product.name}`} disabled={isSubmitting || isClearing} onClick={() => handleRemoveItem(line.id)}><Trash2 className="size-3.5" /></Button></div>
                     </div>
                 ))}
             </div>

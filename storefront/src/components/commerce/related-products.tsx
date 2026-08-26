@@ -49,6 +49,7 @@ export async function RelatedProducts({ collectionSlug, currentProductId }: Rela
         <ProductCarousel
             title={t('relatedProducts')}
             products={products}
+            quickView={false}
         />
     );
 }

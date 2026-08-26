@@ -10,7 +10,6 @@ import {
   CartItemEntity,
   CartCouponEntity,
   ProductVariantEntity,
-  InventoryEntity,
   ProductSizeEntity,
 } from '@app/database';
 import { AddItemDto } from './dto/add-item.dto';
@@ -29,8 +28,6 @@ export class CartService {
     private readonly cartCouponRepo: Repository<CartCouponEntity>,
     @InjectRepository(ProductVariantEntity)
     private readonly variantRepo: Repository<ProductVariantEntity>,
-    @InjectRepository(InventoryEntity)
-    private readonly inventoryRepo: Repository<InventoryEntity>,
     @InjectRepository(ProductSizeEntity)
     private readonly productSizeRepo: Repository<ProductSizeEntity>,
   ) {}
@@ -53,8 +50,6 @@ export class CartService {
       throw new BadRequestException('Variant not found or inactive');
     }
 
-    await this.validateStock(variantId, dto.quantity);
-
     const links = await this.productSizeRepo.find({where: {productId: variant.productId}, relations: ['size']});
     const activeSizes = links.map((link) => link.size).filter((size): size is NonNullable<typeof size> => Boolean(size?.isActive));
     const selectedSize = dto.sizeId ? activeSizes.find((size) => size.id === dto.sizeId) : undefined;
@@ -72,7 +67,6 @@ export class CartService {
       if (newQty > MAX_CART_ITEM_QUANTITY) {
         throw new BadRequestException(`Maximum quantity per product is ${MAX_CART_ITEM_QUANTITY}`);
       }
-      await this.validateStock(variantId, newQty);
       await this.cartItemRepo.update(existingItem.id, {
         quantity: newQty,
       });
@@ -112,7 +106,6 @@ export class CartService {
       if (dto.quantity < 1) {
         await this.cartItemRepo.remove(item);
       } else {
-        await this.validateStock(item.variantId, dto.quantity);
         await this.cartItemRepo.update(item.id, { quantity: dto.quantity });
       }
     }
@@ -249,20 +242,6 @@ export class CartService {
       );
     }
     return variant.id;
-  }
-
-  private async validateStock(variantId: string, quantity: number) {
-    const inventory = await this.inventoryRepo.findOne({
-      where: { variantId },
-    });
-    if (inventory && inventory.trackInventory && !inventory.allowBackorder) {
-      const available = inventory.quantity - inventory.reserved;
-      if (quantity > available) {
-        throw new BadRequestException(
-          `Insufficient stock: ${available} available, ${quantity} requested`,
-        );
-      }
-    }
   }
 
   private async buildCartResponse(cart: CartEntity) {

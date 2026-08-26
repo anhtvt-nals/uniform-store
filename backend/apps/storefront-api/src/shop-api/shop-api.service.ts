@@ -730,6 +730,7 @@ export class ShopApiService {
     }
     const variantId = variables.variantId as string;
     const quantity = (variables.quantity ?? 1) as number;
+    const sizeId = typeof variables.sizeId === 'string' ? variables.sizeId : undefined;
 
     // Resolve productId from variant
     const variant = await this.variantRepo.findOne({
@@ -742,7 +743,7 @@ export class ShopApiService {
 
     try {
       const cart = await this.cartService.addItem(
-        { variantId, quantity, productId: variant.productId },
+        { variantId, quantity, productId: variant.productId, sizeId },
         userId ?? undefined,
         options.sessionId,
       );

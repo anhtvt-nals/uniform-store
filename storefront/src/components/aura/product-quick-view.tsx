@@ -67,7 +67,6 @@ export function ProductQuickView({
     fullName: "",
     email: "",
     phone: "",
-    company: "",
     quantity: 1,
     notes: "",
   });
@@ -158,6 +157,14 @@ export function ProductQuickView({
     }
   };
 
+  const openInquiryForm = () => {
+    if (product?.sizes?.length && !selectedSizeId) {
+      toast.error("Vui lòng chọn size sản phẩm");
+      return;
+    }
+    setShowInquiryForm(true);
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -179,6 +186,9 @@ export function ProductQuickView({
     if (stockLevel === "OUT_OF_STOCK") return t("outOfStock");
     return t("inStock");
   };
+
+  const selectedSize = product?.sizes?.find((size) => size.id === selectedSizeId);
+  const requiresSize = Boolean(product?.sizes?.length);
 
   const images = product?.assets?.length
     ? product.assets
@@ -213,7 +223,7 @@ export function ProductQuickView({
       onClick={onClose}
     >
       <div
-        className="bg-background rounded-[32px] w-full max-w-4xl shadow-2xl grid grid-cols-1 grid-rows-[minmax(12rem,32vh)_minmax(0,1fr)] md:grid-cols-2 md:grid-rows-1 relative h-[80dvh] overflow-hidden"
+        className="bg-background rounded-[32px] w-full max-w-6xl shadow-2xl grid grid-cols-1 grid-rows-[minmax(14rem,36vh)_minmax(0,1fr)] md:grid-cols-2 md:grid-rows-1 relative h-[88dvh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -392,7 +402,6 @@ export function ProductQuickView({
               )}
 
               {product.sizes?.length ? <div className="mb-6 space-y-2"><h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kích thước</h3><div className="flex flex-wrap gap-2">{product.sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{size.code}{size.weightRange ? ` (${size.weightRange})` : ""}</button>)}</div>{product.sizeGuideImageUrl ? <a className="text-xs font-medium text-primary hover:underline" href={product.sizeGuideImageUrl} target="_blank" rel="noreferrer">Xem bảng hướng dẫn chọn size</a> : null}</div> : null}
-              </div>
 
               {/* Inquiry Form */}
               {isSubmitted ? (
@@ -406,10 +415,9 @@ export function ProductQuickView({
                   </p>
                 </div>
               ) : showInquiryForm ? (
-                <form onSubmit={handleSubmitInquiry} className="space-y-3 mb-4">
-                  <h4 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">
-                    {t("inquiryTitle")}
-                  </h4>
+                <form onSubmit={handleSubmitInquiry} className="mb-4 space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4">
+                  <div className="flex items-start justify-between gap-3"><div><h4 className="text-sm font-bold text-foreground">Gửi yêu cầu báo giá</h4><p className="mt-0.5 text-xs text-muted-foreground">Chúng tôi sẽ liên hệ để tư vấn và báo giá chính xác.</p></div><button type="button" onClick={() => setShowInquiryForm(false)} className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground">Thu gọn</button></div>
+                  <div className="rounded-xl border border-border/70 bg-background p-3 text-xs"><div className="font-semibold text-foreground">{product.name}</div><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground"><span>{selectedVariant?.name || "Đang chọn mẫu"}</span>{selectedSize ? <span>Size: <strong className="font-semibold text-foreground">{selectedSize.code}</strong></span> : null}<span>Số lượng: <strong className="font-semibold text-foreground">{formData.quantity}</strong></span></div></div>
                   <input
                     name="fullName"
                     value={formData.fullName}
@@ -436,14 +444,8 @@ export function ProductQuickView({
                       className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      placeholder={t("inquiryCompanyPlaceholder")}
-                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                    />
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2">
+                    <span className="text-xs font-medium text-muted-foreground">Số lượng cần báo giá</span>
                     <input
                       name="quantity"
                       type="number"
@@ -451,7 +453,7 @@ export function ProductQuickView({
                       value={formData.quantity}
                       onChange={handleInputChange}
                       required
-                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="h-8 w-20 rounded-lg border border-border bg-background px-2 text-center text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                   </div>
                   <textarea
@@ -465,7 +467,7 @@ export function ProductQuickView({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-foreground text-background rounded-full py-3.5 font-bold uppercase tracking-widest text-xs hover:bg-muted-foreground transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <>
@@ -479,15 +481,20 @@ export function ProductQuickView({
                     )}
                   </button>
                 </form>
-              ) : (
+              ) : null}
+              </div>
+
+              {!showInquiryForm && !isSubmitted && (
                 <button
                   type="button"
-                  onClick={() => setShowInquiryForm(true)}
-                  className="mb-4 flex w-full items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-xs font-bold uppercase tracking-widest text-background transition hover:bg-muted-foreground"
+                  onClick={openInquiryForm}
+                  disabled={requiresSize && !selectedSizeId}
+                  className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-xs font-bold uppercase tracking-widest text-background transition hover:bg-muted-foreground disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   <Send className="h-4 w-4" /> {t("inquiryTitle")}
                 </button>
               )}
+              {!showInquiryForm && !isSubmitted && requiresSize && !selectedSizeId ? <p className="mt-2 text-center text-xs text-muted-foreground">Vui lòng chọn size để gửi yêu cầu báo giá.</p> : null}
 
               {/* View Detail Link */}
               <Link
