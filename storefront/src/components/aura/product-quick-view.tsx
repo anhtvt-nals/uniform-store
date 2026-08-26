@@ -309,7 +309,6 @@ export function ProductQuickView({
                 )}
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
               {/* Option groups */}
               {product.optionGroups.length > 0 && (
                 <div className="space-y-5 mb-6">
@@ -343,6 +342,7 @@ export function ProductQuickView({
                 </div>
               )}
 
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
               {product.variants.length > 0 && (
                 <div className="mb-6 space-y-2">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -392,6 +392,7 @@ export function ProductQuickView({
               )}
 
               {product.sizes?.length ? <div className="mb-6 space-y-2"><h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kích thước</h3><div className="flex flex-wrap gap-2">{product.sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{size.code}{size.weightRange ? ` (${size.weightRange})` : ""}</button>)}</div>{product.sizeGuideImageUrl ? <a className="text-xs font-medium text-primary hover:underline" href={product.sizeGuideImageUrl} target="_blank" rel="noreferrer">Xem bảng hướng dẫn chọn size</a> : null}</div> : null}
+              </div>
 
               {/* Inquiry Form */}
               {isSubmitted ? (
@@ -496,7 +497,6 @@ export function ProductQuickView({
               >
                 {t("viewDetail")} <ArrowRight className="w-4 h-4" />
               </Link>
-              </div>
             </div>
           </>
         )}
