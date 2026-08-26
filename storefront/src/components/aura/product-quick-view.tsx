@@ -41,14 +41,6 @@ interface QuickViewProduct {
   sizeGuideImageUrl?: string;
 }
 
-function normalizeDescription(value?: string) {
-  return (value || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 export function ProductQuickView({
   slug,
   onClose,
@@ -193,12 +185,6 @@ export function ProductQuickView({
     : product
       ? [{ id: "placeholder", preview: "", source: "" }]
       : [];
-  const hasDistinctDescription = Boolean(
-    product?.description &&
-      normalizeDescription(product.description) !==
-        normalizeDescription(product.sortDescription),
-  );
-
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImage((p) => (p + 1) % images.length);
@@ -300,7 +286,7 @@ export function ProductQuickView({
             </div>
 
             {/* Info */}
-            <div className="min-h-0 p-6 md:p-8 lg:p-12 flex flex-col justify-start overflow-y-auto overscroll-contain relative bg-background">
+            <div className="min-h-0 overflow-hidden p-6 md:p-8 lg:p-12 flex flex-col justify-start relative bg-background">
               <div className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-4">
                 {product.optionGroups[0]?.name ||
                   t("sku", { sku: product.variants[0]?.sku || "" })}
@@ -323,6 +309,7 @@ export function ProductQuickView({
                 )}
               </div>
 
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
               {/* Option groups */}
               {product.optionGroups.length > 0 && (
                 <div className="space-y-5 mb-6">
@@ -405,14 +392,6 @@ export function ProductQuickView({
               )}
 
               {product.sizes?.length ? <div className="mb-6 space-y-2"><h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kích thước</h3><div className="flex flex-wrap gap-2">{product.sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{size.code}{size.weightRange ? ` (${size.weightRange})` : ""}</button>)}</div>{product.sizeGuideImageUrl ? <a className="text-xs font-medium text-primary hover:underline" href={product.sizeGuideImageUrl} target="_blank" rel="noreferrer">Xem bảng hướng dẫn chọn size</a> : null}</div> : null}
-
-              {/* Description */}
-              {hasDistinctDescription && product.description && (
-                <div
-                  className="text-muted-foreground mb-8 leading-relaxed text-sm prose prose-sm max-w-none line-clamp-4"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              )}
 
               {/* Inquiry Form */}
               {isSubmitted ? (
@@ -517,6 +496,7 @@ export function ProductQuickView({
               >
                 {t("viewDetail")} <ArrowRight className="w-4 h-4" />
               </Link>
+              </div>
             </div>
           </>
         )}

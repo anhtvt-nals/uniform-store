@@ -71,7 +71,8 @@ export function ProductInfo({
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/v1/products/${product.slug}`).then((response) => response.ok ? response.json() : null).then((data) => {
+    fetch(`/api/v1/products/${product.slug}`).then((response) => response.ok ? response.json() : null).then((payload) => {
+      const data = payload?.data || payload;
       if (!data) return;
       setSizes(data.sizes || []);
       setSizeGuideImageUrl(data.sizeGuideImageUrl || "");

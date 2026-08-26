@@ -246,9 +246,9 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => {
                     const checked = sizeIds.includes(size.id);
-                    return <label key={size.id} className={`cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors ${checked ? "border-primary bg-primary/10 text-primary" : "border-input hover:border-primary/50"}`}>
+                    return <label key={size.id} className={`cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors ${checked ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary/50"}`}>
                       <input className="sr-only" type="checkbox" checked={checked} onChange={() => setSizeIds((current) => checked ? current.filter((id) => id !== size.id) : [...current, size.id])} />
-                      <span className="font-semibold">{size.code}</span>{size.weightRange ? <span className="ml-1 text-muted-foreground">({size.weightRange})</span> : null}
+                      <span className="font-semibold">{size.code}</span>{size.weightRange ? <span className={`ml-1 ${checked ? "text-primary-foreground/85" : "text-muted-foreground"}`}>({size.weightRange})</span> : null}
                     </label>;
                   })}
                 </div>

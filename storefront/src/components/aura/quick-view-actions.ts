@@ -18,9 +18,10 @@ export async function getProductForQuickView(slug: string) {
     const product = result.data.product as ProductDetail | null | undefined;
     if (!product) return null;
     const shopApiUrl = process.env.VENDURE_SHOP_API_URL || process.env.NEXT_PUBLIC_VENDURE_SHOP_API_URL;
-    const sizeData = shopApiUrl
+    const sizePayload = shopApiUrl
         ? await fetch(new URL(`/api/v1/products/${slug}`, shopApiUrl), {next: {revalidate: 60}}).then((response) => response.ok ? response.json() : null).catch(() => null)
         : null;
+    const sizeData = sizePayload?.data || sizePayload;
     return {
         ...product,
         sizes: sizeData?.sizes || [],

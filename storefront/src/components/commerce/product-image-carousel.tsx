@@ -72,14 +72,14 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
                 )}
             </div>
 
-            {/* Thumbnail Grid */}
+            {/* Scrollable thumbnail strip */}
             {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="flex gap-3 overflow-x-auto pb-2 pr-1 [scrollbar-width:thin]">
                     {images.map((image, index) => (
                         <button
                             key={image.id}
                             onClick={() => setCurrentIndex(index)}
-                            className={`aspect-square relative rounded-lg overflow-hidden transition-all duration-200 ${
+                            className={`relative aspect-square w-20 shrink-0 rounded-lg overflow-hidden transition-all duration-200 sm:w-24 ${
                                 index === currentIndex
                                     ? 'ring-2 ring-primary ring-offset-2'
                                     : 'ring-1 ring-border hover:ring-muted-foreground opacity-70 hover:opacity-100'
@@ -90,7 +90,7 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
                                 alt={`Thumbnail ${index + 1}`}
                                 fill
                                 className="object-cover"
-                                sizes="25vw"
+                                sizes="96px"
                             />
                         </button>
                     ))}
