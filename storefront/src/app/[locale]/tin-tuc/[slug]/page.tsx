@@ -4,7 +4,6 @@ import { SITE_NAME, SITE_URL, buildCanonicalUrl } from "@/lib/metadata";
 import { getTranslations } from "next-intl/server";
 import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
-import { FloatingButtons } from "@/components/aura/floating-buttons";
 import { Link } from "@/i18n/navigation";
 import { ReadingProgress } from "@/components/shared/reading-progress";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User } from "lucide-react";
@@ -248,7 +247,6 @@ export default async function NewsDetailPage({
           <NewsDetailInner locale={locale} slug={slug} />
         </Suspense>
 
-        <FloatingButtons />
       </main>
     </>
   );

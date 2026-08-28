@@ -13,6 +13,7 @@ import {Suspense} from "react";
 import {Navbar} from "@/components/layout/navbar";
 import {Footer} from "@/components/layout/footer";
 import {ThemeProvider} from "@/components/providers/theme-provider";
+import {FloatingButtons} from "@/components/aura/floating-buttons";
 import {SITE_NAME, SITE_URL} from "@/lib/metadata";
 import "./globals.css";
 
@@ -111,6 +112,7 @@ export default async function LocaleLayout({children}: {children: React.ReactNod
                             <Suspense><Navbar /></Suspense>
                             {children}
                             <Suspense><Footer /></Suspense>
+                            <FloatingButtons />
                             <Toaster/>
                         </ThemeProvider>
                     </Suspense>

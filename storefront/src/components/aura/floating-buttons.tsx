@@ -25,7 +25,10 @@ export function FloatingButtons() {
     useEffect(() => {
         fetch('/api/v1/settings/public')
             .then((res) => res.json())
-            .then((data) => {
+            .then((payload) => {
+                const data = typeof payload === 'object' && payload !== null && 'data' in payload
+                    ? (payload as {data: unknown}).data
+                    : payload;
                 const result: Settings = {};
                 if (typeof data === 'object' && data !== null) {
                     for (const [key, value] of Object.entries(data)) {

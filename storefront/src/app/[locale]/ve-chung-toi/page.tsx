@@ -6,7 +6,6 @@ import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
 import { StatsSection } from "@/components/aura/stats-section";
 import { WhyChooseUsSection } from "@/components/aura/why-choose-us-section";
-import { FloatingButtons } from "@/components/aura/floating-buttons";
 import { ShieldCheck, Award, Users, Factory } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -121,7 +120,6 @@ export default async function AboutPage() {
       {/* Why choose us */}
       <WhyChooseUsSection />
 
-      <FloatingButtons />
     </main>
   );
 }

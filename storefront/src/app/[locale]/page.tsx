@@ -16,7 +16,6 @@ import {ConsultationWidget} from "@/components/aura/consultation-widget";
 import {FAQSection} from "@/components/aura/faq-section";
 import {NewsSection} from "@/components/aura/news-section";
 import {CustomerContractsSection} from "@/components/aura/customer-contracts-section";
-import {FloatingButtons} from "@/components/aura/floating-buttons";
 
 async function getTestimonials(locale: string, fallback: Testimonial[]): Promise<Testimonial[]> {
     const backendUrl = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace('/shop-api', '');
@@ -88,7 +87,6 @@ export default async function Home() {
                 <FAQSection />
                 <NewsSection />
             </main>
-            <FloatingButtons />
         </div>
     );
 }

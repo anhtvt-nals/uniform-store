@@ -7,7 +7,6 @@ import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
 import { ProcessSection } from "@/components/aura/process-section";
 import { WhyChooseUsSection } from "@/components/aura/why-choose-us-section";
-import { FloatingButtons } from "@/components/aura/floating-buttons";
 import { ArrowRight } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,7 +55,6 @@ export default async function ServicesPage() {
       </div>
       <ProcessSection />
       <WhyChooseUsSection />
-      <FloatingButtons />
     </main>
   );
 }

@@ -67,6 +67,7 @@ export function ProductInfo({
   const [sizes, setSizes] = useState<Array<{id: string; code: string; weightRange: string}>>([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
   const [basePrice, setBasePrice] = useState<number | null>(null);
+  const [zaloUrl, setZaloUrl] = useState("https://zalo.me/0901234567");
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,6 +79,16 @@ export function ProductInfo({
       setBasePrice(Number(data.basePrice || 0));
     }).catch(() => undefined);
   }, [product.slug]);
+
+  useEffect(() => {
+    fetch("/api/v1/settings/public")
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        const settings = payload?.data || payload;
+        if (typeof settings?.zalo_url === "string" && settings.zalo_url.trim()) setZaloUrl(settings.zalo_url);
+      })
+      .catch(() => undefined);
+  }, []);
 
   // Initialize selected options from URL
   const [selectedOptions, setSelectedOptions] = useState<
@@ -275,17 +286,21 @@ export function ProductInfo({
             max={10000}
             value={quantity}
             onChange={(event) => setQuantity(Math.min(10000, Math.max(1, Number(event.target.value) || 1)))}
+            className="h-11"
           />
         </div>
         <Button
           type="button"
           size="lg"
-          className="h-11 flex-1 rounded-xl text-base font-bold"
+          className="h-11 flex-1 rounded-lg text-base font-bold"
           disabled={!selectedVariant || (sizes.length > 0 && !selectedSizeId) || isOutOfStock || isAddingToCart}
           onClick={handleAddToCart}
         >
           {isAddingToCart ? <Loader2 className="mr-2 size-5 animate-spin" /> : <ShoppingCart className="mr-2 size-5" />}
           {isOutOfStock ? t("outOfStock") : isAddingToCart ? t("adding") : t("addToCart")}
+        </Button>
+        <Button render={<a href={zaloUrl} target="_blank" rel="noopener noreferrer" />} nativeButton={false} type="button" variant="outline" size="lg" className="h-11 flex-1 rounded-lg border-[#0068ff] text-base font-bold text-[#0068ff] hover:border-[#0058d9] hover:bg-[#0068ff]/10 hover:text-[#0058d9]">
+          <img src="/zalo.webp" alt="" className="mr-2 size-5 object-contain" />Tư vấn qua Zalo
         </Button>
       </div>
 

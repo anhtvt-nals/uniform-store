@@ -9,7 +9,6 @@ import { getTranslations } from "next-intl/server";
 import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
 import { Suspense } from "react";
-import { FloatingButtons } from "@/components/aura/floating-buttons";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowRight,
@@ -506,7 +505,6 @@ async function NewsListContent({
         )}
       </div>
 
-      <FloatingButtons />
     </main>
   );
 }
