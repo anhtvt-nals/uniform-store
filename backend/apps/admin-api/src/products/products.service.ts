@@ -134,6 +134,7 @@ export class ProductsService {
       categoryId: dto.categoryId,
       brandId: dto.brandId ?? null,
       description: dto.description ?? {},
+      sortDescription: dto.sortDescription ?? dto.description ?? {},
       detail: dto.detail ?? {},
       sku: dto.sku ?? '',
       basePrice: dto.basePrice ?? 0,
@@ -164,6 +165,8 @@ export class ProductsService {
     if (dto.categoryId !== undefined) product.categoryId = dto.categoryId;
     if (dto.brandId !== undefined) product.brandId = dto.brandId;
     if (dto.description !== undefined) product.description = dto.description;
+    if (dto.sortDescription !== undefined) product.sortDescription = dto.sortDescription;
+    else if (dto.description !== undefined) product.sortDescription = dto.description;
     if (dto.sku !== undefined) product.sku = dto.sku;
     if (dto.basePrice !== undefined) product.basePrice = dto.basePrice;
     if (dto.taxRate !== undefined) product.taxRate = dto.taxRate;

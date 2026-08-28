@@ -595,7 +595,7 @@ export class ShopApiService {
       productId: p.id,
       productName: p.name?.[locale] ?? p.name?.en ?? '',
       slug: p.slug,
-      sortDescription: p.sortDescription?.[locale] ?? p.sortDescription?.en ?? '',
+      sortDescription: p.description?.[locale] ?? p.description?.en ?? p.sortDescription?.[locale] ?? p.sortDescription?.en ?? '',
       productAsset: firstImage ? {
         id: firstImage.id,
         preview: firstImage.url ?? firstImage.preview,
@@ -664,7 +664,7 @@ export class ShopApiService {
       id: product.id,
       name: product.name?.[locale] ?? product.name?.en ?? '',
       description: product.description?.[locale] ?? product.description?.en ?? '',
-      sortDescription: product.sortDescription?.[locale] ?? product.sortDescription?.en ?? '',
+      sortDescription: product.description?.[locale] ?? product.description?.en ?? product.sortDescription?.[locale] ?? product.sortDescription?.en ?? '',
       detail: product.detail?.[locale] ?? product.detail?.en ?? '',
       slug: product.slug,
       assets: images,
