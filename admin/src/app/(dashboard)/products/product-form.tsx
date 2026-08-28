@@ -111,6 +111,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
   const [detail, setDetail] = useState<Record<string, string>>({});
   const [categoryId, setCategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
+  const [basePrice, setBasePrice] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
@@ -132,6 +133,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       setDetail((defaultValues.detail as Record<string, string>) || {});
       setCategoryId((defaultValues.categoryId as string) || (defaultValues.category as { id: string })?.id || "");
       setBrandId((defaultValues.brandId as string) || (defaultValues.brand as { id: string })?.id || "");
+      setBasePrice(defaultValues.basePrice !== undefined && defaultValues.basePrice !== null ? String(defaultValues.basePrice) : "");
       setIsActive(defaultValues.isActive !== undefined ? Boolean(defaultValues.isActive) : true);
       setIsFeatured(defaultValues.isFeatured !== undefined ? Boolean(defaultValues.isFeatured) : false);
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
@@ -179,6 +181,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
     if (!slug.trim()) newErrors.slug = "Vui lòng nhập slug";
     else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = "Slug chỉ gồm chữ thường, số và dấu gạch ngang";
     if (!categoryId) newErrors.categoryId = "Vui lòng chọn danh mục";
+    if (basePrice && (!Number.isInteger(Number(basePrice)) || Number(basePrice) < 0)) newErrors.basePrice = "Giá phải là số VNĐ nguyên, không âm";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -190,6 +193,7 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
       isActive,
       isFeatured,
       detail,
+      basePrice: basePrice ? Number(basePrice) : 0,
       sizeIds,
       sizeGuideImageUrl,
     };
@@ -232,6 +236,12 @@ export function ProductForm({ defaultValues, onSubmit, isSubmitting, productId, 
                 <Label htmlFor="slug">Slug</Label>
                 <Input id="slug" value={slug} onChange={(e) => handleSlugChange(e.target.value)} placeholder="product-slug" />
                 {errors.slug && <p className="text-xs text-destructive">{errors.slug}</p>}
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="basePrice">Giá tham khảo ban đầu (VNĐ)</Label>
+                <Input id="basePrice" type="number" min="0" step="1" inputMode="numeric" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} placeholder="Ví dụ: 250000" />
+                <p className="text-xs text-muted-foreground">Hiển thị trước khi khách chọn mã sản phẩm; không cần trùng giá của từng mã.</p>
+                {errors.basePrice && <p className="text-xs text-destructive">{errors.basePrice}</p>}
               </div>
             </CardContent>
           </Card>
