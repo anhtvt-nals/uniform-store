@@ -26,6 +26,7 @@ export async function getProductForQuickView(slug: string) {
         ...product,
         sizes: sizeData?.sizes || [],
         sizeGuideImageUrl: sizeData?.sizeGuideImageUrl || "",
+        basePrice: Number(sizeData?.basePrice || 0),
         optionGroups: getDisplayOptionGroups(product),
     };
 }

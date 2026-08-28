@@ -21,6 +21,7 @@ interface QuickViewProduct {
   name: string;
   description: string;
   sortDescription?: string;
+  basePrice: number;
   slug: string;
   assets: Array<{ id: string; preview: string; source: string }>;
   variants: Array<{
@@ -82,18 +83,8 @@ export function ProductQuickView({
           setError(t("notFound"));
         } else {
           setProduct(p as QuickViewProduct);
-          const firstVariant = p.variants[0];
-          if (firstVariant) {
-            setSelectedVariantId(firstVariant.id);
-            setSelectedOptions(
-              Object.fromEntries(
-                firstVariant.options.map((option) => [
-                  option.groupId,
-                  option.id,
-                ]),
-              ),
-            );
-          }
+          setSelectedVariantId(null);
+          setSelectedOptions({});
         }
       })
       .catch(() => active && setError(t("errorTitle")))
@@ -105,25 +96,7 @@ export function ProductQuickView({
 
   const selectedVariant = useMemo(() => {
     if (!product) return null;
-    if (product.variants.length === 1) return product.variants[0];
-    if (
-      Object.keys(selectedOptions).length === product.optionGroups.length &&
-      product.optionGroups.length > 0
-    ) {
-      const matchingVariant = product.variants.find((variant) => {
-        const variantOptionIds = variant.options.map((opt) => opt.id);
-        const selectedOptionIds = Object.values(selectedOptions);
-        return selectedOptionIds.every((optId) =>
-          variantOptionIds.includes(optId),
-        );
-      });
-      if (matchingVariant) return matchingVariant;
-    }
-    return (
-      product.variants.find((variant) => variant.id === selectedVariantId) ||
-      product.variants[0] ||
-      null
-    );
+    return product.variants.find((variant) => variant.id === selectedVariantId) || null;
   }, [product, selectedOptions, selectedVariantId]);
 
   const handleOptionChange = (groupId: string, optionId: string) => {
@@ -133,6 +106,10 @@ export function ProductQuickView({
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedVariant) {
+      toast.error("Vui lòng chọn mã sản phẩm");
+      return;
+    }
     if (product?.sizes?.length && !selectedSizeId) {
       toast.error("Vui lòng chọn size sản phẩm");
       return;
@@ -158,6 +135,10 @@ export function ProductQuickView({
   };
 
   const openInquiryForm = () => {
+    if (!selectedVariant) {
+      toast.error("Vui lòng chọn mã sản phẩm");
+      return;
+    }
     if (product?.sizes?.length && !selectedSizeId) {
       toast.error("Vui lòng chọn size sản phẩm");
       return;
@@ -310,13 +291,7 @@ export function ProductQuickView({
                 </p>
               )}
               <div className="text-2xl font-bold text-primary mb-6">
-                {selectedVariant ? (
-                  formatVnd(selectedVariant.priceWithTax)
-                ) : (
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {t("selectOptions")}
-                  </span>
-                )}
+                {formatVnd(selectedVariant?.priceWithTax ?? product.basePrice)}
               </div>
 
               {/* Option groups */}
@@ -417,7 +392,7 @@ export function ProductQuickView({
               ) : showInquiryForm ? (
                 <form onSubmit={handleSubmitInquiry} className="mb-4 space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4">
                   <div className="flex items-start justify-between gap-3"><div><h4 className="text-sm font-bold text-foreground">Gửi yêu cầu báo giá</h4><p className="mt-0.5 text-xs text-muted-foreground">Chúng tôi sẽ liên hệ để tư vấn và báo giá chính xác.</p></div><button type="button" onClick={() => setShowInquiryForm(false)} className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground">Thu gọn</button></div>
-                  <div className="rounded-xl border border-border/70 bg-background p-3 text-xs"><div className="font-semibold text-foreground">{product.name}</div><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground"><span>{selectedVariant?.name || "Đang chọn mẫu"}</span>{selectedSize ? <span>Size: <strong className="font-semibold text-foreground">{selectedSize.code}</strong></span> : null}<span>Số lượng: <strong className="font-semibold text-foreground">{formData.quantity}</strong></span></div></div>
+                  <div className="rounded-xl border border-border/70 bg-background p-3 text-xs"><div className="font-semibold text-foreground">{product.name}</div><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground"><span>{selectedVariant?.name || "Chưa chọn mã sản phẩm"}</span>{selectedSize ? <span>Size: <strong className="font-semibold text-foreground">{selectedSize.code}</strong></span> : null}<span>Số lượng: <strong className="font-semibold text-foreground">{formData.quantity}</strong></span></div></div>
                   <input
                     name="fullName"
                     value={formData.fullName}
@@ -488,13 +463,13 @@ export function ProductQuickView({
                 <button
                   type="button"
                   onClick={openInquiryForm}
-                  disabled={requiresSize && !selectedSizeId}
+                  disabled={!selectedVariant || (requiresSize && !selectedSizeId)}
                   className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-xs font-bold uppercase tracking-widest text-background transition hover:bg-muted-foreground disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   <Send className="h-4 w-4" /> {t("inquiryTitle")}
                 </button>
               )}
-              {!showInquiryForm && !isSubmitted && requiresSize && !selectedSizeId ? <p className="mt-2 text-center text-xs text-muted-foreground">Vui lòng chọn size để gửi yêu cầu báo giá.</p> : null}
+              {!showInquiryForm && !isSubmitted && (!selectedVariant || (requiresSize && !selectedSizeId)) ? <p className="mt-2 text-center text-xs text-muted-foreground">{!selectedVariant ? "Vui lòng chọn mã sản phẩm" : "Vui lòng chọn size"} để gửi yêu cầu báo giá.</p> : null}
 
               {/* View Detail Link */}
               <Link

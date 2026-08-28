@@ -63,11 +63,10 @@ export function ProductInfo({
   const t = useTranslations("Product");
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, startAddingToCart] = useTransition();
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    product.variants[0]?.id ?? null,
-  );
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [sizes, setSizes] = useState<Array<{id: string; code: string; weightRange: string}>>([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
+  const [basePrice, setBasePrice] = useState<number | null>(null);
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -76,6 +75,7 @@ export function ProductInfo({
       if (!data) return;
       setSizes(data.sizes || []);
       setSizeGuideImageUrl(data.sizeGuideImageUrl || "");
+      setBasePrice(Number(data.basePrice || 0));
     }).catch(() => undefined);
   }, [product.slug]);
 
@@ -102,23 +102,7 @@ export function ProductInfo({
 
   // Find the matching variant based on selected options
   const selectedVariant = useMemo(() => {
-    if (product.variants.length === 1) {
-      return product.variants[0];
-    }
-
-    // Default to the first purchasable variant until the buyer selects options.
-    if (product.optionGroups.length === 0 || Object.keys(selectedOptions).length !== product.optionGroups.length) {
-      return product.variants.find((variant) => variant.id === selectedVariantId) ?? product.variants[0];
-    }
-
-    // Find variant that matches all selected options
-    return product.variants.find((variant) => {
-      const variantOptionIds = variant.options.map((opt) => opt.id);
-      const selectedOptionIds = Object.values(selectedOptions);
-      return selectedOptionIds.every((optId) =>
-        variantOptionIds.includes(optId),
-      );
-    }) ?? product.variants.find((variant) => variant.id === selectedVariantId) ?? product.variants[0];
+    return product.variants.find((variant) => variant.id === selectedVariantId) ?? null;
   }, [selectedOptions, selectedVariantId, product.variants, product.optionGroups]);
 
   const pathname = usePathname();
@@ -158,7 +142,7 @@ export function ProductInfo({
 
   const handleAddToCart = () => {
     if (!selectedVariant) {
-      toast.error(t("selectOptions"));
+      toast.error("Vui lòng chọn mã sản phẩm");
       return;
     }
     if (sizes.length && !selectedSizeId) {
@@ -188,22 +172,21 @@ export function ProductInfo({
         <h1 className="font-category-title text-3xl md:text-4xl tracking-tight">
           {product.name}
         </h1>
-        {selectedVariant && (
+        {selectedVariant || basePrice !== null ? (
           <p className="mt-3 text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
             <Price
-              value={selectedVariant.priceWithTax}
+              value={selectedVariant?.priceWithTax ?? basePrice ?? 0}
               currencyCode={currencyCode}
             />
           </p>
+        ) : <div className="mt-3 h-10 w-32 animate-pulse rounded bg-muted" />}
+
+        {product.sortDescription && (
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{product.sortDescription}</p>
         )}
       </div>
 
       <Separator />
-
-      {/* Product Description */}
-      <div className="prose prose-sm max-w-none text-muted-foreground">
-        <div dangerouslySetInnerHTML={{ __html: product.description }} />
-      </div>
 
       {/* Option Groups */}
       {product.optionGroups.length > 0 && (
@@ -298,7 +281,7 @@ export function ProductInfo({
           type="button"
           size="lg"
           className="h-11 flex-1 rounded-xl text-base font-bold"
-          disabled={!selectedVariant || isOutOfStock || isAddingToCart}
+          disabled={!selectedVariant || (sizes.length > 0 && !selectedSizeId) || isOutOfStock || isAddingToCart}
           onClick={handleAddToCart}
         >
           {isAddingToCart ? <Loader2 className="mr-2 size-5 animate-spin" /> : <ShoppingCart className="mr-2 size-5" />}
