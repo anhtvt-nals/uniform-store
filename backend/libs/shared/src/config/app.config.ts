@@ -38,6 +38,6 @@ export default registerAs('app', () => ({
     user: process.env.SMTP_USER || '',
     password: process.env.SMTP_PASSWORD || '',
     from: process.env.MAIL_FROM || 'noreply@minhanuniform.vn',
-    salesEmail: process.env.SALES_EMAIL || 'sales@minhanuniform.vn',
+    notificationEmail: process.env.MAIL_NOTIFICATION_TO || 'minhan.uniform@gmail.com',
   },
 }));

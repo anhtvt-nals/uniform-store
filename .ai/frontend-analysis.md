@@ -562,7 +562,7 @@ The frontend uses `next/cache` with these patterns:
 |--------|----------|------|---------|
 | GET | `/api/v1/products` | Optional | Search with q, collectionSlug, facets, sort, page, groupByProduct |
 | GET | `/api/v1/products/featured` | No | Featured products (limit) |
-| GET | `/api/v1/products/:slug` | No | Product detail |
+| GET | `/api/v1/products/:slug` | No | Product detail; includes `sizes`, `sizeGuideImageUrl`, `basePrice` and `isContactPrice` for detail and quick-view pricing |
 | GET | `/api/v1/products/:slug/variants` | No | Variant list for product |
 | GET | `/api/v1/products/:slug/related` | No | Related products |
 | GET | `/api/v1/collections` | No | Top collections (root, active) |

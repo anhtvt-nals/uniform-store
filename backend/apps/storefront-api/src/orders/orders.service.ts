@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import {
@@ -19,6 +15,7 @@ import {
   ProductVariantEntity,
   UserEntity,
 } from '@app/database';
+import { MailService } from '@app/shared';
 import { PlaceOrderDto } from './dto/place-order.dto';
 import { CreateCartOrderDto } from './dto/create-cart-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
@@ -52,13 +49,10 @@ export class OrdersService {
     private readonly productVariantRepo: Repository<ProductVariantEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly mailService: MailService,
   ) {}
 
-  async create(
-    dto: PlaceOrderDto,
-    userId?: string,
-    sessionId?: string,
-  ) {
+  async create(dto: PlaceOrderDto, userId?: string, sessionId?: string) {
     const cart = await this.findActiveCart(userId, sessionId);
     if (!cart) {
       throw new BadRequestException('No active cart found');
@@ -84,20 +78,16 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
-      const customerId = userId ?? await this.syncCustomer(
-        dto.email,
-        dto.shippingAddress.fullName,
-        dto.shippingAddress.phone ?? '',
-        queryRunner.manager.getRepository(UserEntity),
-      );
-      const subtotal = items.reduce(
-        (sum, i) => sum + i.unitPrice * i.quantity,
-        0,
-      );
-      const discountTotal = coupons.reduce(
-        (sum, c) => sum + c.discountAmount,
-        0,
-      );
+      const customerId =
+        userId ??
+        (await this.syncCustomer(
+          dto.email,
+          dto.shippingAddress.fullName,
+          dto.shippingAddress.phone ?? '',
+          queryRunner.manager.getRepository(UserEntity),
+        ));
+      const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+      const discountTotal = coupons.reduce((sum, c) => sum + c.discountAmount, 0);
       const shippingTotal = 0;
       const taxTotal = 0;
       const grandTotal = subtotal - discountTotal + shippingTotal + taxTotal;
@@ -209,6 +199,30 @@ export class OrdersService {
 
       await queryRunner.commitTransaction();
 
+      await this.mailService.sendOrderNotification({
+        code: savedOrder.code,
+        createdAt: savedOrder.createdAt,
+        customerName: dto.shippingAddress.fullName,
+        phone: dto.shippingAddress.phone,
+        email: dto.email,
+        company: dto.shippingAddress.company,
+        region: [dto.shippingAddress.city, dto.shippingAddress.province].filter(Boolean).join(', '),
+        address: [dto.shippingAddress.streetLine1, dto.shippingAddress.streetLine2]
+          .filter(Boolean)
+          .join(', '),
+        notes: dto.notes,
+        total: grandTotal,
+        items: items.map((item) => ({
+          productName: this.getLocalizedName(item.variant?.product?.name),
+          variantName: this.getLocalizedName(item.variant?.name),
+          sku: item.variant?.sku,
+          sizeName: item.sizeName,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          linePrice: Number(item.unitPrice) * item.quantity,
+        })),
+      });
+
       return this.findOrderById(savedOrder.id);
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -218,11 +232,7 @@ export class OrdersService {
     }
   }
 
-  async createFromCartRequest(
-    dto: CreateCartOrderDto,
-    userId?: string,
-    sessionId?: string,
-  ) {
+  async createFromCartRequest(dto: CreateCartOrderDto, userId?: string, sessionId?: string) {
     const address = dto.address?.trim() || 'Chưa cung cấp';
     const region = dto.region?.trim() || 'Chưa xác định';
 
@@ -318,6 +328,10 @@ export class OrdersService {
     return `MA-${date}-${suffix}`;
   }
 
+  private getLocalizedName(value?: Record<string, string>): string {
+    return value?.vi ?? value?.en ?? Object.values(value ?? {})[0] ?? 'Sản phẩm';
+  }
+
   async findOrderByCode(code: string, userId?: string) {
     const where: any = { code };
     if (userId) {
@@ -326,13 +340,7 @@ export class OrdersService {
 
     const order = await this.orderRepo.findOne({
       where,
-      relations: [
-        'items',
-        'addresses',
-        'payments',
-        'discounts',
-        'statusHistory',
-      ],
+      relations: ['items', 'addresses', 'payments', 'discounts', 'statusHistory'],
     });
 
     if (!order) {
@@ -355,9 +363,7 @@ export class OrdersService {
       throw new NotFoundException('Không tìm thấy đơn hàng phù hợp');
     }
 
-    const shippingAddress = order.addresses?.find(
-      (address) => address.type === 'shipping',
-    );
+    const shippingAddress = order.addresses?.find((address) => address.type === 'shipping');
     const variantIds = order.items?.map((item) => item.variantId) ?? [];
     const variants = variantIds.length
       ? await this.productVariantRepo.find({
@@ -369,9 +375,7 @@ export class OrdersService {
       variants.map((variant) => {
         const images = variant.product?.images ?? [];
         const thumbnail =
-          images.find((image) => image.variantId === variant.id)?.url ??
-          images[0]?.url ??
-          null;
+          images.find((image) => image.variantId === variant.id)?.url ?? images[0]?.url ?? null;
         return [variant.id, thumbnail];
       }),
     );
@@ -407,13 +411,7 @@ export class OrdersService {
   private async findOrderById(id: string) {
     const order = await this.orderRepo.findOne({
       where: { id },
-      relations: [
-        'items',
-        'addresses',
-        'payments',
-        'discounts',
-        'statusHistory',
-      ],
+      relations: ['items', 'addresses', 'payments', 'discounts', 'statusHistory'],
     });
 
     if (!order) {

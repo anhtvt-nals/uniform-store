@@ -212,6 +212,7 @@ backend/
 - Storefront product detail and quick preview load active sizes from the REST product-detail endpoint, require size selection for products that have sizes configured, and retain the selected size when the cart becomes an order.
 
 ### Admin Vietnamese UI Sweep (2026-08-23)
+
 - Translated the remaining customer-facing Admin UI across login, orders, customers, promotions, inquiries, quotes, contracts, assets, settings, inventory, activity logs, permissions, categories, brands, and product detail actions.
 - Brand and Category forms now accept only Vietnamese localized content. The Product list invalidates and refetches its API query when returning from a product edit page, preserving fresh list data.
 
@@ -722,3 +723,13 @@ git push → main
 ### Admin R2 Multipart Uploads (2026-08-24)
 
 - Admin image uploads over 5 MB now use browser-to-R2 multipart uploads with signed part URLs and parallel parts; successful completion creates the same `assets` and optional product/category/brand association as the former API upload. Images up to 5 MB keep the API upload path, and the maximum image size remains 10 MB.
+
+### Internal Order & Quote Email Notifications (2026-08-28)
+
+- A committed storefront order and every storefront quote request now trigger an internal HTML email notification to `MAIL_NOTIFICATION_TO` (default: `minhan.uniform@gmail.com`). The responsive template contains contact details, order/request metadata, requested product/variant/SKU/size/quantity and VND pricing when applicable.
+- Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM` in root `.env` for delivery. SMTP errors are logged without rolling back a saved customer order or quote request.
+
+### Contact Pricing & Product Duplication (2026-09-02)
+
+- Migration `045_add_contact_price_to_products.sql` adds `products.is_contact_price`. When enabled in the Admin product form, `base_price` is stored as `0`; storefront product cards, quick view and product detail show “Giá liên hệ” and do not display a variant price. Contact-priced products are excluded from the hero price-estimate range.
+- Admin product list has a duplicate action. `POST /api/v1/admin/products/:id/duplicate` clones product content, images, option groups/options, variants and their option bindings, available sizes and size-guide image. New names receive ` - Copy`, slug and variant SKU are made unique, and copied inventory starts at zero.

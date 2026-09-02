@@ -44,6 +44,13 @@ export class ProductsController {
     return this.productsService.create(dto);
   }
 
+  @Post(':id/duplicate')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Duplicate a product with its images, variants, options, and sizes' })
+  duplicate(@Param('id') id: string) {
+    return this.productsService.duplicate(id);
+  }
+
   @Get(':id')
   @Roles('super_admin', 'admin', 'editor')
   @ApiOperation({ summary: 'Get product with variants, images, and options' })

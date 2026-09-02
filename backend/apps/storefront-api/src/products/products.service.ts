@@ -1,7 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike, FindOptionsWhere, In, Raw, IsNull } from 'typeorm';
-import { ProductEntity, CategoryEntity, ProductImageEntity, ProductVariantEntity, DiscountEntity, ProductSizeEntity } from '@app/database';
+import {
+  ProductEntity,
+  CategoryEntity,
+  ProductImageEntity,
+  ProductVariantEntity,
+  DiscountEntity,
+  ProductSizeEntity,
+} from '@app/database';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { PriceEstimateQueryDto } from './dto/price-estimate-query.dto';
 
@@ -23,7 +30,9 @@ export class ProductsService {
   ) {}
 
   async estimatePrice({ categorySlug, quantity }: PriceEstimateQueryDto) {
-    const category = await this.categoryRepo.findOne({ where: { slug: categorySlug, isActive: true } });
+    const category = await this.categoryRepo.findOne({
+      where: { slug: categorySlug, isActive: true },
+    });
     if (!category) return { min: null, max: null, currencyCode: 'VND', productCount: 0 };
 
     const categoryIds = [category.id, ...(await this.getSubcategoryIds(category.id))];
@@ -31,6 +40,7 @@ export class ProductsService {
       .createQueryBuilder('product')
       .where('product.is_active = true')
       .andWhere('product.deleted_at IS NULL')
+      .andWhere('product.is_contact_price = false')
       .andWhere('product.category_id IN (:...categoryIds)', { categoryIds })
       .getMany();
     if (!products.length) return { min: null, max: null, currencyCode: 'VND', productCount: 0 };
@@ -45,28 +55,36 @@ export class ProductsService {
 
     const now = new Date();
     const discounts = await this.discountRepo.find({ where: { isActive: true } });
-    const applicable = discounts.filter((discount) =>
-      discount.target === 'product' &&
-      (!discount.endsAt || discount.endsAt >= now) &&
-      quantity >= (discount.minQuantityPerProduct ?? 1),
+    const applicable = discounts.filter(
+      (discount) =>
+        discount.target === 'product' &&
+        (!discount.endsAt || discount.endsAt >= now) &&
+        quantity >= (discount.minQuantityPerProduct ?? 1),
     );
     const variantProductIds = new Set(variants.map((variant) => variant.productId));
     const priceEntries = [
-      ...variants.map((variant) => ({ productId: variant.productId, price: Number(variant.price ?? 0) })),
+      ...variants.map((variant) => ({
+        productId: variant.productId,
+        price: Number(variant.price ?? 0),
+      })),
       ...products
         .filter((product) => !variantProductIds.has(product.id))
         .map((product) => ({ productId: product.id, price: Number(product.basePrice ?? 0) })),
     ].filter((entry) => entry.price > 0);
-    if (!priceEntries.length) return { min: null, max: null, currencyCode: 'VND', productCount: products.length };
+    if (!priceEntries.length)
+      return { min: null, max: null, currencyCode: 'VND', productCount: products.length };
 
     const prices = priceEntries.map((entry) => {
       const original = entry.price;
-      const productDiscounts = applicable.filter((discount) => discount.targetIds.includes(entry.productId));
+      const productDiscounts = applicable.filter((discount) =>
+        discount.targetIds.includes(entry.productId),
+      );
       const finalPrice = productDiscounts.reduce((lowest, discount) => {
         const value = Number(discount.value ?? 0);
-        const discounted = discount.type === 'percentage'
-          ? original * (1 - Math.min(value, 100) / 100)
-          : original - value;
+        const discounted =
+          discount.type === 'percentage'
+            ? original * (1 - Math.min(value, 100) / 100)
+            : original - value;
         return Math.min(lowest, Math.max(0, Math.round(discounted)));
       }, original);
       return finalPrice;
@@ -154,12 +172,13 @@ export class ProductsService {
       .getMany();
 
     const productIds = items.map((p) => p.id);
-    const allImages = productIds.length > 0
-      ? await this.imageRepo.find({
-          where: { productId: In(productIds), deletedAt: IsNull() },
-          order: { sortOrder: 'ASC' },
-        })
-      : [];
+    const allImages =
+      productIds.length > 0
+        ? await this.imageRepo.find({
+            where: { productId: In(productIds), deletedAt: IsNull() },
+            order: { sortOrder: 'ASC' },
+          })
+        : [];
     const imageMap = new Map<string, typeof allImages>();
     for (const img of allImages) {
       const list = imageMap.get(img.productId) || [];
@@ -200,22 +219,24 @@ export class ProductsService {
     }
 
     const sizeLinks = await this.productSizeRepo.find({
-      where: { productId: product.id }, relations: ['size'],
+      where: { productId: product.id },
+      relations: ['size'],
       order: { size: { sortOrder: 'ASC', code: 'ASC' } },
     });
     return {
       ...product,
       sizes: sizeLinks.map((link) => link.size).filter((size) => size?.isActive),
-      variants: product.variants
-        ?.filter((v) => v.isActive && !v.deletedAt)
-        .sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
-      images: product.images
-        ?.filter((i) => !i.deletedAt)
-        .sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
-      optionGroups: product.optionGroups?.map((g) => ({
-        ...g,
-        options: g.options?.sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
-      })) ?? [],
+      variants:
+        product.variants
+          ?.filter((v) => v.isActive && !v.deletedAt)
+          .sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
+      images:
+        product.images?.filter((i) => !i.deletedAt).sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
+      optionGroups:
+        product.optionGroups?.map((g) => ({
+          ...g,
+          options: g.options?.sort((a, b) => a.sortOrder - b.sortOrder) ?? [],
+        })) ?? [],
     };
   }
 
@@ -229,13 +250,13 @@ export class ProductsService {
       throw new NotFoundException(`Product not found: ${slug}`);
     }
 
-    const variants = product.variants
-      ?.filter((v) => v.isActive && !v.deletedAt)
-      .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
+    const variants =
+      product.variants
+        ?.filter((v) => v.isActive && !v.deletedAt)
+        .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
 
-    const images = product.images
-      ?.filter((i) => !i.deletedAt)
-      .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
+    const images =
+      product.images?.filter((i) => !i.deletedAt).sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
 
     return variants.map((v) => ({
       ...v,

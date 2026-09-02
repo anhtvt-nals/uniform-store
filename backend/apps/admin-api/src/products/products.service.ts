@@ -5,8 +5,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, In, Raw } from 'typeorm';
-import {randomUUID} from 'crypto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, FindOptionsWhere, In, Raw, Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
 import {
   ProductEntity,
   ProductVariantEntity,
@@ -31,6 +32,8 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 @Injectable()
 export class ProductsService {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectRepository(ProductEntity)
     private readonly productRepo: Repository<ProductEntity>,
     @InjectRepository(ProductVariantEntity)
@@ -137,7 +140,8 @@ export class ProductsService {
       sortDescription: dto.sortDescription ?? dto.description ?? {},
       detail: dto.detail ?? {},
       sku: dto.sku ?? '',
-      basePrice: dto.basePrice ?? 0,
+      basePrice: dto.isContactPrice ? 0 : (dto.basePrice ?? 0),
+      isContactPrice: dto.isContactPrice ?? false,
       taxRate: dto.taxRate ?? 0,
       isActive: dto.isActive ?? true,
       isFeatured: dto.isFeatured ?? false,
@@ -168,7 +172,9 @@ export class ProductsService {
     if (dto.sortDescription !== undefined) product.sortDescription = dto.sortDescription;
     else if (dto.description !== undefined) product.sortDescription = dto.description;
     if (dto.sku !== undefined) product.sku = dto.sku;
-    if (dto.basePrice !== undefined) product.basePrice = dto.basePrice;
+    if (dto.isContactPrice !== undefined) product.isContactPrice = dto.isContactPrice;
+    if (product.isContactPrice) product.basePrice = 0;
+    else if (dto.basePrice !== undefined) product.basePrice = dto.basePrice;
     if (dto.taxRate !== undefined) product.taxRate = dto.taxRate;
     if (dto.isActive !== undefined) product.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) product.isFeatured = dto.isFeatured;
@@ -183,20 +189,168 @@ export class ProductsService {
     return saved;
   }
 
-  private async replaceSizes(productId: string, sizeIds: string[] = []) {
-    await this.productSizeRepo.delete({productId});
-    if (sizeIds.length) await this.productSizeRepo.save(sizeIds.map((sizeId) => this.productSizeRepo.create({productId, sizeId})));
+  async duplicate(id: string) {
+    const source = await this.productRepo.findOne({
+      where: { id },
+      relations: [
+        'variants',
+        'variants.variantOptions',
+        'images',
+        'optionGroups',
+        'optionGroups.options',
+      ],
+    });
+    if (!source) throw new NotFoundException(`Product not found: ${id}`);
+
+    const sourceSizes = await this.productSizeRepo.find({ where: { productId: id } });
+    const sourceInventory = source.variants?.length
+      ? await this.inventoryRepo.find({
+          where: { variantId: In(source.variants.map((variant) => variant.id)) },
+        })
+      : [];
+    const inventoryByVariantId = new Map(
+      sourceInventory.map((inventory) => [inventory.variantId, inventory]),
+    );
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const productRepo = queryRunner.manager.getRepository(ProductEntity);
+      const copiedProduct = productRepo.create({
+        categoryId: source.categoryId,
+        brandId: source.brandId,
+        name: this.copyLocalizedName(source.name),
+        slug: await this.resolveUniqueSlug(`${source.slug}-copy`),
+        description: source.description,
+        sortDescription: source.sortDescription,
+        detail: source.detail,
+        sku: source.sku ? `${source.sku}-COPY` : '',
+        basePrice: source.isContactPrice ? 0 : Number(source.basePrice),
+        isContactPrice: source.isContactPrice,
+        taxRate: Number(source.taxRate),
+        isActive: source.isActive,
+        isFeatured: false,
+        weight: Number(source.weight),
+        metaTitle: source.metaTitle,
+        metaDesc: source.metaDesc,
+        sizeGuideImageUrl: source.sizeGuideImageUrl,
+      });
+      const savedProduct = await productRepo.save(copiedProduct);
+
+      const copiedOptionIds = new Map<string, string>();
+      for (const group of source.optionGroups ?? []) {
+        const copiedGroup = await queryRunner.manager.save(ProductOptionGroupEntity, {
+          productId: savedProduct.id,
+          name: group.name,
+          sortOrder: group.sortOrder,
+        });
+        for (const option of group.options ?? []) {
+          const copiedOption = await queryRunner.manager.save(ProductOptionEntity, {
+            groupId: copiedGroup.id,
+            name: option.name,
+            value: option.value,
+            sortOrder: option.sortOrder,
+          });
+          copiedOptionIds.set(option.id, copiedOption.id);
+        }
+      }
+
+      const copiedVariantIds = new Map<string, string>();
+      for (const variant of source.variants ?? []) {
+        const copiedVariant = await queryRunner.manager.save(ProductVariantEntity, {
+          productId: savedProduct.id,
+          name: variant.name,
+          sku: this.createCopiedSku(variant.sku),
+          barcode: variant.barcode,
+          price: Number(variant.price),
+          comparePrice: variant.comparePrice,
+          taxRate: Number(variant.taxRate),
+          weight: Number(variant.weight),
+          isActive: variant.isActive,
+          sortOrder: variant.sortOrder,
+        });
+        copiedVariantIds.set(variant.id, copiedVariant.id);
+
+        const inventory = inventoryByVariantId.get(variant.id);
+        await queryRunner.manager.save(InventoryEntity, {
+          variantId: copiedVariant.id,
+          quantity: 0,
+          reserved: 0,
+          lowStockLevel: inventory?.lowStockLevel ?? 5,
+          trackInventory: inventory?.trackInventory ?? true,
+          allowBackorder: inventory?.allowBackorder ?? false,
+        });
+
+        const optionLinks = (variant.variantOptions ?? [])
+          .map((link) => copiedOptionIds.get(link.optionId))
+          .filter((optionId): optionId is string => Boolean(optionId));
+        if (optionLinks.length) {
+          await queryRunner.manager.save(
+            ProductVariantOptionEntity,
+            optionLinks.map((optionId) => ({ variantId: copiedVariant.id, optionId })),
+          );
+        }
+      }
+
+      for (const image of source.images ?? []) {
+        await queryRunner.manager.save(ProductImageEntity, {
+          productId: savedProduct.id,
+          variantId: image.variantId ? (copiedVariantIds.get(image.variantId) ?? null) : null,
+          url: image.url,
+          alt: image.alt,
+          sortOrder: image.sortOrder,
+        });
+      }
+      if (sourceSizes.length) {
+        await queryRunner.manager.save(
+          ProductSizeEntity,
+          sourceSizes.map((link) => ({ productId: savedProduct.id, sizeId: link.sizeId })),
+        );
+      }
+
+      await queryRunner.commitTransaction();
+      return this.findOne(savedProduct.id);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  private async resolveUniqueSlug(requestedSlug: string, excludeProductId?: string): Promise<string> {
+  private async replaceSizes(productId: string, sizeIds: string[] = []) {
+    await this.productSizeRepo.delete({ productId });
+    if (sizeIds.length)
+      await this.productSizeRepo.save(
+        sizeIds.map((sizeId) => this.productSizeRepo.create({ productId, sizeId })),
+      );
+  }
+
+  private async resolveUniqueSlug(
+    requestedSlug: string,
+    excludeProductId?: string,
+  ): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt += 1) {
-      const slug = attempt === 0
-        ? requestedSlug
-        : `${requestedSlug}-${randomUUID().replace(/-/g, '').slice(0, 8)}`;
-      const existing = await this.productRepo.findOne({where: {slug}, withDeleted: true});
+      const slug =
+        attempt === 0
+          ? requestedSlug
+          : `${requestedSlug}-${randomUUID().replace(/-/g, '').slice(0, 8)}`;
+      const existing = await this.productRepo.findOne({ where: { slug }, withDeleted: true });
       if (!existing || existing.id === excludeProductId) return slug;
     }
     throw new ConflictException('Không thể tạo slug duy nhất. Vui lòng thử lại.');
+  }
+
+  private copyLocalizedName(name: Record<string, string>): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(name).map(([locale, value]) => [locale, `${value} - Copy`]),
+    );
+  }
+
+  private createCopiedSku(sku: string): string {
+    const suffix = randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+    return `${sku || 'SKU'}-COPY-${suffix}`;
   }
 
   async remove(id: string) {

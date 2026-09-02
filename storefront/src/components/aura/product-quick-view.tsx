@@ -22,6 +22,7 @@ interface QuickViewProduct {
   description: string;
   sortDescription?: string;
   basePrice: number;
+  isContactPrice: boolean;
   slug: string;
   assets: Array<{ id: string; preview: string; source: string }>;
   variants: Array<{
@@ -38,7 +39,7 @@ interface QuickViewProduct {
     name: string;
     options: Array<{ id: string; code: string; name: string }>;
   }>;
-  sizes?: Array<{id: string; code: string; weightRange: string}>;
+  sizes?: Array<{ id: string; code: string; weightRange: string }>;
   sizeGuideImageUrl?: string;
 }
 
@@ -96,7 +97,10 @@ export function ProductQuickView({
 
   const selectedVariant = useMemo(() => {
     if (!product) return null;
-    return product.variants.find((variant) => variant.id === selectedVariantId) || null;
+    return (
+      product.variants.find((variant) => variant.id === selectedVariantId) ||
+      null
+    );
   }, [product, selectedOptions, selectedVariantId]);
 
   const handleOptionChange = (groupId: string, optionId: string) => {
@@ -119,7 +123,11 @@ export function ProductQuickView({
       const res = await fetch("/api/v1/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product?.id, sizeId: selectedSizeId || undefined, ...formData }),
+        body: JSON.stringify({
+          productId: product?.id,
+          sizeId: selectedSizeId || undefined,
+          ...formData,
+        }),
       });
       if (res.ok) {
         setIsSubmitted(true);
@@ -168,7 +176,9 @@ export function ProductQuickView({
     return t("inStock");
   };
 
-  const selectedSize = product?.sizes?.find((size) => size.id === selectedSizeId);
+  const selectedSize = product?.sizes?.find(
+    (size) => size.id === selectedSizeId,
+  );
   const requiresSize = Boolean(product?.sizes?.length);
 
   const images = product?.assets?.length
@@ -291,7 +301,11 @@ export function ProductQuickView({
                 </p>
               )}
               <div className="text-2xl font-bold text-primary mb-6">
-                {formatVnd(selectedVariant?.priceWithTax ?? product.basePrice)}
+                {product.isContactPrice
+                  ? "Giá liên hệ"
+                  : formatVnd(
+                      selectedVariant?.priceWithTax ?? product.basePrice,
+                    )}
               </div>
 
               {/* Option groups */}
@@ -328,148 +342,234 @@ export function ProductQuickView({
               )}
 
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
-              {product.variants.length > 0 && (
-                <div className="mb-6 space-y-2">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Mã sản phẩm
-                  </h3>
-                  <div className="space-y-2">
-                    {product.variants.map((variant) => {
-                      const isSelected = variant.id === selectedVariant?.id;
-                      return (
+                {product.variants.length > 0 && (
+                  <div className="mb-6 space-y-2">
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Mã sản phẩm
+                    </h3>
+                    <div className="space-y-2">
+                      {product.variants.map((variant) => {
+                        const isSelected = variant.id === selectedVariant?.id;
+                        return (
+                          <button
+                            key={variant.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedVariantId(variant.id);
+                              setSelectedOptions(
+                                Object.fromEntries(
+                                  variant.options.map((option) => [
+                                    option.groupId,
+                                    option.id,
+                                  ]),
+                                ),
+                              );
+                            }}
+                            className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                              isSelected
+                                ? "border-primary bg-primary/5"
+                                : "border-border bg-background hover:border-primary/40"
+                            }`}
+                          >
+                            <span>
+                              <span className="block text-sm font-semibold text-foreground">
+                                {variant.name}
+                              </span>
+                              <span className="block text-xs text-muted-foreground">
+                                SKU: {variant.sku || "—"} ·{" "}
+                                {stockLabel(variant.stockLevel)}
+                              </span>
+                            </span>
+                            <span className="text-sm font-bold text-primary">
+                              {product.isContactPrice
+                                ? "Giá liên hệ"
+                                : formatVnd(variant.priceWithTax)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {product.sizes?.length ? (
+                  <div className="mb-6 space-y-2">
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Kích thước
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizes.map((size) => (
                         <button
-                          key={variant.id}
+                          key={size.id}
                           type="button"
-                          onClick={() => {
-                            setSelectedVariantId(variant.id);
-                            setSelectedOptions(
-                              Object.fromEntries(
-                                variant.options.map((option) => [
-                                  option.groupId,
-                                  option.id,
-                                ]),
-                              ),
-                            );
-                          }}
-                          className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border bg-background hover:border-primary/40"
-                          }`}
+                          onClick={() => setSelectedSizeId(size.id)}
+                          className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}
                         >
-                          <span>
-                            <span className="block text-sm font-semibold text-foreground">
-                              {variant.name}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">
-                              SKU: {variant.sku || "—"} ·{" "}
-                              {stockLabel(variant.stockLevel)}
-                            </span>
-                          </span>
-                          <span className="text-sm font-bold text-primary">
-                            {formatVnd(variant.priceWithTax)}
-                          </span>
+                          {size.code}
+                          {size.weightRange ? ` (${size.weightRange})` : ""}
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
+                    {product.sizeGuideImageUrl ? (
+                      <a
+                        className="text-xs font-medium text-primary hover:underline"
+                        href={product.sizeGuideImageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Xem bảng hướng dẫn chọn size
+                      </a>
+                    ) : null}
                   </div>
-                </div>
-              )}
+                ) : null}
 
-              {product.sizes?.length ? <div className="mb-6 space-y-2"><h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kích thước</h3><div className="flex flex-wrap gap-2">{product.sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{size.code}{size.weightRange ? ` (${size.weightRange})` : ""}</button>)}</div>{product.sizeGuideImageUrl ? <a className="text-xs font-medium text-primary hover:underline" href={product.sizeGuideImageUrl} target="_blank" rel="noreferrer">Xem bảng hướng dẫn chọn size</a> : null}</div> : null}
-
-              {/* Inquiry Form */}
-              {isSubmitted ? (
-                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-5 text-center space-y-2 mb-4">
-                  <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto" />
-                  <h4 className="font-semibold text-green-800 dark:text-green-200">
-                    {t("inquirySuccess")}
-                  </h4>
-                  <p className="text-xs text-green-600 dark:text-green-400">
-                    {t("inquirySuccessDesc")}
-                  </p>
-                </div>
-              ) : showInquiryForm ? (
-                <form onSubmit={handleSubmitInquiry} className="mb-4 space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4">
-                  <div className="flex items-start justify-between gap-3"><div><h4 className="text-sm font-bold text-foreground">Gửi yêu cầu báo giá</h4><p className="mt-0.5 text-xs text-muted-foreground">Chúng tôi sẽ liên hệ để tư vấn và báo giá chính xác.</p></div><button type="button" onClick={() => setShowInquiryForm(false)} className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground">Thu gọn</button></div>
-                  <div className="rounded-xl border border-border/70 bg-background p-3 text-xs"><div className="font-semibold text-foreground">{product.name}</div><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground"><span>{selectedVariant?.name || "Chưa chọn mã sản phẩm"}</span>{selectedSize ? <span>Size: <strong className="font-semibold text-foreground">{selectedSize.code}</strong></span> : null}<span>Số lượng: <strong className="font-semibold text-foreground">{formData.quantity}</strong></span></div></div>
-                  <input
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    required
-                    placeholder={t("inquiryNamePlaceholder")}
-                    className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      placeholder={t("inquiryEmailPlaceholder")}
-                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                    />
-                    <input
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder={t("inquiryPhonePlaceholder")}
-                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                    />
+                {/* Inquiry Form */}
+                {isSubmitted ? (
+                  <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-5 text-center space-y-2 mb-4">
+                    <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto" />
+                    <h4 className="font-semibold text-green-800 dark:text-green-200">
+                      {t("inquirySuccess")}
+                    </h4>
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      {t("inquirySuccessDesc")}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2">
-                    <span className="text-xs font-medium text-muted-foreground">Số lượng cần báo giá</span>
-                    <input
-                      name="quantity"
-                      type="number"
-                      min={1}
-                      value={formData.quantity}
-                      onChange={handleInputChange}
-                      required
-                      className="h-8 w-20 rounded-lg border border-border bg-background px-2 text-center text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-ring"
-                    />
-                  </div>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows={2}
-                    placeholder={t("inquiryNotesPlaceholder")}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+                ) : showInquiryForm ? (
+                  <form
+                    onSubmit={handleSubmitInquiry}
+                    className="mb-4 space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />{" "}
-                        {t("inquirySending")}
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" /> {t("inquirySubmit")}
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : null}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground">
+                          Gửi yêu cầu báo giá
+                        </h4>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Chúng tôi sẽ liên hệ để tư vấn và báo giá chính xác.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowInquiryForm(false)}
+                        className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground"
+                      >
+                        Thu gọn
+                      </button>
+                    </div>
+                    <div className="rounded-xl border border-border/70 bg-background p-3 text-xs">
+                      <div className="font-semibold text-foreground">
+                        {product.name}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
+                        <span>
+                          {selectedVariant?.name || "Chưa chọn mã sản phẩm"}
+                        </span>
+                        {selectedSize ? (
+                          <span>
+                            Size:{" "}
+                            <strong className="font-semibold text-foreground">
+                              {selectedSize.code}
+                            </strong>
+                          </span>
+                        ) : null}
+                        <span>
+                          Số lượng:{" "}
+                          <strong className="font-semibold text-foreground">
+                            {formData.quantity}
+                          </strong>
+                        </span>
+                      </div>
+                    </div>
+                    <input
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      required
+                      placeholder={t("inquiryNamePlaceholder")}
+                      className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        placeholder={t("inquiryEmailPlaceholder")}
+                        className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                      <input
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder={t("inquiryPhonePlaceholder")}
+                        className="w-full h-10 rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Số lượng cần báo giá
+                      </span>
+                      <input
+                        name="quantity"
+                        type="number"
+                        min={1}
+                        value={formData.quantity}
+                        onChange={handleInputChange}
+                        required
+                        className="h-8 w-20 rounded-lg border border-border bg-background px-2 text-center text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                    </div>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      rows={2}
+                      placeholder={t("inquiryNotesPlaceholder")}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />{" "}
+                          {t("inquirySending")}
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" /> {t("inquirySubmit")}
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : null}
               </div>
 
               {!showInquiryForm && !isSubmitted && (
                 <button
                   type="button"
                   onClick={openInquiryForm}
-                  disabled={!selectedVariant || (requiresSize && !selectedSizeId)}
+                  disabled={
+                    !selectedVariant || (requiresSize && !selectedSizeId)
+                  }
                   className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-xs font-bold uppercase tracking-widest text-background transition hover:bg-muted-foreground disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   <Send className="h-4 w-4" /> {t("inquiryTitle")}
                 </button>
               )}
-              {!showInquiryForm && !isSubmitted && (!selectedVariant || (requiresSize && !selectedSizeId)) ? <p className="mt-2 text-center text-xs text-muted-foreground">{!selectedVariant ? "Vui lòng chọn mã sản phẩm" : "Vui lòng chọn size"} để gửi yêu cầu báo giá.</p> : null}
+              {!showInquiryForm &&
+              !isSubmitted &&
+              (!selectedVariant || (requiresSize && !selectedSizeId)) ? (
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  {!selectedVariant
+                    ? "Vui lòng chọn mã sản phẩm"
+                    : "Vui lòng chọn size"}{" "}
+                  để gửi yêu cầu báo giá.
+                </p>
+              ) : null}
 
               {/* View Detail Link */}
               <Link

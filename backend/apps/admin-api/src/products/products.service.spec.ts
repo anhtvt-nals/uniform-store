@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { ProductsService } from './products.service';
 import {
   ProductEntity,
@@ -48,6 +48,7 @@ describe('ProductsService (admin)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
+        { provide: getDataSourceToken(), useValue: { createQueryRunner: jest.fn() } },
         { provide: getRepositoryToken(ProductEntity), useValue: mockProductRepo },
         { provide: getRepositoryToken(ProductVariantEntity), useValue: mockVariantRepo },
         { provide: getRepositoryToken(ProductImageEntity), useValue: mockImageRepo },

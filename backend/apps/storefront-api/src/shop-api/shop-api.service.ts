@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { AuthService, AuthErrorException } from '../auth/auth.service';
@@ -59,65 +56,108 @@ export class ShopApiService {
     try {
       switch (opName) {
         // ─── Auth ───
-        case 'Login': return await this.handleLogin(variables);
-        case 'Logout': return await this.handleLogout(variables, options);
-        case 'RegisterCustomerAccount': return await this.handleRegister(variables, options);
-        case 'VerifyCustomerAccount': return await this.handleVerify(variables, options);
-        case 'RequestPasswordReset': return await this.handleRequestPasswordReset(variables);
-        case 'ResetPassword': return await this.handleResetPassword(variables);
-        case 'UpdateCustomerPassword': return await this.handleUpdatePassword(variables, options);
-        case 'UpdateCustomer': return await this.handleUpdateCustomer(variables, options);
-        case 'RequestUpdateCustomerEmailAddress': return await this.handleRequestEmailChange(variables, options);
-        case 'UpdateCustomerEmailAddress': return await this.handleUpdateEmail(variables);
-        case 'GetActiveCustomer': return await this.handleGetActiveCustomer(options);
-        case 'GetActiveChannel': return await this.handleGetActiveChannel();
+        case 'Login':
+          return await this.handleLogin(variables);
+        case 'Logout':
+          return await this.handleLogout(variables, options);
+        case 'RegisterCustomerAccount':
+          return await this.handleRegister(variables, options);
+        case 'VerifyCustomerAccount':
+          return await this.handleVerify(variables, options);
+        case 'RequestPasswordReset':
+          return await this.handleRequestPasswordReset(variables);
+        case 'ResetPassword':
+          return await this.handleResetPassword(variables);
+        case 'UpdateCustomerPassword':
+          return await this.handleUpdatePassword(variables, options);
+        case 'UpdateCustomer':
+          return await this.handleUpdateCustomer(variables, options);
+        case 'RequestUpdateCustomerEmailAddress':
+          return await this.handleRequestEmailChange(variables, options);
+        case 'UpdateCustomerEmailAddress':
+          return await this.handleUpdateEmail(variables);
+        case 'GetActiveCustomer':
+          return await this.handleGetActiveCustomer(options);
+        case 'GetActiveChannel':
+          return await this.handleGetActiveChannel();
 
         // ─── Collections ───
-        case 'GetTopCollections': return await this.handleGetTopCollections(variables, options);
-        case 'GetCollectionProducts': return await this.handleGetCollectionProducts(variables, options);
+        case 'GetTopCollections':
+          return await this.handleGetTopCollections(variables, options);
+        case 'GetCollectionProducts':
+          return await this.handleGetCollectionProducts(variables, options);
 
         // ─── Products ───
-        case 'SearchProducts': return await this.handleSearchProducts(variables, options);
-        case 'GetProductDetail': return await this.handleGetProductDetail(variables, options);
+        case 'SearchProducts':
+          return await this.handleSearchProducts(variables, options);
+        case 'GetProductDetail':
+          return await this.handleGetProductDetail(variables, options);
 
         // ─── Cart ───
-        case 'GetActiveOrder': return await this.handleGetActiveOrder(options);
-        case 'GetActiveOrderForCheckout': return await this.handleGetActiveOrderForCheckout(options);
-        case 'AddToCart': return await this.handleAddToCart(variables, options);
-        case 'RemoveFromCart': return await this.handleRemoveFromCart(variables, options);
-        case 'AdjustCartItem': return await this.handleAdjustCartItem(variables, options);
-        case 'ApplyPromotionCode': return await this.handleApplyPromotionCode(variables, options);
-        case 'RemovePromotionCode': return await this.handleRemovePromotionCode(variables, options);
+        case 'GetActiveOrder':
+          return await this.handleGetActiveOrder(options);
+        case 'GetActiveOrderForCheckout':
+          return await this.handleGetActiveOrderForCheckout(options);
+        case 'AddToCart':
+          return await this.handleAddToCart(variables, options);
+        case 'RemoveFromCart':
+          return await this.handleRemoveFromCart(variables, options);
+        case 'AdjustCartItem':
+          return await this.handleAdjustCartItem(variables, options);
+        case 'ApplyPromotionCode':
+          return await this.handleApplyPromotionCode(variables, options);
+        case 'RemovePromotionCode':
+          return await this.handleRemovePromotionCode(variables, options);
 
         // ─── Checkout ───
-        case 'GetEligibleShippingMethods': return await this.handleGetEligibleShippingMethods(options);
-        case 'GetEligiblePaymentMethods': return await this.handleGetEligiblePaymentMethods(options);
-        case 'SetOrderShippingAddress': return await this.handleSetOrderShippingAddress(variables, options);
-        case 'SetOrderBillingAddress': return await this.handleSetOrderBillingAddress(variables, options);
-        case 'SetOrderShippingMethod': return await this.handleSetOrderShippingMethod(variables, options);
-        case 'SetCustomerForOrder': return await this.handleSetCustomerForOrder(variables, options);
-        case 'TransitionOrderToState': return await this.handleTransitionOrderToState(variables, options);
-        case 'AddPaymentToOrder': return await this.handleAddPaymentToOrder(variables, options);
+        case 'GetEligibleShippingMethods':
+          return await this.handleGetEligibleShippingMethods(options);
+        case 'GetEligiblePaymentMethods':
+          return await this.handleGetEligiblePaymentMethods(options);
+        case 'SetOrderShippingAddress':
+          return await this.handleSetOrderShippingAddress(variables, options);
+        case 'SetOrderBillingAddress':
+          return await this.handleSetOrderBillingAddress(variables, options);
+        case 'SetOrderShippingMethod':
+          return await this.handleSetOrderShippingMethod(variables, options);
+        case 'SetCustomerForOrder':
+          return await this.handleSetCustomerForOrder(variables, options);
+        case 'TransitionOrderToState':
+          return await this.handleTransitionOrderToState(variables, options);
+        case 'AddPaymentToOrder':
+          return await this.handleAddPaymentToOrder(variables, options);
 
         // ─── Orders ───
-        case 'GetCustomerOrders': return await this.handleGetCustomerOrders(variables, options);
-        case 'GetOrderDetail': return await this.handleGetOrderDetail(variables, options);
-        case 'GetOrderByCode': return await this.handleGetOrderByCode(variables, options);
+        case 'GetCustomerOrders':
+          return await this.handleGetCustomerOrders(variables, options);
+        case 'GetOrderDetail':
+          return await this.handleGetOrderDetail(variables, options);
+        case 'GetOrderByCode':
+          return await this.handleGetOrderByCode(variables, options);
 
         // ─── Addresses ───
-        case 'GetCustomerAddresses': return await this.handleGetCustomerAddresses(options);
-        case 'CreateCustomerAddress': return await this.handleCreateCustomerAddress(variables, options);
-        case 'UpdateCustomerAddress': return await this.handleUpdateCustomerAddress(variables, options);
-        case 'DeleteCustomerAddress': return await this.handleDeleteCustomerAddress(variables, options);
+        case 'GetCustomerAddresses':
+          return await this.handleGetCustomerAddresses(options);
+        case 'CreateCustomerAddress':
+          return await this.handleCreateCustomerAddress(variables, options);
+        case 'UpdateCustomerAddress':
+          return await this.handleUpdateCustomerAddress(variables, options);
+        case 'DeleteCustomerAddress':
+          return await this.handleDeleteCustomerAddress(variables, options);
 
         // ─── Articles ───
-        case 'GetArticles': return await this.handleGetArticles(variables, options);
-        case 'GetArticleBySlug': return await this.handleGetArticleBySlug(variables, options);
-        case 'GetArticleCategories': return await this.handleGetArticleCategories(options);
-        case 'GetArticleTags': return await this.handleGetArticleTags(options);
+        case 'GetArticles':
+          return await this.handleGetArticles(variables, options);
+        case 'GetArticleBySlug':
+          return await this.handleGetArticleBySlug(variables, options);
+        case 'GetArticleCategories':
+          return await this.handleGetArticleCategories(options);
+        case 'GetArticleTags':
+          return await this.handleGetArticleTags(options);
 
         // ─── Reference ───
-        case 'GetAvailableCountries': return await this.handleGetAvailableCountries(options);
+        case 'GetAvailableCountries':
+          return await this.handleGetAvailableCountries(options);
 
         default:
           this.logger.warn(`Unknown operation: ${opName}`);
@@ -186,7 +226,10 @@ export class ShopApiService {
         return {
           data: {
             login: {
-              __typename: e.errorCode === 'INVALID_CREDENTIALS' ? 'InvalidCredentialsError' : 'NotVerifiedError',
+              __typename:
+                e.errorCode === 'INVALID_CREDENTIALS'
+                  ? 'InvalidCredentialsError'
+                  : 'NotVerifiedError',
               errorCode: e.errorCode,
               message: e.message,
             },
@@ -209,7 +252,7 @@ export class ShopApiService {
     variables: Record<string, unknown>,
     _options: ExecuteOptions,
   ): Promise<ExecuteResult> {
-    const input = variables.input as Record<string, unknown> || variables;
+    const input = (variables.input as Record<string, unknown>) || variables;
     try {
       await this.authService.register({
         email: input.emailAddress as string,
@@ -224,8 +267,10 @@ export class ShopApiService {
         return {
           data: {
             registerCustomerAccount: {
-              __typename: e.errorCode === 'EMAIL_ALREADY_REGISTERED'
-                ? 'EmailAddressConflictError' : 'ErrorResult',
+              __typename:
+                e.errorCode === 'EMAIL_ALREADY_REGISTERED'
+                  ? 'EmailAddressConflictError'
+                  : 'ErrorResult',
               errorCode: e.errorCode,
               message: e.message,
             },
@@ -276,9 +321,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleResetPassword(
-    variables: Record<string, unknown>,
-  ): Promise<ExecuteResult> {
+  private async handleResetPassword(variables: Record<string, unknown>): Promise<ExecuteResult> {
     const token = variables.token as string;
     const password = variables.password as string;
     try {
@@ -365,7 +408,11 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     if (!options.token) {
-      return this.errorResult('requestUpdateCustomerEmailAddress', 'NOT_AUTHENTICATED', 'Not authenticated');
+      return this.errorResult(
+        'requestUpdateCustomerEmailAddress',
+        'NOT_AUTHENTICATED',
+        'Not authenticated',
+      );
     }
     try {
       await this.authService.changeEmail(options.token, {
@@ -381,9 +428,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleUpdateEmail(
-    variables: Record<string, unknown>,
-  ): Promise<ExecuteResult> {
+  private async handleUpdateEmail(variables: Record<string, unknown>): Promise<ExecuteResult> {
     try {
       await this.authService.verifyEmailChange(variables.token as string);
       return this.successResult('updateCustomerEmailAddress');
@@ -393,9 +438,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleGetActiveCustomer(
-    options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetActiveCustomer(options: ExecuteOptions): Promise<ExecuteResult> {
     if (!options.token) {
       return { data: { activeCustomer: null } };
     }
@@ -448,7 +491,7 @@ export class ShopApiService {
       name: cat.name?.[options.languageCode ?? 'en'] ?? cat.name?.en ?? '',
       slug: cat.slug,
       description: cat.description?.[options.languageCode ?? 'en'] ?? cat.description?.en ?? '',
-      featuredAsset: cat.imageUrl ? {id: cat.id, preview: cat.imageUrl} : null,
+      featuredAsset: cat.imageUrl ? { id: cat.id, preview: cat.imageUrl } : null,
       children: cat.children?.map(mapCat) ?? [],
     });
     const items = result.items.map(mapCat);
@@ -476,10 +519,12 @@ export class ShopApiService {
         name: collection.name?.[locale] ?? collection.name?.en ?? '',
         slug: collection.slug,
         description: collection.description?.[locale] ?? collection.description?.en ?? '',
-        featuredAsset: collection.imageUrl ? {
-          id: collection.id,
-          preview: collection.imageUrl,
-        } : null,
+        featuredAsset: collection.imageUrl
+          ? {
+              id: collection.id,
+              preview: collection.imageUrl,
+            }
+          : null,
       };
 
       // Reuse products service for search within collection
@@ -585,6 +630,7 @@ export class ShopApiService {
   }
 
   private mapSearchResultItem(p: any, locale: string): Record<string, unknown> {
+    const isContactPrice = Boolean(p.isContactPrice ?? p.is_contact_price);
     const basePrice = Number(p.basePrice ?? p.base_price ?? 0);
     const taxRate = Number(p.taxRate ?? p.tax_rate ?? 0);
     const priceWithTax = basePrice * (1 + taxRate / 100);
@@ -595,11 +641,19 @@ export class ShopApiService {
       productId: p.id,
       productName: p.name?.[locale] ?? p.name?.en ?? '',
       slug: p.slug,
-      sortDescription: p.description?.[locale] ?? p.description?.en ?? p.sortDescription?.[locale] ?? p.sortDescription?.en ?? '',
-      productAsset: firstImage ? {
-        id: firstImage.id,
-        preview: firstImage.url ?? firstImage.preview,
-      } : null,
+      isContactPrice,
+      sortDescription:
+        p.description?.[locale] ??
+        p.description?.en ??
+        p.sortDescription?.[locale] ??
+        p.sortDescription?.en ??
+        '',
+      productAsset: firstImage
+        ? {
+            id: firstImage.id,
+            preview: firstImage.url ?? firstImage.preview,
+          }
+        : null,
       priceWithTax: {
         __typename: 'SinglePrice',
         value: priceWithTax,
@@ -652,19 +706,27 @@ export class ShopApiService {
     }));
 
     const collections = product.category
-      ? [{
-          id: product.category.id,
-          name: product.category.name?.[locale] ?? product.category.name?.en ?? '',
-          slug: product.category.slug,
-          parent: product.category.parentId ? { id: product.category.parentId } : null,
-        }]
+      ? [
+          {
+            id: product.category.id,
+            name: product.category.name?.[locale] ?? product.category.name?.en ?? '',
+            slug: product.category.slug,
+            parent: product.category.parentId ? { id: product.category.parentId } : null,
+          },
+        ]
       : [];
 
     return {
       id: product.id,
+      isContactPrice: Boolean(product.isContactPrice ?? product.is_contact_price),
       name: product.name?.[locale] ?? product.name?.en ?? '',
       description: product.description?.[locale] ?? product.description?.en ?? '',
-      sortDescription: product.description?.[locale] ?? product.description?.en ?? product.sortDescription?.[locale] ?? product.sortDescription?.en ?? '',
+      sortDescription:
+        product.description?.[locale] ??
+        product.description?.en ??
+        product.sortDescription?.[locale] ??
+        product.sortDescription?.en ??
+        '',
       detail: product.detail?.[locale] ?? product.detail?.en ?? '',
       slug: product.slug,
       assets: images,
@@ -677,9 +739,7 @@ export class ShopApiService {
 
   // ─── Cart Handlers ───
 
-  private async handleGetActiveOrder(
-    options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetActiveOrder(options: ExecuteOptions): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
     if (!userId && !options.sessionId) {
       return { data: { activeOrder: null } };
@@ -693,9 +753,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleGetActiveOrderForCheckout(
-    options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetActiveOrderForCheckout(options: ExecuteOptions): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
     if (!userId && !options.sessionId) {
       return { data: { activeOrder: null } };
@@ -766,7 +824,11 @@ export class ShopApiService {
     }
     const lineId = variables.lineId as string;
     try {
-      const cart = await this.cartService.removeItem(lineId, userId ?? undefined, options.sessionId);
+      const cart = await this.cartService.removeItem(
+        lineId,
+        userId ?? undefined,
+        options.sessionId,
+      );
       return { data: { removeOrderLine: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       if (e.name === 'NotFoundException') {
@@ -787,7 +849,12 @@ export class ShopApiService {
     const lineId = variables.lineId as string;
     const quantity = variables.quantity as number;
     try {
-      const cart = await this.cartService.updateItem(lineId, { quantity }, userId ?? undefined, options.sessionId);
+      const cart = await this.cartService.updateItem(
+        lineId,
+        { quantity },
+        userId ?? undefined,
+        options.sessionId,
+      );
       return { data: { adjustOrderLine: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       if (e.name === 'NotFoundException') {
@@ -807,7 +874,11 @@ export class ShopApiService {
     }
     const couponCode = variables.couponCode as string;
     try {
-      const cart = await this.cartService.addCoupon(couponCode, userId ?? undefined, options.sessionId);
+      const cart = await this.cartService.addCoupon(
+        couponCode,
+        userId ?? undefined,
+        options.sessionId,
+      );
       return { data: { applyCouponCode: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       this.logger.warn(`applyCouponCode failed: ${e.message}`);
@@ -825,7 +896,11 @@ export class ShopApiService {
     }
     const couponCode = variables.couponCode as string;
     try {
-      const cart = await this.cartService.removeCoupon(couponCode, userId ?? undefined, options.sessionId);
+      const cart = await this.cartService.removeCoupon(
+        couponCode,
+        userId ?? undefined,
+        options.sessionId,
+      );
       return { data: { removeCouponCode: this.mapCartToOrder(cart) } };
     } catch (e: any) {
       this.logger.warn(`removeCouponCode failed: ${e.message}`);
@@ -843,22 +918,30 @@ export class ShopApiService {
 
   private mapCartToOrder(cart: any): Record<string, unknown> | null {
     if (!cart) return null;
-    const totals = cart.totals ?? { subtotal: 0, discountTotal: 0, shippingTotal: 0, taxTotal: 0, grandTotal: 0 };
+    const totals = cart.totals ?? {
+      subtotal: 0,
+      discountTotal: 0,
+      shippingTotal: 0,
+      taxTotal: 0,
+      grandTotal: 0,
+    };
 
     const lines = (cart.items ?? []).map((item: any) => {
       const unitPriceWithTax = Number(item.unitPrice ?? 0);
       const linePriceWithTax = unitPriceWithTax * Number(item.quantity ?? 0);
-      const productName = typeof item.productName === 'object'
-        ? (item.productName?.en ?? item.productName?.vi ?? '')
-        : (item.productName ?? '');
+      const productName =
+        typeof item.productName === 'object'
+          ? (item.productName?.en ?? item.productName?.vi ?? '')
+          : (item.productName ?? '');
 
       return {
         id: item.id,
         productVariant: {
           id: item.variantId,
-          name: typeof item.variantName === 'object'
-            ? (item.variantName?.en ?? item.variantName?.vi ?? '')
-            : (item.variantName ?? ''),
+          name:
+            typeof item.variantName === 'object'
+              ? (item.variantName?.en ?? item.variantName?.vi ?? '')
+              : (item.variantName ?? ''),
           sku: item.sku ?? '',
           product: {
             id: item.productId,
@@ -900,9 +983,7 @@ export class ShopApiService {
 
   // ─── Checkout Handlers ───
 
-  private async handleGetEligibleShippingMethods(
-    _options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetEligibleShippingMethods(_options: ExecuteOptions): Promise<ExecuteResult> {
     const result = this.checkoutService.getShippingMethods();
     return {
       data: {
@@ -917,9 +998,7 @@ export class ShopApiService {
     };
   }
 
-  private async handleGetEligiblePaymentMethods(
-    _options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetEligiblePaymentMethods(_options: ExecuteOptions): Promise<ExecuteResult> {
     const result = this.checkoutService.getPaymentMethods();
     return {
       data: {
@@ -996,7 +1075,7 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
-    const methodIds = variables.shippingMethodId as string[] ?? [];
+    const methodIds = (variables.shippingMethodId as string[]) ?? [];
     const code = methodIds[0] ?? 'standard';
     try {
       await this.checkoutService.setShippingMethod(code, userId ?? undefined, options.sessionId);
@@ -1006,10 +1085,12 @@ export class ShopApiService {
           setOrderShippingMethod: {
             __typename: 'Order',
             ...this.mapCartToOrder(cart),
-            shippingLines: [{
-              shippingMethod: { id: methodIds[0] ?? '1', name: code, description: '' },
-              priceWithTax: 0,
-            }],
+            shippingLines: [
+              {
+                shippingMethod: { id: methodIds[0] ?? '1', name: code, description: '' },
+                priceWithTax: 0,
+              },
+            ],
           },
         },
       };
@@ -1126,9 +1207,9 @@ export class ShopApiService {
     }
     const input = (variables.options ?? {}) as Record<string, unknown>;
     const orders = await this.ordersService.findMyOrders(userId, {
-      page: (input.skip as number ?? 0) / (input.take as number ?? 20) + 1,
-      limit: input.take as number ?? 20,
-      status: ((input.filter as Record<string, unknown> | undefined)?.status as string | undefined),
+      page: ((input.skip as number) ?? 0) / ((input.take as number) ?? 20) + 1,
+      limit: (input.take as number) ?? 20,
+      status: (input.filter as Record<string, unknown> | undefined)?.status as string | undefined,
     });
     return {
       data: {
@@ -1148,7 +1229,7 @@ export class ShopApiService {
     options: ExecuteOptions,
   ): Promise<ExecuteResult> {
     const code = variables.code as string;
-    const userId = await this.resolveUserId(options.token) ?? undefined;
+    const userId = (await this.resolveUserId(options.token)) ?? undefined;
     try {
       const order = await this.ordersService.findOrderByCode(code, userId);
       return { data: { orderByCode: this.mapOrderToGraphQL(order) } };
@@ -1212,14 +1293,16 @@ export class ShopApiService {
       id: item.id,
       productVariant: {
         id: item.variantId,
-        name: typeof item.variantName === 'object'
-          ? (item.variantName?.en ?? item.variantName?.vi ?? '')
-          : (item.variantName ?? ''),
+        name:
+          typeof item.variantName === 'object'
+            ? (item.variantName?.en ?? item.variantName?.vi ?? '')
+            : (item.variantName ?? ''),
         product: {
           id: item.productId ?? item.variantId,
-          name: typeof item.productName === 'object'
-            ? (item.productName?.en ?? item.productName?.vi ?? '')
-            : (item.productName ?? ''),
+          name:
+            typeof item.productName === 'object'
+              ? (item.productName?.en ?? item.productName?.vi ?? '')
+              : (item.productName ?? ''),
           featuredAsset: {} as any,
         },
       },
@@ -1239,12 +1322,14 @@ export class ShopApiService {
 
   private mapOrderToGraphQL(order: any): Record<string, unknown> {
     const lines = (order.items ?? []).map((item: any) => {
-      const productName = typeof item.productName === 'object'
-        ? (item.productName?.en ?? item.productName?.vi ?? '')
-        : (item.productName ?? '');
-      const variantName = typeof item.variantName === 'object'
-        ? (item.variantName?.en ?? item.variantName?.vi ?? '')
-        : (item.variantName ?? '');
+      const productName =
+        typeof item.productName === 'object'
+          ? (item.productName?.en ?? item.productName?.vi ?? '')
+          : (item.productName ?? '');
+      const variantName =
+        typeof item.variantName === 'object'
+          ? (item.variantName?.en ?? item.variantName?.vi ?? '')
+          : (item.variantName ?? '');
 
       return {
         id: item.id,
@@ -1286,43 +1371,51 @@ export class ShopApiService {
       total: Number(order.grandTotal ?? 0),
       totalWithTax: Number(order.grandTotal ?? 0),
       currencyCode: order.currencyCode ?? 'VND',
-      customer: order.userId ? {
-        id: order.userId,
-        firstName: '',
-        lastName: '',
-        emailAddress: order.email ?? '',
-        phoneNumber: '',
-      } : undefined,
-      shippingAddress: shippingAddr ? {
-        fullName: shippingAddr.fullName ?? '',
-        company: shippingAddr.company ?? '',
-        streetLine1: shippingAddr.streetLine1 ?? '',
-        streetLine2: shippingAddr.streetLine2 ?? '',
-        city: shippingAddr.city ?? '',
-        province: shippingAddr.province ?? '',
-        postalCode: shippingAddr.postalCode ?? '',
-        country: shippingAddr.countryCode ?? '',
-        phoneNumber: shippingAddr.phone ?? '',
-      } : undefined,
-      billingAddress: billingAddr ? {
-        fullName: billingAddr.fullName ?? '',
-        company: billingAddr.company ?? '',
-        streetLine1: billingAddr.streetLine1 ?? '',
-        streetLine2: billingAddr.streetLine2 ?? '',
-        city: billingAddr.city ?? '',
-        province: billingAddr.province ?? '',
-        postalCode: billingAddr.postalCode ?? '',
-        country: billingAddr.countryCode ?? '',
-        phoneNumber: billingAddr.phone ?? '',
-      } : undefined,
-      shippingLines: [{
-        shippingMethod: {
-          id: order.shippingMethod ?? 'standard',
-          name: order.shippingMethod ?? 'Standard Shipping',
-          description: '',
+      customer: order.userId
+        ? {
+            id: order.userId,
+            firstName: '',
+            lastName: '',
+            emailAddress: order.email ?? '',
+            phoneNumber: '',
+          }
+        : undefined,
+      shippingAddress: shippingAddr
+        ? {
+            fullName: shippingAddr.fullName ?? '',
+            company: shippingAddr.company ?? '',
+            streetLine1: shippingAddr.streetLine1 ?? '',
+            streetLine2: shippingAddr.streetLine2 ?? '',
+            city: shippingAddr.city ?? '',
+            province: shippingAddr.province ?? '',
+            postalCode: shippingAddr.postalCode ?? '',
+            country: shippingAddr.countryCode ?? '',
+            phoneNumber: shippingAddr.phone ?? '',
+          }
+        : undefined,
+      billingAddress: billingAddr
+        ? {
+            fullName: billingAddr.fullName ?? '',
+            company: billingAddr.company ?? '',
+            streetLine1: billingAddr.streetLine1 ?? '',
+            streetLine2: billingAddr.streetLine2 ?? '',
+            city: billingAddr.city ?? '',
+            province: billingAddr.province ?? '',
+            postalCode: billingAddr.postalCode ?? '',
+            country: billingAddr.countryCode ?? '',
+            phoneNumber: billingAddr.phone ?? '',
+          }
+        : undefined,
+      shippingLines: [
+        {
+          shippingMethod: {
+            id: order.shippingMethod ?? 'standard',
+            name: order.shippingMethod ?? 'Standard Shipping',
+            description: '',
+          },
+          priceWithTax: Number(order.shippingTotal ?? 0),
         },
-        priceWithTax: Number(order.shippingTotal ?? 0),
-      }],
+      ],
       payments: (order.payments ?? []).map((p: any) => ({
         id: p.id,
         method: p.method,
@@ -1367,19 +1460,23 @@ export class ShopApiService {
       author: article.author ?? '',
       publishedAt: article.publishedAt?.toISOString() ?? article.published_at?.toISOString() ?? '',
       viewCount: 0,
-      featuredAsset: article.imageUrl ? {
-        id: article.id,
-        preview: article.imageUrl,
-        source: article.imageUrl,
-        width: 0,
-        height: 0,
-        name: '',
-      } : null,
-      category: category ? {
-        id: category.id,
-        name: category.name?.[locale] ?? category.name?.en ?? '',
-        slug: category.slug,
-      } : null,
+      featuredAsset: article.imageUrl
+        ? {
+            id: article.id,
+            preview: article.imageUrl,
+            source: article.imageUrl,
+            width: 0,
+            height: 0,
+            name: '',
+          }
+        : null,
+      category: category
+        ? {
+            id: category.id,
+            name: category.name?.[locale] ?? category.name?.en ?? '',
+            slug: category.slug,
+          }
+        : null,
       tags: (article.tags ?? []).map((t: any) => ({
         id: t.id,
         name: t.name?.[locale] ?? t.name?.en ?? '',
@@ -1398,22 +1495,24 @@ export class ShopApiService {
       seoTitle: article.title?.[locale] ?? article.title?.en ?? '',
       seoDescription: article.excerpt?.[locale] ?? article.excerpt?.en ?? '',
       seoKeywords: '',
-      assets: article.imageUrl ? [{
-        id: article.id,
-        preview: article.imageUrl,
-        source: article.imageUrl,
-        width: 0,
-        height: 0,
-        name: '',
-      }] : [],
+      assets: article.imageUrl
+        ? [
+            {
+              id: article.id,
+              preview: article.imageUrl,
+              source: article.imageUrl,
+              width: 0,
+              height: 0,
+              name: '',
+            },
+          ]
+        : [],
     };
   }
 
   // ─── Address Handlers ───
 
-  private async handleGetCustomerAddresses(
-    options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetCustomerAddresses(options: ExecuteOptions): Promise<ExecuteResult> {
     const userId = await this.resolveUserId(options.token);
     if (!userId) {
       return { data: { activeCustomer: { id: '', addresses: [] } } };
@@ -1533,8 +1632,10 @@ export class ShopApiService {
       if (input.phoneNumber !== undefined) existing.phone = input.phoneNumber as string;
       if (input.fullName) existing.fullName = input.fullName as string;
       if (input.company !== undefined) existing.company = input.company as string;
-      if (input.defaultShippingAddress !== undefined) existing.isDefaultShipping = input.defaultShippingAddress as boolean;
-      if (input.defaultBillingAddress !== undefined) existing.isDefaultBilling = input.defaultBillingAddress as boolean;
+      if (input.defaultShippingAddress !== undefined)
+        existing.isDefaultShipping = input.defaultShippingAddress as boolean;
+      if (input.defaultBillingAddress !== undefined)
+        existing.isDefaultBilling = input.defaultBillingAddress as boolean;
       const saved = await this.addressRepo.save(existing);
       return {
         data: {
@@ -1633,9 +1734,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleGetArticleCategories(
-    _options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetArticleCategories(_options: ExecuteOptions): Promise<ExecuteResult> {
     try {
       const result = await this.articlesService.findCategories();
       return {
@@ -1656,9 +1755,7 @@ export class ShopApiService {
     }
   }
 
-  private async handleGetArticleTags(
-    _options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetArticleTags(_options: ExecuteOptions): Promise<ExecuteResult> {
     try {
       const result = await this.articlesService.findTags();
       return {
@@ -1681,9 +1778,7 @@ export class ShopApiService {
 
   // ─── Reference Handlers ───
 
-  private async handleGetAvailableCountries(
-    options: ExecuteOptions,
-  ): Promise<ExecuteResult> {
+  private async handleGetAvailableCountries(options: ExecuteOptions): Promise<ExecuteResult> {
     try {
       const countries = await this.countryRepo.find({
         where: { isActive: true },

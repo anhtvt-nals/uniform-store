@@ -47,6 +47,9 @@ export class ProductEntity {
   @Column({ name: 'base_price', type: 'decimal', default: 0 })
   basePrice: number;
 
+  @Column({ name: 'is_contact_price', type: 'boolean', default: false })
+  isContactPrice: boolean;
+
   @Column({ name: 'tax_rate', type: 'decimal', default: 0 })
   taxRate: number;
 
@@ -65,7 +68,7 @@ export class ProductEntity {
   @Column({ name: 'meta_desc', type: 'jsonb', default: {} })
   metaDesc: Record<string, string>;
 
-  @Column({name: 'size_guide_image_url', type: 'text', default: ''})
+  @Column({ name: 'size_guide_image_url', type: 'text', default: '' })
   sizeGuideImageUrl: string;
 
   @CreateDateColumn({ name: 'created_at' })

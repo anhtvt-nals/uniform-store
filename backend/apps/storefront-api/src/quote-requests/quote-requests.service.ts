@@ -40,6 +40,7 @@ export class QuoteRequestsService {
       address: saved.address,
       productType: saved.productType,
       quantity: saved.quantity,
+      sizeName: saved.sizeName,
     });
 
     return saved;
@@ -63,9 +64,15 @@ export class QuoteRequestsService {
       return;
     }
     if (!normalizedEmail) return;
-    await this.userRepo.save(this.userRepo.create({
-      id: crypto.randomUUID(), email: normalizedEmail, firstName,
-      lastName: lastNameParts.join(' '), phone: normalizedPhone, isActive: true,
-    }));
+    await this.userRepo.save(
+      this.userRepo.create({
+        id: crypto.randomUUID(),
+        email: normalizedEmail,
+        firstName,
+        lastName: lastNameParts.join(' '),
+        phone: normalizedPhone,
+        isActive: true,
+      }),
+    );
   }
 }

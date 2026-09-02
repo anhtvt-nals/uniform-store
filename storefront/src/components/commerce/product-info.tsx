@@ -63,29 +63,39 @@ export function ProductInfo({
   const t = useTranslations("Product");
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, startAddingToCart] = useTransition();
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
-  const [sizes, setSizes] = useState<Array<{id: string; code: string; weightRange: string}>>([]);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    null,
+  );
+  const [sizes, setSizes] = useState<
+    Array<{ id: string; code: string; weightRange: string }>
+  >([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
   const [basePrice, setBasePrice] = useState<number | null>(null);
+  const [isContactPrice, setIsContactPrice] = useState(false);
   const [zaloUrl, setZaloUrl] = useState("https://zalo.me/0901234567");
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/v1/products/${product.slug}`).then((response) => response.ok ? response.json() : null).then((payload) => {
-      const data = payload?.data || payload;
-      if (!data) return;
-      setSizes(data.sizes || []);
-      setSizeGuideImageUrl(data.sizeGuideImageUrl || "");
-      setBasePrice(Number(data.basePrice || 0));
-    }).catch(() => undefined);
+    fetch(`/api/v1/products/${product.slug}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        const data = payload?.data || payload;
+        if (!data) return;
+        setSizes(data.sizes || []);
+        setSizeGuideImageUrl(data.sizeGuideImageUrl || "");
+        setBasePrice(Number(data.basePrice || 0));
+        setIsContactPrice(Boolean(data.isContactPrice));
+      })
+      .catch(() => undefined);
   }, [product.slug]);
 
   useEffect(() => {
     fetch("/api/v1/settings/public")
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
         const settings = payload?.data || payload;
-        if (typeof settings?.zalo_url === "string" && settings.zalo_url.trim()) setZaloUrl(settings.zalo_url);
+        if (typeof settings?.zalo_url === "string" && settings.zalo_url.trim())
+          setZaloUrl(settings.zalo_url);
       })
       .catch(() => undefined);
   }, []);
@@ -113,8 +123,16 @@ export function ProductInfo({
 
   // Find the matching variant based on selected options
   const selectedVariant = useMemo(() => {
-    return product.variants.find((variant) => variant.id === selectedVariantId) ?? null;
-  }, [selectedOptions, selectedVariantId, product.variants, product.optionGroups]);
+    return (
+      product.variants.find((variant) => variant.id === selectedVariantId) ??
+      null
+    );
+  }, [
+    selectedOptions,
+    selectedVariantId,
+    product.variants,
+    product.optionGroups,
+  ]);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -147,7 +165,9 @@ export function ProductInfo({
     setSelectedOptions(nextOptions);
 
     const params = new URLSearchParams(currentSearchParams.toString());
-    variant.options.forEach((option) => params.set(option.group.code, option.code));
+    variant.options.forEach((option) =>
+      params.set(option.group.code, option.code),
+    );
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -162,7 +182,11 @@ export function ProductInfo({
     }
 
     startAddingToCart(async () => {
-      const result = await addToCart(selectedVariant.id, quantity, selectedSizeId || undefined);
+      const result = await addToCart(
+        selectedVariant.id,
+        quantity,
+        selectedSizeId || undefined,
+      );
       if (!result.success) {
         toast.error(result.error || t("errorAddToCart"));
         return;
@@ -183,17 +207,25 @@ export function ProductInfo({
         <h1 className="font-category-title text-3xl md:text-4xl tracking-tight">
           {product.name}
         </h1>
-        {selectedVariant || basePrice !== null ? (
+        {isContactPrice || selectedVariant || basePrice !== null ? (
           <p className="mt-3 text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
-            <Price
-              value={selectedVariant?.priceWithTax ?? basePrice ?? 0}
-              currencyCode={currencyCode}
-            />
+            {isContactPrice ? (
+              "Giá liên hệ"
+            ) : (
+              <Price
+                value={selectedVariant?.priceWithTax ?? basePrice ?? 0}
+                currencyCode={currencyCode}
+              />
+            )}
           </p>
-        ) : <div className="mt-3 h-10 w-32 animate-pulse rounded bg-muted" />}
+        ) : (
+          <div className="mt-3 h-10 w-32 animate-pulse rounded bg-muted" />
+        )}
 
         {product.sortDescription && (
-          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{product.sortDescription}</p>
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+            {product.sortDescription}
+          </p>
         )}
       </div>
 
@@ -249,13 +281,23 @@ export function ProductInfo({
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left transition-colors ${isSelected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/40"}`}
                 >
                   <span>
-                    <span className="block text-sm font-semibold text-foreground">{variant.name}</span>
+                    <span className="block text-sm font-semibold text-foreground">
+                      {variant.name}
+                    </span>
                     <span className="block text-xs text-muted-foreground">
-                      SKU: {variant.sku || "—"} · {stockLabel(variant.stockLevel)}
+                      SKU: {variant.sku || "—"} ·{" "}
+                      {stockLabel(variant.stockLevel)}
                     </span>
                   </span>
                   <span className="ml-3 shrink-0 text-sm font-bold text-primary">
-                    <Price value={variant.priceWithTax} currencyCode={currencyCode} />
+                    {isContactPrice ? (
+                      "Giá liên hệ"
+                    ) : (
+                      <Price
+                        value={variant.priceWithTax}
+                        currencyCode={currencyCode}
+                      />
+                    )}
                   </span>
                 </button>
               );
@@ -268,11 +310,32 @@ export function ProductInfo({
         <div className="space-y-3">
           <Label className="text-base font-semibold">Kích thước</Label>
           <div className="flex flex-wrap gap-2">
-            {sizes.map((size) => <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/60"}`}>
-              {size.code}{size.weightRange ? <span className="ml-1 text-xs font-normal opacity-80">({size.weightRange})</span> : null}
-            </button>)}
+            {sizes.map((size) => (
+              <button
+                key={size.id}
+                type="button"
+                onClick={() => setSelectedSizeId(size.id)}
+                className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/60"}`}
+              >
+                {size.code}
+                {size.weightRange ? (
+                  <span className="ml-1 text-xs font-normal opacity-80">
+                    ({size.weightRange})
+                  </span>
+                ) : null}
+              </button>
+            ))}
           </div>
-          {sizeGuideImageUrl ? <a href={sizeGuideImageUrl} target="_blank" rel="noreferrer" className="inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">Xem bảng hướng dẫn chọn size</a> : null}
+          {sizeGuideImageUrl ? (
+            <a
+              href={sizeGuideImageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Xem bảng hướng dẫn chọn size
+            </a>
+          ) : null}
         </div>
       )}
 
@@ -285,7 +348,11 @@ export function ProductInfo({
             min={1}
             max={10000}
             value={quantity}
-            onChange={(event) => setQuantity(Math.min(10000, Math.max(1, Number(event.target.value) || 1)))}
+            onChange={(event) =>
+              setQuantity(
+                Math.min(10000, Math.max(1, Number(event.target.value) || 1)),
+              )
+            }
             className="h-11"
           />
         </div>
@@ -293,14 +360,37 @@ export function ProductInfo({
           type="button"
           size="lg"
           className="h-11 flex-1 rounded-lg text-base font-bold"
-          disabled={!selectedVariant || (sizes.length > 0 && !selectedSizeId) || isOutOfStock || isAddingToCart}
+          disabled={
+            !selectedVariant ||
+            (sizes.length > 0 && !selectedSizeId) ||
+            isOutOfStock ||
+            isAddingToCart
+          }
           onClick={handleAddToCart}
         >
-          {isAddingToCart ? <Loader2 className="mr-2 size-5 animate-spin" /> : <ShoppingCart className="mr-2 size-5" />}
-          {isOutOfStock ? t("outOfStock") : isAddingToCart ? t("adding") : t("addToCart")}
+          {isAddingToCart ? (
+            <Loader2 className="mr-2 size-5 animate-spin" />
+          ) : (
+            <ShoppingCart className="mr-2 size-5" />
+          )}
+          {isOutOfStock
+            ? t("outOfStock")
+            : isAddingToCart
+              ? t("adding")
+              : t("addToCart")}
         </Button>
-        <Button render={<a href={zaloUrl} target="_blank" rel="noopener noreferrer" />} nativeButton={false} type="button" variant="outline" size="lg" className="h-11 flex-1 rounded-lg border-[#0068ff] text-base font-bold text-[#0068ff] hover:border-[#0058d9] hover:bg-[#0068ff]/10 hover:text-[#0058d9]">
-          <img src="/zalo.webp" alt="" className="mr-2 size-5 object-contain" />Tư vấn qua Zalo
+        <Button
+          render={
+            <a href={zaloUrl} target="_blank" rel="noopener noreferrer" />
+          }
+          nativeButton={false}
+          type="button"
+          variant="outline"
+          size="lg"
+          className="h-11 flex-1 rounded-lg border-[#0068ff] text-base font-bold text-[#0068ff] hover:border-[#0058d9] hover:bg-[#0068ff]/10 hover:text-[#0058d9]"
+        >
+          <img src="/zalo.webp" alt="" className="mr-2 size-5 object-contain" />
+          Tư vấn qua Zalo
         </Button>
       </div>
 

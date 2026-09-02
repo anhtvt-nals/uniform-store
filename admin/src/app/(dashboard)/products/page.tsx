@@ -19,11 +19,12 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select as SelectNative } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, RotateCcw, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, RotateCcw, Search, Copy } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useT } from "@/i18n";
 import { formatDate } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type Product = {
   id: string;
@@ -33,6 +34,7 @@ type Product = {
   images?: { id: string; url: string; sortOrder: number }[];
   isActive: boolean;
   isFeatured: boolean;
+  isContactPrice: boolean;
   category?: { id: string; name: Record<string, string> } | null;
   brand?: { id: string; name: Record<string, string> } | null;
   deletedAt?: string | null;
@@ -58,6 +60,7 @@ export default function ProductsPage() {
     null,
   );
   const queryClient = useQueryClient();
+  const router = useRouter();
   const token = getToken();
 
   const params: Record<string, string | number | boolean | undefined> = {
@@ -118,6 +121,21 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Đã khôi phục sản phẩm");
       setRestoreId(null);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiClient<{ id: string }>(`/products/${id}/duplicate`, {
+        method: "POST",
+        token,
+      }),
+    onSuccess: (response) => {
+      const duplicated = response.data;
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Đã nhân bản sản phẩm");
+      if (duplicated?.id) router.push(`/products/${duplicated.id}`);
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -239,11 +257,13 @@ export default function ProductsPage() {
                       {p.brand?.name?.vi || p.brand?.name?.en || "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {p.basePrice != null
-                        ? new Intl.NumberFormat("vi-VN", {
-                            maximumFractionDigits: 0,
-                          }).format(Math.round(p.basePrice)) + " VNĐ"
-                        : "—"}
+                      {p.isContactPrice
+                        ? "Giá liên hệ"
+                        : p.basePrice != null
+                          ? new Intl.NumberFormat("vi-VN", {
+                              maximumFractionDigits: 0,
+                            }).format(Math.round(p.basePrice)) + " VNĐ"
+                          : "—"}
                     </TableCell>
                     <TableCell>
                       {p.deletedAt ? (
@@ -266,6 +286,18 @@ export default function ProductsPage() {
                             <Pencil className="h-4 w-4" />
                           </Link>
                         </Button>
+                        {!p.deletedAt && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Nhân bản sản phẩm"
+                            aria-label="Nhân bản sản phẩm"
+                            disabled={duplicateMutation.isPending}
+                            onClick={() => duplicateMutation.mutate(p.id)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        )}
                         {p.deletedAt ? (
                           <Button
                             variant="ghost"

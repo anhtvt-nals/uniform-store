@@ -45,6 +45,10 @@ export class CreateProductDto {
   basePrice?: number;
 
   @IsOptional()
+  @IsBoolean()
+  isContactPrice?: boolean;
+
+  @IsOptional()
   @IsNumber()
   taxRate?: number;
 
@@ -73,9 +77,12 @@ export class CreateProductDto {
   @IsObject()
   metaDesc?: Record<string, string>;
 
-  @IsOptional() @IsArray() @IsUUID('4', {each: true})
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
   sizeIds?: string[];
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   sizeGuideImageUrl?: string;
 }
