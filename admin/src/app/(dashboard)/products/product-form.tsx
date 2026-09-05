@@ -194,6 +194,8 @@ export function ProductForm({
   const [isContactPrice, setIsContactPrice] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [soldCount, setSoldCount] = useState(0);
+  const [displayOrder, setDisplayOrder] = useState(0);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
   const [metaDesc, setMetaDesc] = useState<Record<string, string>>({});
   const [sizeIds, setSizeIds] = useState<string[]>([]);
@@ -240,6 +242,8 @@ export function ProductForm({
           ? Boolean(defaultValues.isFeatured)
           : false,
       );
+      setSoldCount(Number(defaultValues.soldCount ?? 0));
+      setDisplayOrder(Number(defaultValues.displayOrder ?? 0));
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
       setMetaDesc((defaultValues.metaDesc as Record<string, string>) || {});
       setSizeIds(
@@ -312,6 +316,10 @@ export function ProductForm({
       (!Number.isInteger(Number(basePrice)) || Number(basePrice) < 0)
     )
       newErrors.basePrice = "Giá phải là số VNĐ nguyên, không âm";
+    if (!Number.isInteger(soldCount) || soldCount < 0)
+      newErrors.soldCount = "Số lượng đã bán phải là số nguyên không âm";
+    if (!Number.isInteger(displayOrder) || displayOrder < 0)
+      newErrors.displayOrder = "Ưu tiên hiển thị phải là số nguyên không âm";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -322,6 +330,8 @@ export function ProductForm({
       categoryId,
       isActive,
       isFeatured,
+      soldCount,
+      displayOrder,
       detail,
       basePrice: isContactPrice ? 0 : basePrice ? Number(basePrice) : 0,
       isContactPrice,
@@ -638,7 +648,36 @@ export function ProductForm({
                     checked={isFeatured}
                     onCheckedChange={setIsFeatured}
                   />
-                  <Label htmlFor="isFeatured">Nổi bật</Label>
+                  <Label htmlFor="isFeatured">Sản phẩm nổi bật (hiển thị ở Hero)</Label>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="soldCount">Số lượng đã bán</Label>
+                  <Input
+                    id="soldCount"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    value={soldCount}
+                    onChange={(event) => setSoldCount(Number(event.target.value))}
+                  />
+                  {errors.soldCount && <p className="text-xs text-destructive">{errors.soldCount}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="displayOrder">Ưu tiên hiển thị</Label>
+                  <Input
+                    id="displayOrder"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    value={displayOrder}
+                    onChange={(event) => setDisplayOrder(Number(event.target.value))}
+                  />
+                  <p className="text-xs text-muted-foreground">Số lớn hơn xuất hiện trước; nếu bằng nhau sẽ ưu tiên số lượng đã bán.</p>
+                  {errors.displayOrder && <p className="text-xs text-destructive">{errors.displayOrder}</p>}
                 </div>
               </div>
             </CardContent>

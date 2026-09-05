@@ -158,6 +158,13 @@
 **Status**: Accepted
 **Context**: Homepage testimonials must be managed by administrators instead of being embedded in storefront translations.
 **Decision**: Store testimonials in the database and expose only active, ordered records through `GET /api/v1/testimonials?locale=vi`; protect CRUD operations behind the admin API at `/api/v1/admin/testimonials`.
+
+## ADR-022: Product Popularity Ordering for Homepage Lists
+
+**Status**: Accepted
+**Context**: Homepage category lists need real best-seller ordering that staff can curate without maintaining a separate homepage catalog.
+**Decision**: Add `products.sold_count` and `products.display_order`, editable from the product form. When no explicit storefront sort is requested, products are ordered by descending display priority, then sold count, then creation time. The homepage-specific `HomepageCategoryProducts` GraphQL compatibility operation selects up to two products from each category in the selected parent tree before filling its 10 remaining slots by ranking. The mapper includes `soldCount` alongside its existing extra storefront fields so product cards can show the administrator-managed total.
+**Rationale**: Product already owns the merchandising metadata. Extending the existing search response preserves the frontend's compatibility endpoint and avoids duplicate lists or a separate ranking API.
 **Rationale**: This retains the storefront's exact card data shape while letting admins update copy, avatar, rating, ordering, and visibility without deployment.
 **Consequences**: Migration `041_create_testimonials.sql` is required. The storefront keeps its existing translated reviews only as a graceful fallback when the public API is unavailable.
 

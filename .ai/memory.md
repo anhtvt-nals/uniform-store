@@ -733,3 +733,11 @@ git push → main
 
 - Migration `045_add_contact_price_to_products.sql` adds `products.is_contact_price`. When enabled in the Admin product form, `base_price` is stored as `0`; storefront product cards, quick view and product detail show “Giá liên hệ” and do not display a variant price. Contact-priced products are excluded from the hero price-estimate range.
 - Admin product list has a duplicate action. `POST /api/v1/admin/products/:id/duplicate` clones product content, images, option groups/options, variants and their option bindings, available sizes and size-guide image. New names receive ` - Copy`, slug and variant SKU are made unique, and copied inventory starts at zero.
+
+### Homepage Featured Products (2026-09-05)
+
+- Hero preserves its existing slider UI. It builds slides from up to four active products returned by `GET /api/v1/products/featured`; when none are selected, it falls back to Hero Slider records configured in Admin. Admin's existing `isFeatured` switch is labelled “Sản phẩm nổi bật (hiển thị ở Hero)” so staff can control the product slides directly from the product form.
+
+### Homepage Product Ranking (2026-09-05)
+
+- Migration `046_add_product_popularity_fields.sql` adds editable `sold_count` and `display_order` to products. Homepage category lists resolve all descendants with a PostgreSQL recursive CTE, then render exactly 10 cards: up to two ranked products per category in the selected parent tree, followed by the remaining highest-ranked products when a branch has fewer than two.

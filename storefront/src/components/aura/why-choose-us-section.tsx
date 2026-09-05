@@ -14,8 +14,8 @@ export async function WhyChooseUsSection() {
     ];
 
     return (
-        <div className="md:col-span-12 py-8 md:py-12">
-            <div className="text-center mb-6 md:mb-10">
+        <div className="md:col-span-12 py-5 md:py-8">
+            <div className="text-center mb-5 md:mb-7">
                 <h2 className="font-category-title text-3xl text-foreground tracking-tighter mb-4">{t('whyShopWithUs')}</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">{t('whyShopWithUsDesc')}</p>
             </div>

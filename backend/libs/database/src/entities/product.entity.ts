@@ -59,6 +59,12 @@ export class ProductEntity {
   @Column({ name: 'is_featured', type: 'boolean', default: false })
   isFeatured: boolean;
 
+  @Column({ name: 'sold_count', type: 'int', default: 0 })
+  soldCount: number;
+
+  @Column({ name: 'display_order', type: 'int', default: 0 })
+  displayOrder: number;
+
   @Column({ type: 'decimal', default: 0 })
   weight: number;
 

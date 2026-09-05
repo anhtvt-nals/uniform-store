@@ -63,6 +63,28 @@ export const SearchProductsQuery = graphql(`
     }
 `, [ProductCardFragment]);
 
+export const HomepageCategoryProductsQuery = graphql(`
+    query HomepageCategoryProducts($input: SearchInput!) {
+        search(input: $input) {
+            totalItems
+            items {
+                ...ProductCard
+            }
+            facetValues {
+                count
+                facetValue {
+                    id
+                    name
+                    facet {
+                        id
+                        name
+                    }
+                }
+            }
+        }
+    }
+`, [ProductCardFragment]);
+
 export const GetProductDetailQuery = graphql(`
     query GetProductDetail($slug: String!) {
         product(slug: $slug) {

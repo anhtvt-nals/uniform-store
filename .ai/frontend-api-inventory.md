@@ -55,6 +55,7 @@ Server Action / Component / Route Handler
 |-------|-----------|----------|------------|
 | `GetTopCollectionsQuery` | none | `collections {items {id, name, slug}}` | `cached.ts` → navbar, mobile-nav |
 | `SearchProductsQuery` | `$input: SearchInput!` | `search {totalItems, items {...ProductCard}, facetValues[{count, facetValue{id, name, facet{id, name}}}]}` | homepage products section, search results, collection products |
+| `HomepageCategoryProductsQuery` | `$input: SearchInput!` with `collectionSlug` and `take: 10` | Same `search` shape as `SearchProductsQuery`; products are balanced at two per category in the selected parent tree before remaining slots are filled | homepage category showcase |
 | `GetProductDetailQuery` | `$slug: String!` | `product {id, name, description, slug, assets[...], variants[{id, name, sku, priceWithTax, stockLevel, options[{id, code, name, groupId, group{id, code, name}}]}], optionGroups[{id, code, name, options[{id, code, name}]}], collections[{id, name, slug, parent{id}}]}` | product detail page, quick-view; size metadata is additionally loaded from `GET /api/v1/products/:slug` (`sizes`, `sizeGuideImageUrl`) |
 | `GetCollectionProductsQuery` | `$slug: String!, $input: SearchInput!` | `collection {id, name, slug, description, featuredAsset{id, preview}}` + `search {totalItems, items {...ProductCard}}` | collection page, featured products, related products |
 | `GetActiveChannelQuery` | none | `activeChannel {id, code, defaultLanguageCode, availableLanguageCodes, defaultCurrencyCode, availableCurrencyCodes}` | `cached.ts` → currency/locale config |
@@ -95,6 +96,7 @@ Server Action / Component / Route Handler
 |----------|-------|----------|-----------|
 | `GET /api/v1/orders/lookup` | `email`, `code` | `{code, status, createdAt, currencyCode, total, customerName, shippingAddress, items[]}` | order lookup page |
 | `GET /api/v1/products/price-estimate` | `categorySlug`, `quantity` | `{min, max, currencyCode, productCount}` | Hero configurator |
+| `GET /api/v1/products/featured` | `limit` | Active featured product entities with `name`, `slug`, `basePrice`, `isContactPrice`, `sku`, `soldCount`, `displayOrder`, and `images[]` | Hero featured-product list |
 
 ### 2f. Articles — `src/lib/graphql/articles.ts`
 

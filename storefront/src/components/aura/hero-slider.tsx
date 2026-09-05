@@ -78,7 +78,7 @@ export function HeroSlider({
                             </div>
                         )}
 
-                        <h1 className="py-1 text-4xl md:text-5xl lg:text-7xl font-black italic tracking-[-0.06em] leading-[1.12] mb-6 whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm">
+                        <h1 className="py-1 text-[2.125rem] md:text-[2.75rem] lg:text-6xl font-black italic tracking-[-0.06em] leading-[1.12] mb-6 whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm">
                             {s.title.replace(/\\n/g, '\n')}
                             {s.titleHighlight && <><span>{"\n"}</span><span className="text-primary">{s.titleHighlight}</span></>}
                         </h1>

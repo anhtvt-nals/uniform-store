@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ProductsService } from './products.service';
-import { ProductEntity, CategoryEntity } from '@app/database';
+import {
+  ProductEntity,
+  CategoryEntity,
+  ProductImageEntity,
+  ProductVariantEntity,
+  DiscountEntity,
+  ProductSizeEntity,
+} from '@app/database';
 import { NotFoundException } from '@nestjs/common';
 
 const mockProductRepo = {
@@ -13,7 +20,13 @@ const mockProductRepo = {
 const mockCategoryRepo = {
   findOne: jest.fn(),
   find: jest.fn(),
+  query: jest.fn().mockResolvedValue([]),
 };
+
+const mockImageRepo = { find: jest.fn().mockResolvedValue([]) };
+const mockVariantRepo = { createQueryBuilder: jest.fn() };
+const mockDiscountRepo = { find: jest.fn().mockResolvedValue([]) };
+const mockProductSizeRepo = { find: jest.fn().mockResolvedValue([]) };
 
 function mockQb(overrides: any = {}) {
   const qb: any = {
@@ -21,6 +34,7 @@ function mockQb(overrides: any = {}) {
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
+    addOrderBy: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
@@ -41,6 +55,10 @@ describe('ProductsService (storefront)', () => {
         ProductsService,
         { provide: getRepositoryToken(ProductEntity), useValue: mockProductRepo },
         { provide: getRepositoryToken(CategoryEntity), useValue: mockCategoryRepo },
+        { provide: getRepositoryToken(ProductImageEntity), useValue: mockImageRepo },
+        { provide: getRepositoryToken(ProductVariantEntity), useValue: mockVariantRepo },
+        { provide: getRepositoryToken(DiscountEntity), useValue: mockDiscountRepo },
+        { provide: getRepositoryToken(ProductSizeEntity), useValue: mockProductSizeRepo },
       ],
     }).compile();
 
@@ -214,6 +232,34 @@ describe('ProductsService (storefront)', () => {
 
       const result = await service.findFeatured(8);
       expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('findHomepageCategoryProducts', () => {
+    it('should select two products per category before filling remaining slots', async () => {
+      jest.spyOn(service, 'findAll').mockResolvedValue({
+        items: [
+          { id: 'a-1', categoryId: 'a' },
+          { id: 'a-2', categoryId: 'a' },
+          { id: 'a-3', categoryId: 'a' },
+          { id: 'b-1', categoryId: 'b' },
+          { id: 'c-1', categoryId: 'c' },
+        ] as any,
+        total: 5,
+        page: 1,
+        pageSize: 500,
+        totalPages: 1,
+      });
+
+      const result = await service.findHomepageCategoryProducts('parent', 5, 2);
+
+      expect(result.items.map((product) => product.id)).toEqual([
+        'a-1',
+        'a-2',
+        'b-1',
+        'c-1',
+        'a-3',
+      ]);
     });
   });
 });

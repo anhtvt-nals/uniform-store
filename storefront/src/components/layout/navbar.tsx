@@ -21,6 +21,7 @@ export async function Navbar() {
   ]);
   const storePhone = getStringSetting(settings, "store_phone");
   const t = await getTranslations({ locale, namespace: "Navigation" });
+  const contactItems = Array.from({ length: 12 }, (_, index) => index);
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -86,9 +87,9 @@ export async function Navbar() {
             {storePhone && (
               <a
                 href={`tel:${storePhone.replace(/[^0-9+]/g, "")}`}
-                className="hidden 2xl:flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/20 transition-colors"
+                className="hidden xl:flex items-center gap-2.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-extrabold tracking-wide text-primary-foreground shadow-md shadow-primary/25 transition hover:bg-primary/90 hover:shadow-lg"
               >
-                <Phone className="w-4 h-4" /> {storePhone}
+                <Phone className="size-4" /> {storePhone}
               </a>
             )}
             <div className="hidden xl:block">
@@ -105,6 +106,19 @@ export async function Navbar() {
               <NavbarCart />
             </Suspense>
           </div>
+        </div>
+      </div>
+      <div className="contact-marquee border-t border-primary/20 bg-foreground py-1.5 text-amber-300">
+        <div className="contact-marquee-track">
+          {[0, 1].map((loop) => (
+            <div key={loop} className="flex shrink-0 items-center gap-5 pr-5 sm:gap-8 sm:pr-8">
+              {contactItems.map((item) => (
+                <span key={`${loop}-${item}`} className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.16em] sm:text-[11px]">
+                  Liên hệ trực tiếp <span className="ml-5 text-amber-400/70 sm:ml-8">✦</span>
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
     </header>

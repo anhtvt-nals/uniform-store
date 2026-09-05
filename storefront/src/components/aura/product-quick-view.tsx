@@ -43,6 +43,14 @@ interface QuickViewProduct {
   sizeGuideImageUrl?: string;
 }
 
+type InquirySelection = {
+  variantId: string;
+  variantName: string;
+  variantSku: string;
+  sizeId?: string;
+  sizeName?: string;
+};
+
 export function ProductQuickView({
   slug,
   onClose,
@@ -63,6 +71,8 @@ export function ProductQuickView({
   );
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquirySelection, setInquirySelection] =
+    useState<InquirySelection | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -86,6 +96,7 @@ export function ProductQuickView({
           setProduct(p as QuickViewProduct);
           setSelectedVariantId(null);
           setSelectedOptions({});
+          setInquirySelection(null);
         }
       })
       .catch(() => active && setError(t("errorTitle")))
@@ -110,11 +121,11 @@ export function ProductQuickView({
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedVariant) {
+    if (!inquirySelection) {
       toast.error("Vui lòng chọn mã sản phẩm");
       return;
     }
-    if (product?.sizes?.length && !selectedSizeId) {
+    if (product?.sizes?.length && !inquirySelection.sizeId) {
       toast.error("Vui lòng chọn size sản phẩm");
       return;
     }
@@ -125,8 +136,17 @@ export function ProductQuickView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: product?.id,
-          sizeId: selectedSizeId || undefined,
+          sizeId: inquirySelection.sizeId,
           ...formData,
+          notes: [
+            `Mã sản phẩm: ${inquirySelection.variantName}${inquirySelection.variantSku ? ` (${inquirySelection.variantSku})` : ""}`,
+            inquirySelection.sizeName
+              ? `Size: ${inquirySelection.sizeName}`
+              : "",
+            formData.notes.trim(),
+          ]
+            .filter(Boolean)
+            .join("\n"),
         }),
       });
       if (res.ok) {
@@ -151,6 +171,13 @@ export function ProductQuickView({
       toast.error("Vui lòng chọn size sản phẩm");
       return;
     }
+    setInquirySelection({
+      variantId: selectedVariant.id,
+      variantName: selectedVariant.name,
+      variantSku: selectedVariant.sku,
+      sizeId: selectedSizeId || undefined,
+      sizeName: selectedSize?.code,
+    });
     setShowInquiryForm(true);
   };
 
@@ -462,13 +489,14 @@ export function ProductQuickView({
                       </div>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
                         <span>
-                          {selectedVariant?.name || "Chưa chọn mã sản phẩm"}
+                          {inquirySelection?.variantName ||
+                            "Chưa chọn mã sản phẩm"}
                         </span>
-                        {selectedSize ? (
+                        {inquirySelection?.sizeName ? (
                           <span>
                             Size:{" "}
                             <strong className="font-semibold text-foreground">
-                              {selectedSize.code}
+                              {inquirySelection.sizeName}
                             </strong>
                           </span>
                         ) : null}

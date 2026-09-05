@@ -10,6 +10,39 @@ const slideImages = [
     "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop",
 ];
 
+type FeaturedProduct = {
+    id: string;
+    slug: string;
+    name: Record<string, string>;
+    description?: Record<string, string>;
+    images?: Array<{url?: string}>;
+};
+
+function getLocalizedText(value: Record<string, string>, locale: string) {
+    return value[locale] || value.vi || value.en || Object.values(value)[0] || '';
+}
+
+async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
+    const backendUrl = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace('/shop-api', '');
+    try {
+        const response = await fetch(`${backendUrl}/api/v1/products/featured?limit=4`, {cache: 'no-store'});
+        if (!response.ok) return [];
+        const payload: unknown = await response.json();
+        const data = typeof payload === 'object' && payload !== null && 'data' in payload ? (payload as {data: unknown}).data : payload;
+        if (!Array.isArray(data)) return [];
+        return data.filter((item): item is FeaturedProduct =>
+            typeof item === 'object' && item !== null &&
+            typeof (item as FeaturedProduct).id === 'string' &&
+            typeof (item as FeaturedProduct).slug === 'string' &&
+            typeof (item as FeaturedProduct).name === 'object' &&
+            (item as FeaturedProduct).name !== null &&
+            !Array.isArray((item as FeaturedProduct).name),
+        );
+    } catch {
+        return [];
+    }
+}
+
 async function getHeroSlides(locale: string, fallback: HeroSlide[]): Promise<HeroSlide[]> {
     const backendUrl = (process.env.VENDURE_SHOP_API_URL || 'http://localhost:3000/shop-api').replace('/shop-api', '');
     try {
@@ -30,16 +63,25 @@ async function getHeroSlides(locale: string, fallback: HeroSlide[]): Promise<Her
 export async function HeroSection() {
     const locale = await getRouteLocale();
     const t = await getTranslations({locale, namespace: 'Hero'});
-
     const slideTexts = t.raw('slides') as Array<{tag: string; title: string; desc: string}>;
-    const fallbackSlides: HeroSlide[] = slideTexts.map((s, i) => ({
-        tag: s.tag,
-        title: s.title,
+    const fallbackSlides: HeroSlide[] = slideTexts.map((slide, index) => ({
+        tag: slide.tag,
+        title: slide.title,
         titleHighlight: '',
-        desc: s.desc,
-        image: slideImages[i % slideImages.length],
+        desc: slide.desc,
+        image: slideImages[index % slideImages.length],
     }));
-    const slides = await getHeroSlides(locale, fallbackSlides);
+    const products = await getFeaturedProducts();
+    const slides = products.length > 0
+        ? products.map((product, index) => ({
+            tag: 'Sản phẩm nổi bật',
+            title: getLocalizedText(product.name, locale),
+            titleHighlight: '',
+            desc: getLocalizedText(product.description || {}, locale),
+            image: product.images?.[0]?.url || slideImages[index % slideImages.length],
+        }))
+        : await getHeroSlides(locale, fallbackSlides);
+
     return (
         <div className="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 mt-4">
             <HeroSlider
@@ -67,7 +109,7 @@ async function BulkOrderWidget() {
                     <div className="bg-primary-foreground/10 rounded-2xl p-5 border border-primary-foreground/10 backdrop-blur-sm">
                         <div className="text-[10px] font-bold text-primary-foreground/60 tracking-widest mb-1 uppercase">{home('bulkOrderEstimate')}</div>
                         <div className="text-4xl font-black tracking-tighter">{home('bulkOrderNote')}</div>
-                        <div className="mt-1 text-sm font-bold text-amber-200">{home('bulkOrderContact')}</div>
+                        <div className="mt-1 text-md font-bold text-amber-200">{home('bulkOrderContact')}</div>
                     </div>
                     <div className="bg-primary-foreground/10 rounded-2xl p-5 border border-primary-foreground/10 backdrop-blur-sm mt-2 space-y-2">
                         {[home('bulkOrderFreeDesign'), home('bulkOrderFreeShip'), home('bulkOrderWarranty'), home('bulkOrderWarranty3Month')].map((benefit) => <div key={benefit} className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-green-300" /><span className="text-sm font-bold">{benefit}</span></div>)}

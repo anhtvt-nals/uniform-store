@@ -145,6 +145,8 @@ export class ProductsService {
       taxRate: dto.taxRate ?? 0,
       isActive: dto.isActive ?? true,
       isFeatured: dto.isFeatured ?? false,
+      soldCount: dto.soldCount ?? 0,
+      displayOrder: dto.displayOrder ?? 0,
       weight: dto.weight ?? 0,
       metaTitle: dto.metaTitle ?? {},
       metaDesc: dto.metaDesc ?? {},
@@ -178,6 +180,8 @@ export class ProductsService {
     if (dto.taxRate !== undefined) product.taxRate = dto.taxRate;
     if (dto.isActive !== undefined) product.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) product.isFeatured = dto.isFeatured;
+    if (dto.soldCount !== undefined) product.soldCount = dto.soldCount;
+    if (dto.displayOrder !== undefined) product.displayOrder = dto.displayOrder;
     if (dto.weight !== undefined) product.weight = dto.weight;
     if (dto.metaTitle !== undefined) product.metaTitle = dto.metaTitle;
     if (dto.detail !== undefined) product.detail = dto.detail;
@@ -231,6 +235,8 @@ export class ProductsService {
         taxRate: Number(source.taxRate),
         isActive: source.isActive,
         isFeatured: false,
+        soldCount: 0,
+        displayOrder: source.displayOrder,
         weight: Number(source.weight),
         metaTitle: source.metaTitle,
         metaDesc: source.metaDesc,

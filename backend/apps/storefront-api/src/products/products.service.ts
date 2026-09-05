@@ -161,7 +161,9 @@ export class ProductsService {
       const safeField = allowedFields.includes(field) ? field : 'createdAt';
       qb.orderBy(`p.${safeField}`, dir);
     } else {
-      qb.orderBy('p.createdAt', 'DESC');
+      qb.orderBy('p.displayOrder', 'DESC')
+        .addOrderBy('p.soldCount', 'DESC')
+        .addOrderBy('p.createdAt', 'DESC');
     }
 
     const total = await qb.clone().getCount();
@@ -195,6 +197,47 @@ export class ProductsService {
       page,
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async findHomepageCategoryProducts(
+    categorySlug: string,
+    limit = 10,
+    perCategory = 2,
+  ) {
+    const catalog = await this.findAll({
+      categorySlug,
+      page: 1,
+      // This is an internal source set used to balance the small homepage list,
+      // not the number of cards rendered to the customer.
+      limit: 500,
+    });
+
+    const selected: typeof catalog.items = [];
+    const selectedIds = new Set<string>();
+    const categoryCounts = new Map<string, number>();
+
+    for (const product of catalog.items) {
+      const count = categoryCounts.get(product.categoryId) ?? 0;
+      if (count >= perCategory) continue;
+      selected.push(product);
+      selectedIds.add(product.id);
+      categoryCounts.set(product.categoryId, count + 1);
+    }
+
+    // When a branch has fewer than its two allotted products, use the
+    // remaining highest-ranked products from the entire category tree.
+    for (const product of catalog.items) {
+      if (selected.length >= limit) break;
+      if (!selectedIds.has(product.id)) {
+        selected.push(product);
+        selectedIds.add(product.id);
+      }
+    }
+
+    return {
+      items: selected.slice(0, limit),
+      total: catalog.total,
     };
   }
 
@@ -282,7 +325,7 @@ export class ProductsService {
       },
       relations: ['images'],
       take: limit,
-      order: { isFeatured: 'DESC', createdAt: 'DESC' },
+      order: { isFeatured: 'DESC', displayOrder: 'DESC', soldCount: 'DESC', createdAt: 'DESC' },
     });
 
     return related;
@@ -293,20 +336,27 @@ export class ProductsService {
       where: { isFeatured: true, isActive: true },
       relations: ['images'],
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { displayOrder: 'DESC', soldCount: 'DESC', createdAt: 'DESC' },
     });
   }
 
   private async getSubcategoryIds(parentId: string): Promise<string[]> {
-    const children = await this.categoryRepo.find({
-      where: { parentId, isActive: true },
-      select: ['id'],
-    });
-    const ids = children.map((c) => c.id);
-    for (const child of children) {
-      const grandchildIds = await this.getSubcategoryIds(child.id);
-      ids.push(...grandchildIds);
-    }
-    return ids;
+    const rows = await this.categoryRepo.query<{ id: string }[]>(
+      `WITH RECURSIVE category_descendants AS (
+        SELECT id
+        FROM categories
+        WHERE parent_id = $1 AND is_active = true AND deleted_at IS NULL
+
+        UNION ALL
+
+        SELECT category.id
+        FROM categories AS category
+        INNER JOIN category_descendants AS descendant ON category.parent_id = descendant.id
+        WHERE category.is_active = true AND category.deleted_at IS NULL
+      )
+      SELECT id FROM category_descendants`,
+      [parentId],
+    );
+    return rows.map((row) => row.id);
   }
 }

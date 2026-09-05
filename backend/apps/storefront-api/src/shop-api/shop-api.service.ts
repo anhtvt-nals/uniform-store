@@ -90,6 +90,8 @@ export class ShopApiService {
         // ─── Products ───
         case 'SearchProducts':
           return await this.handleSearchProducts(variables, options);
+        case 'HomepageCategoryProducts':
+          return await this.handleHomepageCategoryProducts(variables, options);
         case 'GetProductDetail':
           return await this.handleGetProductDetail(variables, options);
 
@@ -607,6 +609,37 @@ export class ShopApiService {
     }
   }
 
+  private async handleHomepageCategoryProducts(
+    variables: Record<string, unknown>,
+    options: ExecuteOptions,
+  ): Promise<ExecuteResult> {
+    const input = (variables.input || {}) as Record<string, unknown>;
+    const categorySlug = (input.collectionSlug ?? input.categorySlug) as string;
+    const locale = options.languageCode ?? 'en';
+    if (!categorySlug) {
+      return { data: { search: { totalItems: 0, items: [], facetValues: [] } } };
+    }
+
+    try {
+      const products = await this.productsService.findHomepageCategoryProducts(
+        categorySlug,
+        Math.min(Math.max(Number(input.take) || 10, 1), 10),
+      );
+      return {
+        data: {
+          search: {
+            totalItems: products.total,
+            items: products.items.map((product: any) => this.mapSearchResultItem(product, locale)),
+            facetValues: [],
+          },
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error in handleHomepageCategoryProducts:', error);
+      return { data: { search: { totalItems: 0, items: [], facetValues: [] } } };
+    }
+  }
+
   private async handleGetProductDetail(
     variables: Record<string, unknown>,
     options: ExecuteOptions,
@@ -642,6 +675,7 @@ export class ShopApiService {
       productName: p.name?.[locale] ?? p.name?.en ?? '',
       slug: p.slug,
       isContactPrice,
+      soldCount: Number(p.soldCount ?? p.sold_count ?? 0),
       sortDescription:
         p.description?.[locale] ??
         p.description?.en ??

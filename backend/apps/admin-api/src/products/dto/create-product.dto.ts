@@ -63,6 +63,16 @@ export class CreateProductDto {
   @IsOptional()
   @IsInt()
   @Min(0)
+  soldCount?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  displayOrder?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   weight?: number;
 
   @IsOptional()

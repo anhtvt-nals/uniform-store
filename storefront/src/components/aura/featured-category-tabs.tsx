@@ -1,7 +1,7 @@
 import {Suspense} from 'react';
 import {getTranslations} from 'next-intl/server';
 import {query} from '@/lib/vendure/api';
-import {SearchProductsQuery} from '@/lib/vendure/queries';
+import {HomepageCategoryProductsQuery} from '@/lib/vendure/queries';
 import {getTopCollections} from '@/lib/vendure/cached';
 import {getRouteLocale} from '@/i18n/server';
 import {getActiveCurrencyCode} from '@/lib/currency-server';
@@ -22,14 +22,13 @@ const showcaseSlugs = ['dong-phuc-cong-so', 'dong-phuc-khach-san', 'dong-phuc-ao
 async function getCollectionProducts(locale: string, currencyCode: string, collectionSlug: string, take: number) {
 
     const result = await query(
-        SearchProductsQuery,
+        HomepageCategoryProductsQuery,
         {
             input: {
-                take,
+                take: Math.min(take, 10),
                 skip: 0,
                 groupByProduct: true,
                 collectionSlug,
-                sort: { name: 'ASC' as const },
             },
         },
         {languageCode: locale, currencyCode},
