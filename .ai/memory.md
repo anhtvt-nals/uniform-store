@@ -741,3 +741,8 @@ git push → main
 ### Homepage Product Ranking (2026-09-05)
 
 - Migration `046_add_product_popularity_fields.sql` adds editable `sold_count` and `display_order` to products. Homepage category lists resolve all descendants with a PostgreSQL recursive CTE, then render exactly 10 cards: up to two ranked products per category in the selected parent tree, followed by the remaining highest-ranked products when a branch has fewer than two.
+
+### Product Detail Visual System (2026-09-06)
+
+- Product Detail now uses the standard Inter B2B visual system rather than the decorative category font: a 36–40px product title, compact price hierarchy, muted breadcrumb/body copy, restrained navy/blue/gold palette, and a responsive two-column grid with a 56–64px desktop gap.
+- Existing product/gallery/size/quote/cart behavior and API contracts remain unchanged. The product image gallery, detail content, CTA row, trust badges and global floating actions were restyled for clearer scanning, consistent borders/radii and lower visual noise.

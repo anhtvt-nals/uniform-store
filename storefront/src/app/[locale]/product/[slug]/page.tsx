@@ -252,12 +252,13 @@ export default async function ProductDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
-      <div className="container mx-auto px-4 py-8 mt-0">
+      <div className="bg-[#F8FAFC]">
+      <div className="container mx-auto max-w-[1400px] px-4 py-7 md:px-6 md:py-10 lg:px-8">
         {/* Breadcrumb Navigation */}
-        <Breadcrumb className="mb-6">
+        <Breadcrumb className="mb-7 text-sm text-[#64748B] md:mb-9">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/" />}>
+              <BreadcrumbLink className="text-[#64748B] hover:text-[#2563A8]" render={<Link href="/" />}>
                 {t("home")}
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -266,6 +267,7 @@ export default async function ProductDetailPage({
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink
+                    className="text-[#64748B] hover:text-[#2563A8]"
                     render={
                       <Link href={`/collection/${primaryCollection.slug}`} />
                     }
@@ -277,55 +279,58 @@ export default async function ProductDetailPage({
             )}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{product.name}</BreadcrumbPage>
+              <BreadcrumbPage className="max-w-48 truncate font-medium text-[#334155] sm:max-w-xs">{product.name}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-16">
           {/* Left Column: Image Carousel */}
-          <div className="lg:sticky lg:top-20 lg:self-start">
+          <div className="lg:sticky lg:top-28 lg:self-start">
             <ProductImageCarousel images={product.assets} />
           </div>
 
           {/* Right Column: Product Info */}
-          <div>
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 md:p-8">
             <ProductInfo
-              product={productForDisplay}
+              product={{
+                ...productForDisplay,
+                categoryName: primaryCollection?.name ?? null,
+              }}
               currencyCode={currencyCode}
             />
           </div>
         </div>
       </div>
+      </div>
 
       {/* Shipping & Trust Badges */}
-      <section className="py-8 mt-8 border-y border-border/50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground">
-              <Truck className="h-4 w-4 text-primary" />
-              {t("trustBadges.fastShipping")}
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground">
-              <RotateCcw className="h-4 w-4 text-primary" />
-              {t("trustBadges.freeReturns")}
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              {t("trustBadges.secureCheckout")}
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground">
-              <Clock className="h-4 w-4 text-primary" />
-              {t("trustBadges.guarantee")}
-            </div>
+      <section className="border-y border-[#E2E8F0] bg-white py-10 md:py-12">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6 lg:px-8">
+          <div className="mb-7 max-w-2xl md:mb-8">
+            <h2 className="text-[22px] font-bold tracking-[-0.01em] text-[#173B6C] md:text-2xl">Vì sao doanh nghiệp chọn Minh An Uniform?</h2>
+            <p className="mt-2 text-sm leading-6 text-[#64748B]">Quy trình rõ ràng, chất lượng đồng bộ và hỗ trợ sát nhu cầu thực tế của doanh nghiệp.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+            {[
+              { icon: Truck, text: t("trustBadges.fastShipping") },
+              { icon: RotateCcw, text: t("trustBadges.freeReturns") },
+              { icon: ShieldCheck, text: t("trustBadges.secureCheckout") },
+              { icon: Clock, text: t("trustBadges.guarantee") },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5 text-sm font-medium leading-5 text-[#475569]">
+                <Icon className="size-5 shrink-0 text-[#2563A8]" />
+                <span>{text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Store FAQ Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="bg-[#F8FAFC] py-12 md:py-16">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-2xl font-bold text-center mb-8">
+          <h2 className="mb-8 text-center text-[22px] font-bold tracking-[-0.01em] text-[#173B6C] md:text-2xl">
             {t("faq.title")}
           </h2>
           <Accordion className="w-full">

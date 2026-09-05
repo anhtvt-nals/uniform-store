@@ -60,7 +60,7 @@ export function FloatingButtons() {
         href={fbUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative cursor-pointer"
+        className="group relative flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#1877F2] text-white shadow-sm transition hover:scale-105"
       >
         <FacebookIcon className="w-5 h-5" />
         <span className="pointer-events-none absolute right-14 hidden whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-foreground shadow-md transition group-hover:opacity-100 md:block md:opacity-0">
@@ -71,7 +71,7 @@ export function FloatingButtons() {
         href={zaloUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative border border-gray-200 cursor-pointer"
+        className="group relative flex size-11 cursor-pointer items-center justify-center rounded-full border border-[#E2E8F0] bg-white shadow-sm transition hover:scale-105"
       >
         <img
           src="/zalo.webp"
@@ -84,7 +84,7 @@ export function FloatingButtons() {
       </a>
       <a
         href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
-        className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition group relative cursor-pointer"
+        className="group relative flex size-11 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white shadow-sm transition hover:scale-105"
       >
         <PhoneCall className="w-6 h-6" />
         <span className="pointer-events-none absolute right-14 hidden whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-foreground shadow-md transition group-hover:opacity-100 md:block md:opacity-0">
@@ -97,19 +97,19 @@ export function FloatingButtons() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 hidden flex-col items-end gap-3 md:flex">
+      <div className="fixed bottom-5 right-5 z-50 hidden flex-col items-end gap-2.5 md:flex">
         {actions}
       </div>
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 md:hidden">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2.5 md:hidden">
         {isOpen && (
-          <div className="flex flex-col items-end gap-3">{actions}</div>
+          <div className="flex flex-col items-end gap-2.5">{actions}</div>
         )}
         <button
           type="button"
           aria-label={isOpen ? "Đóng liên hệ nhanh" : "Mở liên hệ nhanh"}
           aria-expanded={isOpen}
           onClick={() => setIsOpen((open) => !open)}
-          className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition hover:scale-105"
+          className="flex size-11 items-center justify-center rounded-full bg-[#173B6C] text-white shadow-sm transition hover:scale-105"
         >
           {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </button>

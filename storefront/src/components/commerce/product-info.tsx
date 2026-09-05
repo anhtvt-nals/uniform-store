@@ -13,6 +13,7 @@ interface ProductInfoProps {
     slug: string;
     name: string;
     detail?: string | null;
+    categoryName?: string | null;
   };
   currencyCode: string;
 }
@@ -69,30 +70,39 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
   const quoteProductType = `${product.name}${selectedSize ? `\nSize: ${selectedSize.code}` : ""}`;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <h1 className="font-category-title text-2xl tracking-tight md:text-3xl">
+    <div className="space-y-7">
+      <div className="space-y-4">
+        {product.categoryName ? (
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#2563A8]">
+            {product.categoryName}
+          </p>
+        ) : null}
+        <h1 className="text-[30px] font-bold leading-[1.2] tracking-[-0.02em] text-[#172033] md:text-[36px] xl:text-[40px]">
           {product.name}
         </h1>
         {pricing ? (
-          <p className="inline-flex items-center gap-2 text-primary">
+          <div className="border-l-2 border-[#C9A227] pl-4">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B]">Giá</p>
             {pricing.isContactPrice ? (
-              <span className="text-xl font-extrabold tracking-tight md:text-2xl">Giá liên hệ</span>
-            ) : (
               <>
-                <span className="whitespace-nowrap text-sm font-bold text-foreground md:text-base">Chỉ từ</span>
-                <span className="text-xl font-extrabold tracking-tight md:text-2xl">
+                <p className="text-2xl font-bold tracking-[-0.02em] text-[#2563A8] md:text-[28px]">Giá liên hệ</p>
+                <p className="mt-1 text-sm leading-6 text-[#64748B]">Liên hệ để nhận báo giá theo số lượng và yêu cầu thực tế.</p>
+              </>
+            ) : (
+              <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span className="whitespace-nowrap text-base font-semibold text-[#334155]">Chỉ từ</span>
+                <span className="text-2xl font-bold tracking-[-0.02em] text-[#2563A8] md:text-[28px]">
                   <Price value={pricing.basePrice} currencyCode={currencyCode} />
                 </span>
-              </>
+              </p>
             )}
-          </p>
+          </div>
         ) : (
           <div className="h-8 w-28 animate-pulse rounded bg-muted" />
         )}
         {product.detail ? (
           <div
-            className="prose prose-sm max-w-none leading-relaxed text-muted-foreground prose-headings:text-foreground prose-a:text-primary"
+            className="prose prose-sm max-w-none border-t border-[#E2E8F0] pt-6 leading-7 text-[#475569] prose-headings:font-bold prose-headings:text-[#173B6C] prose-p:my-3 prose-li:my-1 prose-li:marker:text-[#2563A8] prose-a:text-[#2563A8]"
             dangerouslySetInnerHTML={{ __html: product.detail }}
           />
         ) : null}
@@ -101,15 +111,15 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
       {pricing?.sizes.length ? (
         <>
           <Separator />
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Kích thước</Label>
+          <div className="space-y-3 pt-1">
+            <Label className="text-base font-semibold text-[#334155]">Kích thước</Label>
             <div className="flex flex-wrap gap-2">
               {pricing.sizes.map((size) => (
                 <button
                   key={size.id}
                   type="button"
                   onClick={() => setSelectedSizeId(size.id)}
-                  className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${selectedSizeId === size.id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/60"}`}
+                  className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${selectedSizeId === size.id ? "border-[#173B6C] bg-[#173B6C] text-white" : "border-[#E2E8F0] text-[#334155] hover:border-[#2563A8] hover:text-[#173B6C]"}`}
                 >
                   {size.code}
                   {size.weightRange ? (
@@ -125,7 +135,7 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
                 href={pricing.sizeGuideImageUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+                className="inline-block text-sm font-medium text-[#2563A8] underline-offset-4 hover:underline"
               >
                 Xem bảng hướng dẫn chọn size
               </a>
@@ -134,9 +144,9 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
         </>
       ) : null}
 
-      <div className="rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+      <div className="rounded-lg border border-[#C9A227]/35 bg-[#C9A227]/10 px-4 py-3 text-sm leading-6 text-[#475569]">
         <div className="flex gap-2">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#C9A227]" />
           <p>
             <strong>Lưu ý:</strong> Giá sản phẩm có thể thay đổi theo chất liệu,
             số lượng và kỹ thuật in. Vui lòng liên hệ hoặc nhấn{" "}
@@ -145,10 +155,10 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row">
+      <div className="flex flex-col gap-3 border-t border-[#E2E8F0] pt-6 sm:flex-row">
         <QuoteButton
           prefill={{ productType: quoteProductType, quantity: "" }}
-          className="h-11 flex-1 rounded-lg text-base"
+          className="h-12 flex-1 rounded-lg bg-[#173B6C] text-base hover:bg-[#123158]"
         />
         <Button
           render={
@@ -158,7 +168,7 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
           type="button"
           variant="outline"
           size="lg"
-          className="h-11 flex-1 rounded-lg border-[#0068ff] text-base font-bold text-[#0068ff] hover:border-[#0058d9] hover:bg-[#0068ff]/10 hover:text-[#0058d9]"
+          className="h-12 flex-1 rounded-lg border-[#2563A8] text-base font-semibold text-[#2563A8] hover:border-[#173B6C] hover:bg-[#2563A8]/5 hover:text-[#173B6C]"
         >
           <img src="/zalo.webp" alt="" className="mr-2 size-5 object-contain" />
           Tư vấn qua Zalo
