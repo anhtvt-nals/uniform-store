@@ -111,7 +111,7 @@ export async function Navbar() {
       <marquee
         behavior="scroll"
         direction="left"
-        scrollamount={10}
+        scrollamount={6}
         className="block border-t border-primary/20 bg-foreground pb-1.5 text-amber-300"
       >
         {contactItems.map((item) => (
