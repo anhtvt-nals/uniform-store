@@ -33,6 +33,38 @@ export const GetTopCollectionsQuery = graphql(`
     }
 `);
 
+export const GetHomepageCollectionsQuery = graphql(`
+    query GetHomepageCollections {
+        collections {
+            items {
+                id
+                name
+                slug
+                description
+                featuredAsset {
+                    id
+                    preview
+                }
+                children {
+                    id
+                    name
+                    slug
+                    children {
+                        id
+                        name
+                        slug
+                        children {
+                            id
+                            name
+                            slug
+                        }
+                    }
+                }
+            }
+        }
+    }
+`);
+
 export const GetActiveCustomerQuery = graphql(`
     query GetActiveCustomer {
         activeCustomer {

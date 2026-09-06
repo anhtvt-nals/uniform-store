@@ -203,7 +203,7 @@ export class ProductsService {
   async findHomepageCategoryProducts(
     categorySlug: string,
     limit = 10,
-    perCategory = 2,
+    perCategory = 1,
   ) {
     const catalog = await this.findAll({
       categorySlug,
@@ -225,8 +225,8 @@ export class ProductsService {
       categoryCounts.set(product.categoryId, count + 1);
     }
 
-    // When a branch has fewer than its two allotted products, use the
-    // remaining highest-ranked products from the entire category tree.
+    // When a branch has fewer than its allotted product, use the remaining
+    // highest-ranked products from the entire category tree.
     for (const product of catalog.items) {
       if (selected.length >= limit) break;
       if (!selectedIds.has(product.id)) {

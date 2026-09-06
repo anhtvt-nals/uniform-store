@@ -81,6 +81,34 @@ describe('CollectionsService (storefront)', () => {
     });
   });
 
+  describe('findHomepageCategories', () => {
+    it('should return only enabled root categories for the homepage', async () => {
+      const category = {
+        id: 'cat-home',
+        name: { vi: 'Đồng phục công sở' },
+        slug: 'dong-phuc-cong-so',
+        isActive: true,
+        showOnHomepage: true,
+        parentId: null,
+        children: [],
+      };
+      mockCategoryRepo.findAndCount.mockResolvedValue([[category], 1]);
+
+      const result = await service.findHomepageCategories();
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].slug).toBe('dong-phuc-cong-so');
+      expect(mockCategoryRepo.findAndCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isActive: true,
+            showOnHomepage: true,
+          }),
+        }),
+      );
+    });
+  });
+
   describe('findBySlug', () => {
     it('should return category when found', async () => {
       const cat = {

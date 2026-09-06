@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ interface ProductInfoProps {
     slug: string;
     name: string;
     detail?: string | null;
-    categoryName?: string | null;
   };
   currencyCode: string;
 }
@@ -29,10 +28,14 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
   const [pricing, setPricing] = useState<ProductPricing | null>(null);
   const [zaloUrl, setZaloUrl] = useState("https://zalo.me/0901234567");
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
+  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+  const [hasExpandableDetail, setHasExpandableDetail] = useState(false);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setPricing(null);
     setSelectedSizeId(null);
+    setIsDetailExpanded(false);
     fetch(`/api/v1/products/${product.slug}`)
       .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
@@ -47,6 +50,28 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
       })
       .catch(() => undefined);
   }, [product.slug]);
+
+  useEffect(() => {
+    if (isDetailExpanded) {
+      setHasExpandableDetail(true);
+      return;
+    }
+
+    const detailElement = detailRef.current;
+    if (!detailElement) {
+      setHasExpandableDetail(false);
+      return;
+    }
+
+    const updateExpandableState = () => {
+      setHasExpandableDetail(detailElement.scrollHeight > detailElement.clientHeight + 1);
+    };
+
+    updateExpandableState();
+    const observer = new ResizeObserver(updateExpandableState);
+    observer.observe(detailElement);
+    return () => observer.disconnect();
+  }, [product.detail, isDetailExpanded]);
 
   useEffect(() => {
     fetch("/api/v1/settings/public")
@@ -72,17 +97,11 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
   return (
     <div className="space-y-7">
       <div className="space-y-4">
-        {product.categoryName ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#2563A8]">
-            {product.categoryName}
-          </p>
-        ) : null}
-        <h1 className="text-[30px] font-bold leading-[1.2] tracking-[-0.02em] text-[#172033] md:text-[36px] xl:text-[40px]">
+        <h1 className="text-[24px] font-bold leading-[1.2] tracking-[-0.02em] text-[#172033] md:text-[26px] xl:text-[28px]">
           {product.name}
         </h1>
         {pricing ? (
           <div className="border-l-2 border-[#C9A227] pl-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B]">Giá</p>
             {pricing.isContactPrice ? (
               <>
                 <p className="text-2xl font-bold tracking-[-0.02em] text-[#2563A8] md:text-[28px]">Giá liên hệ</p>
@@ -101,10 +120,23 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
           <div className="h-8 w-28 animate-pulse rounded bg-muted" />
         )}
         {product.detail ? (
-          <div
-            className="prose prose-sm max-w-none border-t border-[#E2E8F0] pt-6 leading-7 text-[#475569] prose-headings:font-bold prose-headings:text-[#173B6C] prose-p:my-3 prose-li:my-1 prose-li:marker:text-[#2563A8] prose-a:text-[#2563A8]"
-            dangerouslySetInnerHTML={{ __html: product.detail }}
-          />
+          <div className="border-t border-[#E2E8F0] pt-5">
+            <div
+              ref={detailRef}
+              className={`prose prose-sm max-w-none leading-7 text-[#475569] prose-headings:font-bold prose-headings:text-[#173B6C] prose-p:my-3 prose-li:my-1 prose-li:marker:text-[#2563A8] prose-a:text-[#2563A8] ${isDetailExpanded ? "max-h-56 overflow-y-auto overscroll-contain pr-2" : "max-h-32 overflow-hidden"}`}
+              dangerouslySetInnerHTML={{ __html: product.detail }}
+            />
+            {hasExpandableDetail ? (
+              <button
+                type="button"
+                onClick={() => setIsDetailExpanded((expanded) => !expanded)}
+                aria-expanded={isDetailExpanded}
+                className="mt-3 text-sm font-semibold text-[#2563A8] underline-offset-4 hover:text-[#173B6C] hover:underline"
+              >
+                {isDetailExpanded ? "Thu gọn" : "Xem toàn bộ thông tin sản phẩm"}
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 

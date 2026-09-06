@@ -253,9 +253,9 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
       <div className="bg-[#F8FAFC]">
-      <div className="container mx-auto max-w-[1400px] px-4 py-7 md:px-6 md:py-10 lg:px-8">
+      <div className="container mx-auto max-w-[1400px] px-4 py-4 md:px-6 md:py-6 lg:px-8">
         {/* Breadcrumb Navigation */}
-        <Breadcrumb className="mb-7 text-sm text-[#64748B] md:mb-9">
+        <Breadcrumb className="mb-4 text-sm text-[#64748B] md:mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-[#64748B] hover:text-[#2563A8]" render={<Link href="/" />}>
@@ -291,12 +291,9 @@ export default async function ProductDetailPage({
           </div>
 
           {/* Right Column: Product Info */}
-          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 md:p-8">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-3 md:p-4">
             <ProductInfo
-              product={{
-                ...productForDisplay,
-                categoryName: primaryCollection?.name ?? null,
-              }}
+              product={productForDisplay}
               currencyCode={currencyCode}
             />
           </div>

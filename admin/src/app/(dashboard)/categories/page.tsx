@@ -23,6 +23,7 @@ type Category = {
   name: Record<string, string>;
   slug: string;
   isActive: boolean;
+  showOnHomepage: boolean;
   sortOrder: number;
   parentId: string | null;
   parent?: { id: string; name: Record<string, string> } | null;
@@ -110,7 +111,7 @@ export default function CategoriesPage() {
             onChange={(e) => { setIncludeDeleted(e.target.checked); setPage(1); }}
             className="rounded border-gray-300"
           />
-          Show deleted
+          Hiện danh mục đã xóa
         </label>
       </div>
 
@@ -122,7 +123,7 @@ export default function CategoriesPage() {
         </div>
       ) : isError ? (
         <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">
-          Failed to load categories: {(error as Error).message}
+          Không thể tải danh mục: {(error as Error).message}
         </div>
       ) : data && data.items.length > 0 ? (
         <>
@@ -134,6 +135,7 @@ export default function CategoriesPage() {
                   <TableHead>Đường dẫn</TableHead>
                   <TableHead>Danh mục cha</TableHead>
                   <TableHead>Trạng thái</TableHead>
+                  <TableHead>Trang chủ</TableHead>
                   <TableHead>Thứ tự</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead className="w-24">Thao tác</TableHead>
@@ -156,6 +158,13 @@ export default function CategoriesPage() {
                         <Badge variant="success">Đang hoạt động</Badge>
                       ) : (
                         <Badge variant="secondary">Đã tắt</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {cat.parentId ? "—" : cat.showOnHomepage ? (
+                        <Badge variant="success">Hiển thị</Badge>
+                      ) : (
+                        <Badge variant="secondary">Ẩn</Badge>
                       )}
                     </TableCell>
                     <TableCell>{cat.sortOrder}</TableCell>
@@ -212,7 +221,7 @@ export default function CategoriesPage() {
         onOpenChange={() => setDeleteId(null)}
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="Xóa danh mục"
-        description="This category will be soft-deleted. You can restore it later."
+        description="Danh mục sẽ được chuyển vào thùng rác và có thể khôi phục sau."
         isLoading={deleteMutation.isPending}
       />
 
@@ -221,7 +230,7 @@ export default function CategoriesPage() {
         onOpenChange={() => setRestoreId(null)}
         onConfirm={() => restoreId && restoreMutation.mutate(restoreId)}
         title="Khôi phục danh mục"
-        description="This will restore the soft-deleted category."
+        description="Danh mục sẽ được khôi phục từ thùng rác."
         confirmText="Khôi phục"
         isLoading={restoreMutation.isPending}
       />

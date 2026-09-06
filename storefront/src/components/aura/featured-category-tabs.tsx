@@ -2,7 +2,7 @@ import {Suspense} from 'react';
 import {getTranslations} from 'next-intl/server';
 import {query} from '@/lib/vendure/api';
 import {HomepageCategoryProductsQuery} from '@/lib/vendure/queries';
-import {getTopCollections} from '@/lib/vendure/cached';
+import {getHomepageCollections} from '@/lib/vendure/cached';
 import {getRouteLocale} from '@/i18n/server';
 import {getActiveCurrencyCode} from '@/lib/currency-server';
 import {FeaturedCategoryTabsClient} from './featured-category-tabs-client';
@@ -16,8 +16,6 @@ type CollectionItem = {
     description: string;
     featuredAsset?: { id: string; preview: string } | null;
 };
-
-const showcaseSlugs = ['dong-phuc-cong-so', 'dong-phuc-khach-san', 'dong-phuc-ao-polo'];
 
 async function getCollectionProducts(locale: string, currencyCode: string, collectionSlug: string, take: number) {
 
@@ -41,10 +39,7 @@ export async function FeaturedCategoryTabs() {
     const locale = await getRouteLocale();
     const currencyCode = await getActiveCurrencyCode();
     const t = await getTranslations({locale, namespace: 'Product'});
-    const collections = (await getTopCollections(locale)) as CollectionItem[];
-    const showcaseCategories = showcaseSlugs
-        .map((slug) => collections.find((collection) => collection.slug === slug))
-        .filter((collection): collection is CollectionItem => Boolean(collection));
+    const showcaseCategories = (await getHomepageCollections(locale)) as CollectionItem[];
 
     if (showcaseCategories.length === 0) {
         return null;

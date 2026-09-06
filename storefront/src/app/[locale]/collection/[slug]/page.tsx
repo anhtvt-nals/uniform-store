@@ -148,9 +148,9 @@ export default async function CollectionPage({
   const categories = categoriesResult.data.collections?.items ?? [];
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-0">
+    <div className="container mx-auto px-4 py-6 md:py-7 mt-0">
       {/* Breadcrumbs */}
-      <Breadcrumb className="mb-6">
+      <Breadcrumb className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link href="/" />}>

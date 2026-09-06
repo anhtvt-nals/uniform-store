@@ -34,6 +34,10 @@ export class UpdateCategoryDto {
   isActive?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  showOnHomepage?: boolean;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   sortOrder?: number;

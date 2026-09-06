@@ -740,7 +740,11 @@ git push → main
 
 ### Homepage Product Ranking (2026-09-05)
 
-- Migration `046_add_product_popularity_fields.sql` adds editable `sold_count` and `display_order` to products. Homepage category lists resolve all descendants with a PostgreSQL recursive CTE, then render exactly 10 cards: up to two ranked products per category in the selected parent tree, followed by the remaining highest-ranked products when a branch has fewer than two.
+- Migration `046_add_product_popularity_fields.sql` adds editable `sold_count` and `display_order` to products. Homepage category lists resolve all descendants with a PostgreSQL recursive CTE, then render exactly 10 cards: first one ranked product from each category in the selected parent tree, then the remaining highest-ranked products until the limit is reached.
+
+### Homepage Category Visibility (2026-09-06)
+
+- Migration `047_add_category_homepage_visibility.sql` adds `categories.show_on_homepage`. Admin exposes this as “Hiển thị danh mục trên trang chủ” for root categories only; a child category is automatically excluded. The homepage uses `GetHomepageCollectionsQuery` to render only enabled root categories, while navigation continues to use the complete category tree.
 
 ### Product Detail Visual System (2026-09-06)
 

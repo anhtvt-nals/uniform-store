@@ -84,6 +84,8 @@ export class ShopApiService {
         // ─── Collections ───
         case 'GetTopCollections':
           return await this.handleGetTopCollections(variables, options);
+        case 'GetHomepageCollections':
+          return await this.handleGetHomepageCollections(options);
         case 'GetCollectionProducts':
           return await this.handleGetCollectionProducts(variables, options);
 
@@ -500,6 +502,29 @@ export class ShopApiService {
     return {
       data: {
         collections: { items },
+      },
+    };
+  }
+
+  private async handleGetHomepageCollections(
+    options: ExecuteOptions,
+  ): Promise<ExecuteResult> {
+    const result = await this.collectionsService.findHomepageCategories(10);
+    const mapCat = (cat: any): Record<string, unknown> => ({
+      id: cat.id,
+      name: cat.name?.[options.languageCode ?? 'en'] ?? cat.name?.en ?? '',
+      slug: cat.slug,
+      description:
+        cat.description?.[options.languageCode ?? 'en'] ?? cat.description?.en ?? '',
+      featuredAsset: cat.imageUrl
+        ? { id: cat.id, preview: cat.imageUrl }
+        : null,
+      children: cat.children?.map(mapCat) ?? [],
+    });
+
+    return {
+      data: {
+        collections: { items: result.items.map(mapCat) },
       },
     };
   }

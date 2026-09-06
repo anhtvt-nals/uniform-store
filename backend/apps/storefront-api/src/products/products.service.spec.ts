@@ -236,7 +236,7 @@ describe('ProductsService (storefront)', () => {
   });
 
   describe('findHomepageCategoryProducts', () => {
-    it('should select two products per category before filling remaining slots', async () => {
+    it('should select one product per category before filling remaining slots', async () => {
       jest.spyOn(service, 'findAll').mockResolvedValue({
         items: [
           { id: 'a-1', categoryId: 'a' },
@@ -251,13 +251,13 @@ describe('ProductsService (storefront)', () => {
         totalPages: 1,
       });
 
-      const result = await service.findHomepageCategoryProducts('parent', 5, 2);
+      const result = await service.findHomepageCategoryProducts('parent', 5);
 
       expect(result.items.map((product) => product.id)).toEqual([
         'a-1',
-        'a-2',
         'b-1',
         'c-1',
+        'a-2',
         'a-3',
       ]);
     });

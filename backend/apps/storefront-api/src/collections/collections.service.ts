@@ -50,6 +50,28 @@ export class CollectionsService {
     };
   }
 
+  async findHomepageCategories(limit = 10) {
+    const [items, total] = await this.categoryRepo.findAndCount({
+      where: {
+        isActive: true,
+        parentId: IsNull(),
+        showOnHomepage: true,
+      },
+      order: { sortOrder: 'ASC' },
+      take: limit,
+      relations: ['children'],
+    });
+
+    return {
+      items: this.buildTree(items),
+      total,
+      page: 1,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+      meta: { type: 'category_tree' },
+    };
+  }
+
   async findBySlug(slug: string) {
     const category = await this.categoryRepo.findOne({
       where: { slug, isActive: true },

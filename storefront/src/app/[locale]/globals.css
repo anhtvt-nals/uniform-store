@@ -268,25 +268,3 @@
 .animate-fade-up {
   animation: fade-up 0.4s ease-out both;
 }
-
-@keyframes contact-marquee-scroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.contact-marquee {
-  overflow: hidden;
-}
-
-.contact-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: contact-marquee-scroll 28s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .contact-marquee-track {
-    animation: none;
-  }
-}

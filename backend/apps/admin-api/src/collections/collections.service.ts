@@ -96,6 +96,12 @@ export class CollectionsService {
       }
     }
 
+    if (dto.showOnHomepage && dto.parentId) {
+      throw new BadRequestException(
+        'Only root categories can be shown on the homepage',
+      );
+    }
+
     const category = this.categoryRepo.create({
       name: dto.name,
       slug: dto.slug,
@@ -103,6 +109,7 @@ export class CollectionsService {
       imageUrl: dto.imageUrl ?? '',
       parentId: dto.parentId ?? null,
       isActive: dto.isActive ?? true,
+      showOnHomepage: dto.showOnHomepage ?? false,
       sortOrder: dto.sortOrder ?? 0,
     });
 
@@ -142,6 +149,19 @@ export class CollectionsService {
         }
         category.parentId = dto.parentId;
       }
+    }
+
+    if (dto.showOnHomepage !== undefined) {
+      if (dto.showOnHomepage && category.parentId) {
+        throw new BadRequestException(
+          'Only root categories can be shown on the homepage',
+        );
+      }
+      category.showOnHomepage = dto.showOnHomepage;
+    }
+
+    if (category.parentId) {
+      category.showOnHomepage = false;
     }
 
     if (dto.name !== undefined) category.name = dto.name;

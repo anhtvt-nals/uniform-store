@@ -54,8 +54,9 @@ Server Action / Component / Route Handler
 | Query | Variables | Response | Call Sites |
 |-------|-----------|----------|------------|
 | `GetTopCollectionsQuery` | none | `collections {items {id, name, slug}}` | `cached.ts` → navbar, mobile-nav |
+| `GetHomepageCollectionsQuery` | none | `collections {items {id, name, slug, description, featuredAsset, children}}`; only root categories marked `showOnHomepage` | `FeaturedCategoryTabs` |
 | `SearchProductsQuery` | `$input: SearchInput!` | `search {totalItems, items {...ProductCard}, facetValues[{count, facetValue{id, name, facet{id, name}}}]}` | homepage products section, search results, collection products |
-| `HomepageCategoryProductsQuery` | `$input: SearchInput!` with `collectionSlug` and `take: 10` | Same `search` shape as `SearchProductsQuery`; products are balanced at two per category in the selected parent tree before remaining slots are filled | homepage category showcase |
+| `HomepageCategoryProductsQuery` | `$input: SearchInput!` with `collectionSlug` and `take: 10` | Same `search` shape as `SearchProductsQuery`; one product from each category in the selected parent tree is prioritized before remaining slots are filled | homepage category showcase |
 | `GetProductDetailQuery` | `$slug: String!` | `product {id, name, description, slug, assets[...], variants[{id, name, sku, priceWithTax, stockLevel, options[{id, code, name, groupId, group{id, code, name}}]}], optionGroups[{id, code, name, options[{id, code, name}]}], collections[{id, name, slug, parent{id}}]}` | product detail page, quick-view; size metadata is additionally loaded from `GET /api/v1/products/:slug` (`sizes`, `sizeGuideImageUrl`) |
 | `GetCollectionProductsQuery` | `$slug: String!, $input: SearchInput!` | `collection {id, name, slug, description, featuredAsset{id, preview}}` + `search {totalItems, items {...ProductCard}}` | collection page, featured products, related products |
 | `GetActiveChannelQuery` | none | `activeChannel {id, code, defaultLanguageCode, availableLanguageCodes, defaultCurrencyCode, availableCurrencyCodes}` | `cached.ts` → currency/locale config |

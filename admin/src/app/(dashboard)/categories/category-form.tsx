@@ -38,6 +38,7 @@ export function CategoryForm({
   const [parentId, setParentId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [showOnHomepage, setShowOnHomepage] = useState(false);
   const [sortOrder, setSortOrder] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -52,6 +53,7 @@ export function CategoryForm({
     setParentId((value.parentId as string) ?? "");
     setImageUrl((value.imageUrl as string) ?? "");
     setIsActive(value.isActive === undefined ? true : Boolean(value.isActive));
+    setShowOnHomepage(Boolean(value.showOnHomepage));
     setSortOrder((value.sortOrder as number) ?? 0);
   }, [defaultValues]);
   function submit(event: React.FormEvent) {
@@ -70,6 +72,7 @@ export function CategoryForm({
       parentId: parentId || undefined,
       imageUrl,
       isActive,
+      showOnHomepage,
       sortOrder,
     });
   }
@@ -123,7 +126,11 @@ export function CategoryForm({
             <select
               id="parentId"
               value={parentId}
-              onChange={(event) => setParentId(event.target.value)}
+              onChange={(event) => {
+                const nextParentId = event.target.value;
+                setParentId(nextParentId);
+                if (nextParentId) setShowOnHomepage(false);
+              }}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
             >
               <option value="">Không có (danh mục cấp cao nhất)</option>
@@ -160,6 +167,18 @@ export function CategoryForm({
               onCheckedChange={setIsActive}
             />
             <Label htmlFor="isActive">Đang hoạt động</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              id="showOnHomepage"
+              checked={showOnHomepage}
+              disabled={Boolean(parentId)}
+              onCheckedChange={setShowOnHomepage}
+            />
+            <div>
+              <Label htmlFor="showOnHomepage">Hiển thị danh mục trên trang chủ</Label>
+              <p className="text-xs text-muted-foreground">Chỉ áp dụng cho danh mục cấp cao nhất.</p>
+            </div>
           </div>
         </CardContent>
       </Card>

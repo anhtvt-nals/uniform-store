@@ -33,6 +33,9 @@ export class CategoryEntity {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'show_on_homepage', type: 'boolean', default: false })
+  showOnHomepage: boolean;
+
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder: number;
 

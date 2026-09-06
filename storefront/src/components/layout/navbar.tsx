@@ -108,19 +108,18 @@ export async function Navbar() {
           </div>
         </div>
       </div>
-      <div className="contact-marquee border-t border-primary/20 bg-foreground py-1.5 text-amber-300">
-        <div className="contact-marquee-track">
-          {[0, 1].map((loop) => (
-            <div key={loop} className="flex shrink-0 items-center gap-5 pr-5 sm:gap-8 sm:pr-8">
-              {contactItems.map((item) => (
-                <span key={`${loop}-${item}`} className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.16em] sm:text-[11px]">
-                  Liên hệ trực tiếp <span className="ml-5 text-amber-400/70 sm:ml-8">✦</span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      <marquee
+        behavior="scroll"
+        direction="left"
+        scrollamount={10}
+        className="block border-t border-primary/20 bg-foreground pb-1.5 text-amber-300"
+      >
+        {contactItems.map((item) => (
+          <span key={item} className="mr-5 whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.16em] sm:mr-8 sm:text-[11px]">
+            Liên hệ trực tiếp <span className="ml-5 text-amber-400/70 sm:ml-8">✦</span>
+          </span>
+        ))}
+      </marquee>
     </header>
   );
 }
