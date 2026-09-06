@@ -24,7 +24,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useT } from "@/i18n";
 import { formatDate } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Product = {
   id: string;
@@ -50,14 +50,18 @@ type Category = {
 
 export default function ProductsPage() {
   const { t } = useT();
-  const [search, setSearch] = useState("");
-  const [searchDraft, setSearchDraft] = useState("");
-  const [page, setPage] = useState(1);
-  const [isActive, setIsActive] = useState<string>("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get("search") || "");
+  const [searchDraft, setSearchDraft] = useState(() => searchParams.get("search") || "");
+  const [page, setPage] = useState(() => {
+    const value = Number.parseInt(searchParams.get("page") || "1", 10);
+    return Number.isFinite(value) && value > 0 ? value : 1;
+  });
+  const [isActive, setIsActive] = useState<string>(() => searchParams.get("isActive") || "");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null,
+    () => searchParams.get("categoryId"),
   );
   const queryClient = useQueryClient();
   const router = useRouter();

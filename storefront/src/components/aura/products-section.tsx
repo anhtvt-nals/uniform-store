@@ -17,7 +17,6 @@ async function getProducts(locale: string, currencyCode: string, limit: number) 
                 take: limit,
                 skip: 0,
                 groupByProduct: true,
-                sort: { name: 'ASC' as const },
             },
         },
         {languageCode: locale, currencyCode},
@@ -68,7 +67,7 @@ async function ProductsGrid({limit, locale, currencyCode}: {limit: number; local
     return (
         <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${limit === 3 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'} gap-6`}>
             {products.map((product, i) => (
-                <ProductTile key={i} product={product} index={i} />
+                <ProductTile key={i} product={product} />
             ))}
 
             <Link

@@ -40,7 +40,7 @@ export function FeaturedCategoryTabsClient({categories, productsMap, noProductsL
                                     <div className="flex min-h-64 items-center justify-center text-center text-sm text-muted-foreground">{noProductsLabel}</div>
                                 ) : (
                                     <div className="grid w-full auto-rows-max content-start items-start grid-cols-2 gap-4 lg:grid-cols-5">
-                                        {products.map((product, index) => <ProductTile key={index} product={product} index={index} compact />)}
+                                        {products.map((product, index) => <ProductTile key={index} product={product} compact />)}
                                     </div>
                                 )}
                             </div>

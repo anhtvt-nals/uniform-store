@@ -152,6 +152,17 @@ describe('ProductsService (storefront)', () => {
 
       expect(result.total).toBe(1);
     });
+
+    it('should sort the default listing by sold quantity descending', async () => {
+      const qb = mockQb();
+      qb.getCount.mockResolvedValue(0);
+      qb.getMany.mockResolvedValue([]);
+      mockProductRepo.createQueryBuilder.mockReturnValue(qb);
+
+      await service.findAll({ page: 1, limit: 12 });
+
+      expect(qb.orderBy).toHaveBeenCalledWith('p.soldCount', 'DESC');
+    });
   });
 
   describe('findBySlug', () => {

@@ -30,7 +30,7 @@ export function ProductCarousel({title, products, quickView = true}: ProductCaro
                         {products.map((product, i) => (
                             <CarouselItem key={id + i}
                                           className="pl-2 md:pl-4 basis-1/2 lg:basis-1/4 xl:basis-1/5">
-                                <ProductTile product={product} index={i} compact quickView={quickView} />
+                                <ProductTile product={product} compact quickView={quickView} />
                             </CarouselItem>
                         ))}
                     </CarouselContent>

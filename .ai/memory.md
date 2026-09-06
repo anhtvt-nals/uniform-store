@@ -746,6 +746,10 @@ git push → main
 
 - Migration `047_add_category_homepage_visibility.sql` adds `categories.show_on_homepage`. Admin exposes this as “Hiển thị danh mục trên trang chủ” for root categories only; a child category is automatically excluded. The homepage uses `GetHomepageCollectionsQuery` to render only enabled root categories, while navigation continues to use the complete category tree.
 
+### Storefront Product Listing Priority (2026-09-06)
+
+- Homepage, search and category lists use `sold_count DESC` as their default order, with `display_order` and `created_at` as stable tie-breakers. Manual sort choices still override this default.
+
 ### Product Detail Visual System (2026-09-06)
 
 - Product Detail now uses the standard Inter B2B visual system rather than the decorative category font: a 36–40px product title, compact price hierarchy, muted breadcrumb/body copy, restrained navy/blue/gold palette, and a responsive two-column grid with a 56–64px desktop gap.

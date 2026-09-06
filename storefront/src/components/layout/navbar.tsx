@@ -112,7 +112,7 @@ export async function Navbar() {
         behavior="scroll"
         direction="left"
         scrollamount={6}
-        className="block border-t border-primary/20 bg-foreground pb-1.5 text-amber-300"
+        className="block border-t border-primary/20 bg-primary pb-1.5 text-amber-300"
       >
         {contactItems.map((item) => (
           <span key={item} className="mr-5 whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.16em] sm:mr-8 sm:text-[11px]">

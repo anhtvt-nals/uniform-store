@@ -46,7 +46,7 @@ export async function ProductGrid({productDataPromise, currentPage, take}: Produ
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
                 {searchResult.items.map((product, i) => (
-                    <ProductTile key={'product-grid-item' + i} product={product} index={i} compact />
+                    <ProductTile key={'product-grid-item' + i} product={product} compact />
                 ))}
             </div>
 

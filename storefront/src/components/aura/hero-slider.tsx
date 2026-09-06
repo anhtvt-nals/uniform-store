@@ -58,7 +58,7 @@ export function HeroSlider({
                 ))}
             </div>
 
-            <div className="relative z-20 w-full max-w-2xl flex flex-col justify-start md:justify-end h-full">
+            <div className="relative z-20 w-full max-w-[calc(100%-11rem)] flex h-full flex-col justify-start md:max-w-[60%] md:justify-end lg:max-w-[65%]">
                 {/* Slide content (crossfade) */}
                 {slides.map((s, i) => (
                     <div
@@ -78,7 +78,7 @@ export function HeroSlider({
                             </div>
                         )}
 
-                        <h1 className="py-1 text-[2.125rem] md:text-[2.75rem] lg:text-6xl font-black italic tracking-[-0.06em] leading-[1.12] mb-6 whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm">
+                        <h1 className="mb-5 py-1 text-3xl font-black italic leading-[1.12] tracking-[-0.05em] whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm md:text-[2.25rem] lg:text-[2.75rem]">
                             {s.title.replace(/\\n/g, '\n')}
                             {s.titleHighlight && <><span>{"\n"}</span><span className="text-primary">{s.titleHighlight}</span></>}
                         </h1>

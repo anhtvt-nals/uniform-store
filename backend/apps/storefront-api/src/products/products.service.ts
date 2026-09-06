@@ -161,8 +161,8 @@ export class ProductsService {
       const safeField = allowedFields.includes(field) ? field : 'createdAt';
       qb.orderBy(`p.${safeField}`, dir);
     } else {
-      qb.orderBy('p.displayOrder', 'DESC')
-        .addOrderBy('p.soldCount', 'DESC')
+      qb.orderBy('p.soldCount', 'DESC')
+        .addOrderBy('p.displayOrder', 'DESC')
         .addOrderBy('p.createdAt', 'DESC');
     }
 
@@ -336,7 +336,7 @@ export class ProductsService {
       where: { isFeatured: true, isActive: true },
       relations: ['images'],
       take: limit,
-      order: { displayOrder: 'DESC', soldCount: 'DESC', createdAt: 'DESC' },
+      order: { soldCount: 'DESC', displayOrder: 'DESC', createdAt: 'DESC' },
     });
   }
 

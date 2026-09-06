@@ -8,11 +8,9 @@ import { Price } from "@/components/commerce/price";
 
 export function ProductTile({
   product: productProp,
-  index,
   compact = false,
 }: {
   product: FragmentOf<typeof ProductCardFragment>;
-  index: number;
   compact?: boolean;
   // Kept for existing callers while product quick-view is intentionally disabled.
   quickView?: boolean;
@@ -52,19 +50,6 @@ export function ProductTile({
       href={`/product/${product.slug}`}
       className={`group relative flex flex-col border border-border bg-background shadow-sm transition-shadow hover:shadow-md ${compact ? "h-auto self-start rounded-2xl p-2" : "h-full rounded-[24px] p-3"}`}
     >
-      <div className="absolute left-5 top-5 z-20">
-        {index === 0 && (
-          <span className="rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
-            {t("bestSeller")}
-          </span>
-        )}
-        {index === 1 && (
-          <span className="rounded-full bg-blue-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
-            {t("new")}
-          </span>
-        )}
-      </div>
-
       <div
         className={`relative overflow-hidden bg-muted ${compact ? "mb-3 aspect-[16/15] rounded-xl" : "mb-4 aspect-[4/5] flex-1 rounded-[16px]"}`}
       >
