@@ -34,6 +34,11 @@ interface FormErrors {
 
 export function QuoteRequestModal({open, onOpenChange, source, initialProductType, initialQuantity}: QuoteRequestModalProps) {
     const t = useTranslations('Home');
+    const regionOptions = [
+        {value: 'north', label: t('quoteRegionNorth')},
+        {value: 'central', label: t('quoteRegionCentral')},
+        {value: 'south', label: t('quoteRegionSouth')},
+    ];
     const [form, setForm] = useState<FormState>({
         customerName: '',
         phone: '',
@@ -182,14 +187,20 @@ export function QuoteRequestModal({open, onOpenChange, source, initialProductTyp
             <div className="grid grid-cols-1 md:grid-cols-[3fr_7fr] gap-3">
                 <div className="space-y-1.5">
                     <Label>{t('quoteRegion')}</Label>
-                    <Select value={form.region} onValueChange={(v) => handleChange('region', v || '')}>
+                    <Select
+                        value={form.region}
+                        items={regionOptions}
+                        onValueChange={(v) => handleChange('region', v || '')}
+                    >
                         <SelectTrigger className="w-full text-sm md:text-base">
                             <SelectValue placeholder={t('quoteRegion')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="north">{t('quoteRegionNorth')}</SelectItem>
-                            <SelectItem value="central">{t('quoteRegionCentral')}</SelectItem>
-                            <SelectItem value="south">{t('quoteRegionSouth')}</SelectItem>
+                            {regionOptions.map((region) => (
+                                <SelectItem key={region.value} value={region.value}>
+                                    {region.label}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
