@@ -44,9 +44,9 @@ export function HeroSlider({
     if (count === 0) return null;
 
     return (
-        <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[500px] md:min-h-[520px] rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-start md:justify-end px-4 pb-4 pt-8 md:p-6 lg:p-10">
+        <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[430px] md:min-h-[520px] rounded-[24px] md:rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-start md:justify-end px-4 pb-4 pt-6 md:p-6 lg:p-10">
             {/* Slide images (crossfade) */}
-            <div className="absolute right-[-20px] bottom-[-24px] md:right-[-40px] md:bottom-10 w-48 md:w-80 h-64 md:h-[500px] rounded-2xl transform rotate-6 border-8 border-background shadow-2xl overflow-hidden z-0">
+            <div className="absolute bottom-[-12px] right-[-8px] h-44 w-32 rounded-xl border-4 border-background shadow-xl transform rotate-3 overflow-hidden z-0 md:right-[-40px] md:bottom-10 md:h-[500px] md:w-80 md:rounded-2xl md:rotate-6 md:border-8 md:shadow-2xl">
                 {slides.map((s, i) => (
                     <img
                         key={i}
@@ -58,7 +58,7 @@ export function HeroSlider({
                 ))}
             </div>
 
-            <div className="relative z-20 w-full max-w-[calc(100%-11rem)] flex h-full flex-col justify-start md:max-w-[60%] md:justify-end lg:max-w-[65%]">
+            <div className="relative z-20 flex h-full w-full max-w-full flex-col justify-start md:max-w-[60%] md:justify-end lg:max-w-[65%]">
                 {/* Slide content (crossfade) */}
                 {slides.map((s, i) => (
                     <div
@@ -72,21 +72,21 @@ export function HeroSlider({
                         }}
                     >
                         {s.tag && (
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-foreground text-background text-[10px] uppercase tracking-widest rounded-full mb-6 font-bold shadow-sm">
+                            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-background shadow-sm md:mb-6 md:gap-2 md:px-4 md:py-1.5 md:text-[10px] md:tracking-widest">
                                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                                 {s.tag}
                             </div>
                         )}
 
-                        <h1 className="mb-5 py-1 text-3xl font-black italic leading-[1.12] tracking-[-0.05em] whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm md:text-[2.25rem] lg:text-[2.75rem]">
+                        <h1 className="mb-3 py-1 text-[1.625rem] font-black italic leading-[1.1] tracking-[-0.045em] whitespace-pre-line bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent drop-shadow-sm md:mb-5 md:text-[2.25rem] lg:text-[2.75rem]">
                             {s.title.replace(/\\n/g, '\n')}
                             {s.titleHighlight && <><span>{"\n"}</span><span className="text-primary">{s.titleHighlight}</span></>}
                         </h1>
-                        <p className="text-muted-foreground font-medium text-sm md:text-base max-w-md mb-6 leading-relaxed">
+                        <p className="mb-4 max-w-md text-xs font-medium leading-relaxed text-muted-foreground md:mb-6 md:text-base">
                             {s.desc}
                         </p>
 
-                        <div className="grid grid-cols-2 gap-2 mb-5 text-[10px] font-bold text-foreground sm:flex sm:flex-wrap sm:items-center sm:gap-4 sm:mb-8 sm:text-xs">
+                        <div className="mb-4 grid grid-cols-2 gap-1.5 text-[9px] font-bold text-foreground sm:mb-8 sm:flex sm:flex-wrap sm:items-center sm:gap-4 sm:text-xs">
                             <div className="flex items-center gap-1 bg-background/50 backdrop-blur-sm px-2 py-1 rounded-full border border-border sm:gap-1.5 sm:px-3 sm:py-1.5">
                                 <CheckCircle2 className="w-3 h-3 text-primary sm:w-4 sm:h-4" /> {badgeCustomers}
                             </div>
@@ -100,16 +100,16 @@ export function HeroSlider({
                     </div>
                 ))}
 
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-5 sm:mb-8 pointer-events-auto">
+                <div className="mb-4 flex flex-wrap items-center gap-1.5 pointer-events-auto sm:mb-8 sm:gap-4">
                     <Link
                         href="/search"
-                        className="bg-primary text-primary-foreground rounded-full px-5 py-3 text-[11px] font-black uppercase tracking-wider hover:bg-foreground transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-1.5 group sm:px-10 sm:py-5 sm:text-sm sm:tracking-widest sm:gap-2"
+                        className="flex items-center gap-1 rounded-full bg-primary px-3 py-2 text-[9px] font-black uppercase tracking-wide text-primary-foreground shadow-md transition-all duration-300 hover:bg-foreground hover:shadow-xl group sm:gap-2 sm:px-10 sm:py-5 sm:text-sm sm:tracking-widest"
                     >
                         {ctaShopNow} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform sm:w-5 sm:h-5" />
                     </Link>
                     <Link
                         href="/search"
-                        className="bg-background text-foreground border-2 border-foreground rounded-full px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider hover:bg-muted transition shadow-sm flex items-center gap-1.5 sm:px-8 sm:py-4 sm:text-sm sm:tracking-widest sm:gap-2"
+                        className="flex items-center gap-1 rounded-full border border-foreground bg-background px-2.5 py-2 text-[9px] font-bold uppercase tracking-wide text-foreground shadow-sm transition hover:bg-muted sm:gap-2 sm:border-2 sm:px-8 sm:py-4 sm:text-sm sm:tracking-widest"
                     >
                         <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {ctaViewCollections}
                     </Link>

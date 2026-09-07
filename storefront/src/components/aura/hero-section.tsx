@@ -101,25 +101,25 @@ async function BulkOrderWidget() {
     const locale = await getRouteLocale();
     const home = await getTranslations({locale, namespace: 'Home'});
     return (
-        <div className="md:col-span-12 lg:col-span-4 bg-primary text-primary-foreground rounded-[32px] p-8 flex flex-col justify-between shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-20 transform translate-x-4 -translate-y-4"><BoxIcon /></div>
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-[24px] bg-primary p-5 text-primary-foreground shadow-lg md:col-span-12 md:rounded-[32px] md:p-8 lg:col-span-4">
+            <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 p-4 opacity-20 md:p-8"><BoxIcon /></div>
             <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8"><div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-primary-foreground/70 uppercase"><BoxIconSmall /> {home('bulkOrderTitle')}</div></div>
-                <div className="flex flex-col gap-4 relative">
-                    <div className="bg-primary-foreground/10 rounded-2xl p-5 border border-primary-foreground/10 backdrop-blur-sm">
-                        <div className="text-[10px] font-bold text-primary-foreground/60 tracking-widest mb-1 uppercase">{home('bulkOrderEstimate')}</div>
-                        <div className="text-4xl font-black tracking-tighter">{home('bulkOrderNote')}</div>
-                        <div className="mt-1 text-md font-bold text-amber-200">{home('bulkOrderContact')}</div>
+                <div className="mb-5 flex items-center justify-between md:mb-8"><div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground/70 md:gap-2 md:text-[10px] md:tracking-widest"><BoxIconSmall /> {home('bulkOrderTitle')}</div></div>
+                <div className="relative flex flex-col gap-3 md:gap-4">
+                    <div className="rounded-xl border border-primary-foreground/10 bg-primary-foreground/10 p-4 backdrop-blur-sm md:rounded-2xl md:p-5">
+                        <div className="mb-1 text-[9px] font-bold uppercase tracking-wider text-primary-foreground/60 md:text-[10px] md:tracking-widest">{home('bulkOrderEstimate')}</div>
+                        <div className="text-2xl font-black tracking-tighter md:text-4xl">{home('bulkOrderNote')}</div>
+                        <div className="mt-1 text-sm font-bold text-amber-200 md:text-base">{home('bulkOrderContact')}</div>
                     </div>
-                    <div className="bg-primary-foreground/10 rounded-2xl p-5 border border-primary-foreground/10 backdrop-blur-sm mt-2 space-y-2">
-                        {[home('bulkOrderFreeDesign'), home('bulkOrderFreeShip'), home('bulkOrderWarranty'), home('bulkOrderWarranty3Month')].map((benefit) => <div key={benefit} className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-green-300" /><span className="text-sm font-bold">{benefit}</span></div>)}
+                    <div className="mt-1 space-y-1.5 rounded-xl border border-primary-foreground/10 bg-primary-foreground/10 p-4 backdrop-blur-sm md:mt-2 md:space-y-2 md:rounded-2xl md:p-5">
+                        {[home('bulkOrderFreeDesign'), home('bulkOrderFreeShip'), home('bulkOrderWarranty'), home('bulkOrderWarranty3Month')].map((benefit) => <div key={benefit} className="flex items-center gap-2 md:gap-3"><CheckCircle2 className="size-3.5 text-green-300 md:size-4" /><span className="text-xs font-bold md:text-sm">{benefit}</span></div>)}
                     </div>
                 </div>
             </div>
-            <div className="mt-6 w-full"><QuoteButton variant="hero" /></div>
+            <div className="mt-5 w-full md:mt-6"><QuoteButton variant="hero" /></div>
         </div>
     );
 }
 
-function BoxIcon() { return <svg className="w-32 h-32 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>; }
-function BoxIconSmall() { return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>; }
+function BoxIcon() { return <svg className="size-20 text-primary-foreground md:size-32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>; }
+function BoxIconSmall() { return <svg className="size-3.5 md:size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9-5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>; }

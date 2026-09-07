@@ -144,7 +144,7 @@ export function ProductInfo({ product, currencyCode }: ProductInfoProps) {
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#C9A227]" />
           <p>
             <strong>Lưu ý:</strong> Giá sản phẩm có thể thay đổi theo chất liệu,
-            số lượng và kỹ thuật in. Vui lòng liên hệ hoặc nhấn{" "}
+            số lượng và kỹ thuật in thêu. Vui lòng liên hệ hoặc nhấn{" "}
             <strong>Nhận báo giá</strong> để được tư vấn và nhận giá chính thức.
           </p>
         </div>
