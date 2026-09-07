@@ -44,7 +44,7 @@ export function HeroSlider({
     if (count === 0) return null;
 
     return (
-        <div className="md:col-span-12 lg:col-span-8 relative w-full min-h-[430px] md:min-h-[520px] rounded-[24px] md:rounded-[32px] overflow-hidden group bg-[#E5E7EB] dark:bg-[#2A2A2D] border border-border shadow-sm flex flex-col justify-start md:justify-end px-4 pb-4 pt-6 md:p-6 lg:p-10">
+        <div className="relative hidden w-full min-h-[430px] flex-col justify-start overflow-hidden rounded-[24px] border border-border bg-[#E5E7EB] px-4 pb-4 pt-6 shadow-sm dark:bg-[#2A2A2D] md:col-span-12 md:flex md:min-h-[520px] md:justify-end md:rounded-[32px] md:p-6 lg:col-span-8 lg:p-10">
             {/* Slide images (crossfade) */}
             <div className="absolute bottom-[-12px] right-[-8px] h-44 w-32 rounded-xl border-4 border-background shadow-xl transform rotate-3 overflow-hidden z-0 md:right-[-40px] md:bottom-10 md:h-[500px] md:w-80 md:rounded-2xl md:rotate-6 md:border-8 md:shadow-2xl">
                 {slides.map((s, i) => (
