@@ -97,7 +97,7 @@ cd "$HOME/uniform-store"
 bash .github/scripts/rebuild.sh
 ```
 
-It stops if `package-lock.json` or `backend/migrations` changed; run `deploy.sh` for those updates.
+It stops if `package-lock.json` or `backend/migrations` changed; run `deploy.sh` for those updates. Both commands build an immutable release under `releases/` and switch the `current` symlink only after a successful build, preventing clients from receiving Next.js assets from two different builds during deployment.
 
 Useful checks:
 

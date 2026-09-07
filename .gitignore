@@ -12,6 +12,10 @@ build/
 .next/
 out/
 
+# Immutable deployment releases generated on the VPS.
+/releases/
+/current
+
 # Logs
 *.log
 npm-debug.log*

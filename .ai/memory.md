@@ -754,3 +754,8 @@ git push → main
 
 - Product Detail now uses the standard Inter B2B visual system rather than the decorative category font: a 36–40px product title, compact price hierarchy, muted breadcrumb/body copy, restrained navy/blue/gold palette, and a responsive two-column grid with a 56–64px desktop gap.
 - Existing product/gallery/size/quote/cart behavior and API contracts remain unchanged. The product image gallery, detail content, CTA row, trust badges and global floating actions were restyled for clearer scanning, consistent borders/radii and lower visual noise.
+
+### Atomic VPS Releases (2026-09-07)
+
+- `.github/scripts/deploy.sh` and `rebuild.sh` now delegate to `release-deploy.sh`. It builds in an immutable `releases/<commit>-<timestamp>` Git worktree, links the persistent root environment files, then atomically switches the `current` symlink only after build/migration success. PM2 starts all services from `current`, avoiding mixed Next.js HTML/chunk builds during deployment.
+- Full deploy runs `npm ci` and migrations inside the new release. Fast rebuild reuses `node_modules` from the active release and refuses dependency or migration changes. Five newest releases are retained; the script checks both the Admin root and a dynamic Admin route after activation.
