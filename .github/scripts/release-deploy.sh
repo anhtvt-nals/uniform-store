@@ -43,6 +43,26 @@ wait_for_http() {
     return 1
 }
 
+fetch_origin_main() {
+    local attempt
+    local wait_seconds
+
+    for attempt in 1 2 3; do
+        if timeout 45s git fetch --prune origin main; then
+            return 0
+        fi
+
+        if [ "${attempt}" -lt 3 ]; then
+            wait_seconds=$((attempt * 10))
+            echo "GitHub is temporarily unreachable. Retrying in ${wait_seconds}s (${attempt}/3)..." >&2
+            sleep "${wait_seconds}"
+        fi
+    done
+
+    echo "Cannot reach GitHub after 3 attempts. Check the VPS outbound HTTPS/DNS connection, then rerun the deployment." >&2
+    return 1
+}
+
 link_persistent_env() {
     local release_dir="$1"
     local env_file
@@ -123,7 +143,7 @@ echo "🚀 Preparing atomic ${MODE} release"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 previous_ref="$(git rev-parse HEAD)"
-git fetch origin main
+fetch_origin_main
 target_ref="origin/main"
 
 if [ "${MODE}" = "fast" ] && ! git diff --quiet "${previous_ref}" "${target_ref}" -- package-lock.json backend/migrations; then

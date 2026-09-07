@@ -68,6 +68,10 @@ NEXT_PUBLIC_ADMIN_API_URL=https://admin.yourdomain.com/api/v1/admin
 
 The second setup run obtains Let's Encrypt certificates, creates a persistent 2GB swap file when the VPS has none, builds all apps, runs migrations, starts PM2 and validates local health endpoints. Node uses a 1.5GB heap for dependency installation and builds; use a VPS with at least 1GB RAM and sufficient disk space for swap.
 
+### VPS repository access
+
+The deploy script fetches through the repository's existing `origin` remote. For VPS environments where GitHub HTTPS is unreliable, configure a read-only GitHub Deploy key for the deployment user and set `origin` to `git@github.com:<owner>/<repo>.git`. Do not store the private key in GitHub Actions secrets or in project environment files.
+
 ## 3. GitHub Actions deployment
 
 Add these repository secrets:

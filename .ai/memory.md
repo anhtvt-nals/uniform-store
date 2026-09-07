@@ -759,3 +759,5 @@ git push → main
 
 - `.github/scripts/deploy.sh` and `rebuild.sh` now delegate to `release-deploy.sh`. It builds in an immutable `releases/<commit>-<timestamp>` Git worktree, links the persistent root environment files, then atomically switches the `current` symlink only after build/migration success. PM2 starts all services from `current`, avoiding mixed Next.js HTML/chunk builds during deployment.
 - Full deploy runs `npm ci` and migrations inside the new release. Fast rebuild reuses `node_modules` from the active release and refuses dependency or migration changes. Five newest releases are retained; the script checks both the Admin root and a dynamic Admin route after activation.
+- The atomic deployment fetches `origin/main` with three bounded retries (45-second attempt timeout and incremental wait) so a transient VPS-to-GitHub HTTPS outage fails clearly rather than holding the CI SSH session indefinitely.
+- The deployment transport is determined by the VPS repository's `origin`; a read-only GitHub Deploy key configured for the `ubuntu` user and an SSH `origin` URL require no source-code secret or special CI configuration.
