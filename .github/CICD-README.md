@@ -70,7 +70,13 @@ The second setup run obtains Let's Encrypt certificates, creates a persistent 2G
 
 ### VPS repository access
 
-The deploy script fetches through the repository's existing `origin` remote. For VPS environments where GitHub HTTPS is unreliable, configure a read-only GitHub Deploy key for the deployment user and set `origin` to `git@github.com:<owner>/<repo>.git`. Do not store the private key in GitHub Actions secrets or in project environment files.
+The deploy script fetches through the repository's existing `origin` remote. For VPS environments where GitHub HTTPS is unreliable, configure a read-only GitHub Deploy key for the deployment user and set `origin` to `git@github.com:<owner>/<repo>.git`. The script automatically tries GitHub SSH through `ssh.github.com:443` first, so it also works when the VPS provider blocks outbound SSH port 22. Do not store the private key in GitHub Actions secrets or in project environment files.
+
+If a manual `git ls-remote origin HEAD` still times out, verify outbound TCP port 443 from the VPS:
+
+```bash
+ssh -T -o HostName=ssh.github.com -o Port=443 -o HostKeyAlias=github.com git@github.com
+```
 
 ## 3. GitHub Actions deployment
 

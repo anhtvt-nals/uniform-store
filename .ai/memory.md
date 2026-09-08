@@ -205,6 +205,10 @@ backend/
 
 ## Recent Changes
 
+### GitHub SSH Deployment Fallback (2026-09-08)
+
+- Atomic deploy fetches use GitHub's SSH endpoint on `ssh.github.com:443` first when `origin` is a GitHub SSH remote, then fall back to the configured origin connection. This supports VPS networks that block outbound port 22 while preserving the deployment user's existing GitHub deploy key.
+
 ### Product Size Management (2026-08-26)
 
 - Added migration `044_add_product_sizes.sql`: shared `sizes` catalog, product-to-size assignment, optional size-guide image, and immutable size snapshots on cart lines, order lines, inquiries, and quote requests.

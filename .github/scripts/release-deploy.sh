@@ -48,6 +48,18 @@ fetch_origin_main() {
     local wait_seconds
 
     for attempt in 1 2 3; do
+        # Some VPS providers/firewalls block outbound port 22. GitHub exposes
+        # its SSH service on ssh.github.com:443 specifically for that case.
+        # HostKeyAlias keeps an existing github.com entry in known_hosts valid,
+        # while the user's Host github.com settings still supply the deploy key.
+        if origin_uses_github_ssh; then
+            echo "Fetching GitHub origin through SSH port 443..."
+            if timeout 45s git -c core.sshCommand='ssh -o HostName=ssh.github.com -o Port=443 -o HostKeyAlias=github.com -o BatchMode=yes' fetch --prune origin main; then
+                return 0
+            fi
+            echo "GitHub SSH over port 443 failed; trying the configured origin connection..." >&2
+        fi
+
         if timeout 45s git fetch --prune origin main; then
             return 0
         fi
@@ -59,8 +71,14 @@ fetch_origin_main() {
         fi
     done
 
-    echo "Cannot reach GitHub after 3 attempts. Check the VPS outbound HTTPS/DNS connection, then rerun the deployment." >&2
+    echo "Cannot fetch origin/main after 3 attempts. Check VPS outbound access to ssh.github.com:443 (or the configured GitHub remote), DNS, and the deploy key, then rerun the deployment." >&2
     return 1
+}
+
+origin_uses_github_ssh() {
+    local origin_url
+    origin_url="$(git remote get-url origin 2>/dev/null || true)"
+    [[ "${origin_url}" =~ ^git@github\.com: ]] || [[ "${origin_url}" =~ ^ssh://git@github\.com([:/]|$) ]]
 }
 
 link_persistent_env() {
