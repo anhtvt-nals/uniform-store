@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Vendure Store';
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Minh An Uniform';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://minhanuniform.com';
 
 /**
  * Truncate text to a maximum length, preserving word boundaries.
