@@ -207,6 +207,7 @@ EOF
 cat > storefront/.env.local <<EOF
 VENDURE_SHOP_API_URL=http://127.0.0.1:3000/shop-api
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
+NEXT_PUBLIC_SITE_NAME=Minh An Uniform
 NEXT_PUBLIC_STORAGE_URL=$(env_value R2_PUBLIC_URL)
 EOF
 chmod 600 admin/.env.local storefront/.env.local
