@@ -1,4 +1,4 @@
-import {ResultOf} from '@/graphql';
+import {readFragment, ResultOf} from '@/graphql';
 import {PackageSearch} from 'lucide-react';
 import {ProductTile} from '@/components/aura/product-tile';
 import {Pagination} from '@/components/shared/pagination';
@@ -6,6 +6,8 @@ import {SortDropdown} from './sort-dropdown';
 import {SearchProductsQuery} from "@/lib/vendure/queries";
 import {getRouteLocale} from '@/i18n/server';
 import {getTranslations} from 'next-intl/server';
+import {ProductGridTransition} from './product-grid-transition';
+import {ProductCardFragment} from '@/lib/vendure/fragments';
 
 interface ProductGridProps {
     productDataPromise: Promise<{
@@ -22,9 +24,13 @@ export async function ProductGrid({productDataPromise, currentPage, take}: Produ
     const result = await productDataPromise;
 
     const searchResult = result.data.search;
+    const products = searchResult.items.map((product) => ({
+        data: product,
+        id: readFragment(ProductCardFragment, product).productId,
+    }));
     const totalPages = Math.ceil(searchResult.totalItems / take);
 
-    if (!searchResult.items.length) {
+    if (!products.length) {
         return (
             <div className="flex min-h-[340px] w-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
                 <div className="mb-5 flex size-24 items-center justify-center rounded-3xl border border-primary/15 bg-primary/5 text-primary shadow-sm">
@@ -44,11 +50,13 @@ export async function ProductGrid({productDataPromise, currentPage, take}: Produ
                 <SortDropdown/>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-                {searchResult.items.map((product, i) => (
-                    <ProductTile key={'product-grid-item' + i} product={product} compact />
+            <ProductGridTransition
+                transitionKey={products.map((product) => product.id).join(':')}
+            >
+                {products.map((product) => (
+                    <ProductTile key={product.id} product={product.data} compact />
                 ))}
-            </div>
+            </ProductGridTransition>
 
             {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages}/>

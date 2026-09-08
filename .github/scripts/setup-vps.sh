@@ -46,6 +46,35 @@ require_env_value() {
 
 write_nginx_config() {
     cat <<NGINX | sudo tee /etc/nginx/sites-available/uniform-store >/dev/null
+# Each PM2-managed app is a single process (no cluster mode), so \`pm2 delete\`
+# + \`pm2 start\` during a release briefly closes the listening socket. The
+# same backend address is listed 3x in each upstream block purely so nginx
+# treats it as a retryable group: on connection refused/timeout it re-tries
+# the "next" peer (the same process, now back up) instead of surfacing a raw
+# connection error to the browser (this is what caused admin dynamic routes,
+# e.g. /categories/[id], to show "This page couldn't load" right after a
+# deploy, until a manual reload).
+upstream storefront_upstream {
+    server 127.0.0.1:3001 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:3001 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:3001 max_fails=1 fail_timeout=1s;
+    keepalive 16;
+}
+
+upstream admin_api_upstream {
+    server 127.0.0.1:3002 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:3002 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:3002 max_fails=1 fail_timeout=1s;
+    keepalive 16;
+}
+
+upstream admin_upstream {
+    server 127.0.0.1:5002 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:5002 max_fails=1 fail_timeout=1s;
+    server 127.0.0.1:5002 max_fails=1 fail_timeout=1s;
+    keepalive 16;
+}
+
 server {
     listen 80;
     listen [::]:80;
@@ -53,7 +82,10 @@ server {
     client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
     location / {
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://storefront_upstream;
+        proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+        proxy_next_upstream_tries 3;
+        proxy_connect_timeout 3s;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -71,7 +103,10 @@ server {
     client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
 
     location /api/ {
-        proxy_pass http://127.0.0.1:3002;
+        proxy_pass http://admin_api_upstream;
+        proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+        proxy_next_upstream_tries 3;
+        proxy_connect_timeout 3s;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -79,7 +114,10 @@ server {
     }
 
     location / {
-        proxy_pass http://127.0.0.1:5002;
+        proxy_pass http://admin_upstream;
+        proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+        proxy_next_upstream_tries 3;
+        proxy_connect_timeout 3s;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
