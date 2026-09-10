@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
+import { getLocalizedText } from "@/lib/localized-text";
 
 export default function InventoryPage() {
   const { t } = useT();
@@ -28,7 +29,7 @@ export default function InventoryPage() {
         items: {
           variantId: string;
           sku: string;
-          productName: string;
+          productName?: string | Record<string, string>;
           quantity: number;
           lowStockLevel: number;
         }[];
@@ -73,7 +74,7 @@ export default function InventoryPage() {
                 {lowStock.map((item) => (
                   <TableRow key={item.variantId}>
                     <TableCell className="font-medium">
-                      {item.productName}
+                      {getLocalizedText(item.productName, item.sku)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {item.sku}

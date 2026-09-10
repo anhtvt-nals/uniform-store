@@ -21,6 +21,25 @@ type Setting = {
 
 type GroupedSettings = Record<string, Setting[]>;
 
+const groupLabels: Record<string, string> = {
+  seo: "SEO & chia sẻ mạng xã hội",
+  general: "Thông tin chung",
+  commerce: "Thương mại",
+  shipping: "Vận chuyển",
+  inventory: "Kho hàng",
+};
+
+const seoFieldLabels: Record<string, string> = {
+  seo_site_title: "Tên website",
+  seo_home_title: "Tiêu đề SEO trang chủ",
+  seo_home_description: "Mô tả SEO trang chủ",
+  seo_keywords: "Từ khóa SEO",
+  seo_og_image: "Ảnh chia sẻ mạng xã hội (Open Graph)",
+};
+
+const isLongTextSetting = (key: string) =>
+  key === "seo_home_description" || key === "seo_keywords";
+
 export default function SettingsPage() {
   const { t } = useT();
   const token = getToken();
@@ -107,37 +126,53 @@ export default function SettingsPage() {
         Object.entries(grouped).map(([group, settings]) => (
           <Card key={group}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base capitalize">{group}</CardTitle>
+              <CardTitle className="text-base capitalize">
+                {groupLabels[group] ?? group}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {settings.map((setting) => (
                   <div key={setting.key} className="flex items-center gap-4">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{setting.key}</p>
+                      <p className="text-sm font-medium">
+                        {seoFieldLabels[setting.key] ?? setting.key}
+                      </p>
                       {setting.description && (
                         <p className="text-xs text-muted-foreground">
                           {setting.description}
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 max-w-[400px]">
+                    <div className="flex items-center gap-2 shrink-0 max-w-[520px]">
                       {isEditing(setting.key) ? (
-                        <Input
-                          defaultValue={
-                            editValues[setting.key] ?? displayValue(setting)
-                          }
-                          onChange={(e) =>
-                            setEditValues((prev) => ({
-                              ...prev,
-                              [setting.key]: e.target.value,
-                            }))
-                          }
-                          className="h-9 text-sm"
-                          autoFocus
-                        />
+                        isLongTextSetting(setting.key) ? (
+                          <textarea
+                            value={editValues[setting.key] ?? displayValue(setting)}
+                            onChange={(e) =>
+                              setEditValues((prev) => ({
+                                ...prev,
+                                [setting.key]: e.target.value,
+                              }))
+                            }
+                            className="min-h-20 w-80 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            autoFocus
+                          />
+                        ) : (
+                          <Input
+                            value={editValues[setting.key] ?? displayValue(setting)}
+                            onChange={(e) =>
+                              setEditValues((prev) => ({
+                                ...prev,
+                                [setting.key]: e.target.value,
+                              }))
+                            }
+                            className="h-9 text-sm w-80"
+                            autoFocus
+                          />
+                        )
                       ) : (
-                        <span className="text-sm text-muted-foreground truncate block max-w-[300px]">
+                        <span className="text-sm text-muted-foreground truncate block max-w-[380px]">
                           {displayValue(setting)}
                         </span>
                       )}

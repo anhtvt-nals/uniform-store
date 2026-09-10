@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown } from "lucide-react"
 import { format } from "date-fns"
 import { useT } from "@/i18n"
+import { getLocalizedText } from "@/lib/localized-text"
 import { vi } from "date-fns/locale"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
 
@@ -29,21 +30,28 @@ type RevenueData = {
 };
 
 type TopProduct = {
-  id: string;
-  name: Record<string, string>;
-  slug: string;
+  variantId: string;
+  productName: string | Record<string, string>;
+  sku: string;
   totalSold: number;
   totalRevenue: number;
-  image?: string;
 };
 
-type OrderStats = Record<string, number>;
+type OrderStat = {
+  status: string;
+  count: number;
+  total: number;
+};
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(amount);
+}
+
+function getProductName(product: TopProduct): string {
+  return getLocalizedText(product.productName, product.sku);
 }
 
 export default function DashboardPage() {
@@ -70,7 +78,7 @@ export default function DashboardPage() {
 
   const { data: orderStats, isLoading: orderStatsLoading } = useQuery({
     queryKey: ["dashboard", "order-stats"],
-    queryFn: () => apiClient<OrderStats>("/dashboard/order-stats", { token }),
+    queryFn: () => apiClient<OrderStat[]>("/dashboard/order-stats", { token }),
     select: (res) => res.data,
   });
 
@@ -83,9 +91,7 @@ export default function DashboardPage() {
     { id: "pending-orders", title: t("dashboard.pendingOrders"), value: (stats.pendingOrders ?? 0).toString(), icon: ShoppingCart, trend: "", trendUp: true },
   ] : [];
 
-  const orderStatusEntries = orderStats
-    ? Object.entries(orderStats).map(([status, count]) => ({ status, count }))
-    : [];
+  const orderStatusEntries = orderStats ?? [];
 
   return (
     <div className="space-y-6">
@@ -212,11 +218,11 @@ export default function DashboardPage() {
           ) : topProducts && topProducts.length > 0 ? (
             <div className="space-y-4">
               {topProducts.map((product, index) => (
-                <div key={product.id} className="flex items-center gap-4">
+                <div key={product.variantId} className="flex items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground w-6">{index + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {product.name?.en || product.name?.vi || product.slug}
+                      {getProductName(product)}
                     </p>
                     <p className="text-xs text-muted-foreground">{product.totalSold} {t("dashboard.sold")}</p>
                   </div>

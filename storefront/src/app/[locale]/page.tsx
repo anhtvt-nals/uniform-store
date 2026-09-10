@@ -5,6 +5,7 @@ import {SITE_NAME, SITE_URL, buildCanonicalUrl} from "@/lib/metadata";
 import {getTranslations} from 'next-intl/server';
 import {toOgLocale} from '@/i18n/locale-utils';
 import {routing} from '@/i18n/routing';
+import {getSeoSettings} from '@/lib/public-settings';
 import {HeroSection} from "@/components/aura/hero-section";
 import {StatsSection} from "@/components/aura/stats-section";
 import {FeaturedCategoryTabs} from "@/components/aura/featured-category-tabs";
@@ -36,22 +37,28 @@ export async function generateMetadata(): Promise<Metadata> {
     const locale = await getRouteLocale();
     const t = await getTranslations({locale, namespace: 'Home'});
     const ogLocale = toOgLocale(locale);
+    const seo = await getSeoSettings();
+    const title = seo.homeTitle ?? `${SITE_NAME} - ${t('pageTitle')}`;
+    const description = seo.homeDescription ?? t('description');
+    const ogDescription = seo.homeDescription ?? t('ogDescription');
 
     return {
         title: {
-            absolute: `${SITE_NAME} - ${t('pageTitle')}`,
+            absolute: title,
         },
-        description: t('description'),
+        description,
+        keywords: seo.keywords ?? undefined,
         alternates: {
             canonical: buildCanonicalUrl("/"),
             languages: Object.fromEntries(routing.locales.map((l) => [l, buildCanonicalUrl(`/${l}`)])),
         },
         openGraph: {
-            title: `${SITE_NAME} - ${t('pageTitle')}`,
-            description: t('ogDescription'),
+            title,
+            description: ogDescription,
             type: "website",
             locale: ogLocale,
             url: SITE_URL,
+            images: seo.ogImage ? [{url: seo.ogImage, alt: title}] : undefined,
         },
     };
 }

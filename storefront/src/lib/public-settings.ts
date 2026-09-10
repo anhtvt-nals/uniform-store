@@ -22,3 +22,22 @@ export function getStringSetting(settings: PublicSettings, key: string): string 
     const value = settings[key];
     return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
+
+export type SeoSettings = {
+    siteTitle: string | null;
+    homeTitle: string | null;
+    homeDescription: string | null;
+    keywords: string | null;
+    ogImage: string | null;
+};
+
+export async function getSeoSettings(): Promise<SeoSettings> {
+    const settings = await getPublicSettings();
+    return {
+        siteTitle: getStringSetting(settings, 'seo_site_title'),
+        homeTitle: getStringSetting(settings, 'seo_home_title'),
+        homeDescription: getStringSetting(settings, 'seo_home_description'),
+        keywords: getStringSetting(settings, 'seo_keywords'),
+        ogImage: getStringSetting(settings, 'seo_og_image'),
+    };
+}

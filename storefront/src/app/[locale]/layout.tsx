@@ -15,6 +15,7 @@ import {Footer} from "@/components/layout/footer";
 import {ThemeProvider} from "@/components/providers/theme-provider";
 import {FloatingButtons} from "@/components/aura/floating-buttons";
 import {SITE_NAME, SITE_URL} from "@/lib/metadata";
+import {getSeoSettings} from "@/lib/public-settings";
 import "./globals.css";
 
 const inter = localFont({
@@ -38,18 +39,23 @@ export async function generateMetadata(): Promise<Metadata> {
     const locale = await getRouteLocale();
     const ogLocale = toOgLocale(locale);
     const t = await getTranslations({locale, namespace: 'Common'});
+    const seo = await getSeoSettings();
+    const siteTitle = seo.siteTitle ?? SITE_NAME;
+    const description = seo.homeDescription ?? t('siteDescription', {siteName: siteTitle});
 
     return {
         metadataBase: new URL(SITE_URL),
         title: {
-            default: SITE_NAME,
-            template: `%s | ${SITE_NAME}`,
+            default: siteTitle,
+            template: `%s | ${siteTitle}`,
         },
-        description: t('siteDescription', {siteName: SITE_NAME}),
+        description,
+        keywords: seo.keywords ?? undefined,
         openGraph: {
             type: "website",
-            siteName: SITE_NAME,
+            siteName: siteTitle,
             locale: ogLocale,
+            images: seo.ogImage ? [{url: seo.ogImage, alt: siteTitle}] : undefined,
         },
         twitter: {
             card: "summary_large_image",

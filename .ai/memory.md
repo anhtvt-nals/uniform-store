@@ -205,6 +205,12 @@ backend/
 
 ## Recent Changes
 
+### Site-wide SEO Settings (2026-09-10)
+
+- Added migration `045_add_seo_settings.sql` with public settings for website title, homepage SEO title/description, keywords, and an Open Graph share image.
+- Admin **Cài đặt** now presents the SEO group with Vietnamese labels and multi-line editors for description and keywords.
+- Storefront reads the public SEO settings for default metadata and homepage metadata; existing environment/translation values remain safe fallbacks.
+
 ### GitHub SSH Deployment Fallback (2026-09-08)
 
 - Atomic deploy fetches use GitHub's SSH endpoint on `ssh.github.com:443` first when `origin` is a GitHub SSH remote, then fall back to the configured origin connection. This supports VPS networks that block outbound port 22 while preserving the deployment user's existing GitHub deploy key.
