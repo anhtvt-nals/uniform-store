@@ -108,6 +108,22 @@ describe('ProductsService (admin)', () => {
     });
   });
 
+  it('persists supplied product SEO fields', async () => {
+    mockProductRepo.findOne.mockResolvedValue(null);
+    mockProductRepo.create.mockImplementation((input) => input);
+    mockProductRepo.save.mockImplementation(async (input) => input);
+
+    const result = await service.create({
+      name: { vi: 'Áo polo' }, slug: 'ao-polo',
+      categoryId: 'f4335894-9c32-4dd4-bd98-ace2734a6152',
+      focusKeyword: { vi: 'áo polo đồng phục' },
+      ogImageUrl: { vi: 'https://cdn/img.jpg' },
+    });
+
+    expect(result.focusKeyword).toEqual({ vi: 'áo polo đồng phục' });
+    expect(result.ogImageUrl).toEqual({ vi: 'https://cdn/img.jpg' });
+  });
+
   describe('addVariant', () => {
     it('should create variant with barcode, auto-create inventory, and link options', async () => {
       mockProductRepo.findOne.mockResolvedValue({ id: 'p-1' });

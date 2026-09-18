@@ -31,6 +31,24 @@ export class ArticleEntity {
   @Column({ name: 'image_url', type: 'text', default: '' })
   imageUrl: string;
 
+  @Column({ name: 'meta_title', type: 'jsonb', default: {} })
+  metaTitle: Record<string, string>;
+
+  @Column({ name: 'meta_desc', type: 'jsonb', default: {} })
+  metaDesc: Record<string, string>;
+
+  @Column({ name: 'focus_keyword', type: 'jsonb', default: {} })
+  focusKeyword: Record<string, string>;
+
+  @Column({ name: 'og_title', type: 'jsonb', default: {} })
+  ogTitle: Record<string, string>;
+
+  @Column({ name: 'og_description', type: 'jsonb', default: {} })
+  ogDescription: Record<string, string>;
+
+  @Column({ name: 'og_image_url', type: 'jsonb', default: {} })
+  ogImageUrl: Record<string, string>;
+
   @Column({ type: 'text', default: '' })
   author: string;
 

@@ -74,6 +74,18 @@ export class ProductEntity {
   @Column({ name: 'meta_desc', type: 'jsonb', default: {} })
   metaDesc: Record<string, string>;
 
+  @Column({ name: 'focus_keyword', type: 'jsonb', default: {} })
+  focusKeyword: Record<string, string>;
+
+  @Column({ name: 'og_title', type: 'jsonb', default: {} })
+  ogTitle: Record<string, string>;
+
+  @Column({ name: 'og_description', type: 'jsonb', default: {} })
+  ogDescription: Record<string, string>;
+
+  @Column({ name: 'og_image_url', type: 'jsonb', default: {} })
+  ogImageUrl: Record<string, string>;
+
   @Column({ name: 'size_guide_image_url', type: 'text', default: '' })
   sizeGuideImageUrl: string;
 

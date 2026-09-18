@@ -1,0 +1,13 @@
+ALTER TABLE articles
+  ADD COLUMN meta_title JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN meta_desc JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN focus_keyword JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_title JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_description JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_image_url JSONB NOT NULL DEFAULT '{}';
+
+ALTER TABLE products
+  ADD COLUMN focus_keyword JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_title JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_description JSONB NOT NULL DEFAULT '{}',
+  ADD COLUMN og_image_url JSONB NOT NULL DEFAULT '{}';

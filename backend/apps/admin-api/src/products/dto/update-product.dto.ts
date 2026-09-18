@@ -91,6 +91,22 @@ export class UpdateProductDto {
   metaDesc?: Record<string, string>;
 
   @IsOptional()
+  @IsObject()
+  focusKeyword?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogTitle?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogDescription?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogImageUrl?: Record<string, string>;
+
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   sizeIds?: string[];

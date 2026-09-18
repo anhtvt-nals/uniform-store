@@ -150,6 +150,10 @@ export class ProductsService {
       weight: dto.weight ?? 0,
       metaTitle: dto.metaTitle ?? {},
       metaDesc: dto.metaDesc ?? {},
+      focusKeyword: dto.focusKeyword ?? {},
+      ogTitle: dto.ogTitle ?? {},
+      ogDescription: dto.ogDescription ?? {},
+      ogImageUrl: dto.ogImageUrl ?? {},
       sizeGuideImageUrl: dto.sizeGuideImageUrl ?? '',
     });
 
@@ -186,6 +190,10 @@ export class ProductsService {
     if (dto.metaTitle !== undefined) product.metaTitle = dto.metaTitle;
     if (dto.detail !== undefined) product.detail = dto.detail;
     if (dto.metaDesc !== undefined) product.metaDesc = dto.metaDesc;
+    if (dto.focusKeyword !== undefined) product.focusKeyword = dto.focusKeyword;
+    if (dto.ogTitle !== undefined) product.ogTitle = dto.ogTitle;
+    if (dto.ogDescription !== undefined) product.ogDescription = dto.ogDescription;
+    if (dto.ogImageUrl !== undefined) product.ogImageUrl = dto.ogImageUrl;
     if (dto.sizeGuideImageUrl !== undefined) product.sizeGuideImageUrl = dto.sizeGuideImageUrl;
 
     const saved = await this.productRepo.save(product);
@@ -240,6 +248,10 @@ export class ProductsService {
         weight: Number(source.weight),
         metaTitle: source.metaTitle,
         metaDesc: source.metaDesc,
+        focusKeyword: source.focusKeyword,
+        ogTitle: source.ogTitle,
+        ogDescription: source.ogDescription,
+        ogImageUrl: source.ogImageUrl,
         sizeGuideImageUrl: source.sizeGuideImageUrl,
       });
       const savedProduct = await productRepo.save(copiedProduct);
