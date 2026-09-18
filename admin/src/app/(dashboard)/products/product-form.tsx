@@ -198,6 +198,10 @@ export function ProductForm({
   const [displayOrder, setDisplayOrder] = useState(0);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
   const [metaDesc, setMetaDesc] = useState<Record<string, string>>({});
+  const [focusKeyword, setFocusKeyword] = useState<Record<string, string>>({});
+  const [ogTitle, setOgTitle] = useState<Record<string, string>>({});
+  const [ogDescription, setOgDescription] = useState<Record<string, string>>({});
+  const [ogImageUrl, setOgImageUrl] = useState<Record<string, string>>({});
   const [sizeIds, setSizeIds] = useState<string[]>([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -246,6 +250,10 @@ export function ProductForm({
       setDisplayOrder(Number(defaultValues.displayOrder ?? 0));
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
       setMetaDesc((defaultValues.metaDesc as Record<string, string>) || {});
+      setFocusKeyword((defaultValues.focusKeyword as Record<string, string>) || {});
+      setOgTitle((defaultValues.ogTitle as Record<string, string>) || {});
+      setOgDescription((defaultValues.ogDescription as Record<string, string>) || {});
+      setOgImageUrl((defaultValues.ogImageUrl as Record<string, string>) || {});
       setSizeIds(
         ((defaultValues.sizes as Size[] | undefined) || []).map(
           (size) => size.id,
@@ -266,6 +274,10 @@ export function ProductForm({
         detail: setDetail,
         metaTitle: setMetaTitle,
         metaDesc: setMetaDesc,
+        focusKeyword: setFocusKeyword,
+        ogTitle: setOgTitle,
+        ogDescription: setOgDescription,
+        ogImageUrl: setOgImageUrl,
       };
       setter[field]?.((prev) => ({ ...prev, [locale]: value }));
     },
@@ -280,10 +292,14 @@ export function ProductForm({
         detail,
         metaTitle,
         metaDesc,
+        focusKeyword,
+        ogTitle,
+        ogDescription,
+        ogImageUrl,
       };
       return source[field]?.[locale] || "";
     },
-    [name, description, detail, metaTitle, metaDesc],
+    [name, description, detail, metaTitle, metaDesc, focusKeyword, ogTitle, ogDescription, ogImageUrl],
   );
 
   function handleNameChange(value: string) {
@@ -343,6 +359,10 @@ export function ProductForm({
     if (Object.keys(description).length > 0) data.sortDescription = description;
     if (Object.keys(metaTitle).length > 0) data.metaTitle = metaTitle;
     if (Object.keys(metaDesc).length > 0) data.metaDesc = metaDesc;
+    if (Object.keys(focusKeyword).length > 0) data.focusKeyword = focusKeyword;
+    if (Object.keys(ogTitle).length > 0) data.ogTitle = ogTitle;
+    if (Object.keys(ogDescription).length > 0) data.ogDescription = ogDescription;
+    if (Object.keys(ogImageUrl).length > 0) data.ogImageUrl = ogImageUrl;
 
     onSubmit(data);
   }
@@ -698,6 +718,10 @@ export function ProductForm({
                     onChange={(e) => setField("metaDesc", l, e.target.value)}
                     placeholder="Mô tả SEO"
                   />
+                  <Input value={getField("focusKeyword", l)} onChange={(e) => setField("focusKeyword", l, e.target.value)} placeholder="Từ khóa chính" />
+                  <Input value={getField("ogTitle", l)} onChange={(e) => setField("ogTitle", l, e.target.value)} placeholder="Tiêu đề Open Graph" />
+                  <Input value={getField("ogDescription", l)} onChange={(e) => setField("ogDescription", l, e.target.value)} placeholder="Mô tả Open Graph" />
+                  <Input value={getField("ogImageUrl", l)} onChange={(e) => setField("ogImageUrl", l, e.target.value)} placeholder="URL ảnh Open Graph" />
                 </div>
               ))}
             </CardContent>

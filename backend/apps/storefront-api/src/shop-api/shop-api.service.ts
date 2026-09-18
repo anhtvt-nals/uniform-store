@@ -787,6 +787,12 @@ export class ShopApiService {
         product.sortDescription?.en ??
         '',
       detail: product.detail?.[locale] ?? product.detail?.en ?? '',
+      seoTitle: product.metaTitle?.[locale] ?? product.metaTitle?.en ?? product.name?.[locale] ?? product.name?.en ?? '',
+      seoDescription: product.metaDesc?.[locale] ?? product.metaDesc?.en ?? product.description?.[locale] ?? product.description?.en ?? '',
+      seoKeywords: product.focusKeyword?.[locale] ?? product.focusKeyword?.en ?? '',
+      ogTitle: product.ogTitle?.[locale] ?? product.ogTitle?.en ?? product.metaTitle?.[locale] ?? product.name?.[locale] ?? '',
+      ogDescription: product.ogDescription?.[locale] ?? product.ogDescription?.en ?? product.metaDesc?.[locale] ?? product.description?.[locale] ?? '',
+      ogImageUrl: product.ogImageUrl?.[locale] ?? product.ogImageUrl?.en ?? asset?.preview ?? '',
       slug: product.slug,
       assets: images,
       featuredAsset: asset,
@@ -1551,9 +1557,12 @@ export class ShopApiService {
       content: article.content?.[locale] ?? article.content?.en ?? '',
       createdAt: article.createdAt?.toISOString() ?? '',
       updatedAt: article.updatedAt?.toISOString() ?? '',
-      seoTitle: article.title?.[locale] ?? article.title?.en ?? '',
-      seoDescription: article.excerpt?.[locale] ?? article.excerpt?.en ?? '',
-      seoKeywords: '',
+      seoTitle: article.metaTitle?.[locale] ?? article.metaTitle?.en ?? article.title?.[locale] ?? article.title?.en ?? '',
+      seoDescription: article.metaDesc?.[locale] ?? article.metaDesc?.en ?? article.excerpt?.[locale] ?? article.excerpt?.en ?? '',
+      seoKeywords: article.focusKeyword?.[locale] ?? article.focusKeyword?.en ?? '',
+      ogTitle: article.ogTitle?.[locale] ?? article.ogTitle?.en ?? article.metaTitle?.[locale] ?? article.title?.[locale] ?? '',
+      ogDescription: article.ogDescription?.[locale] ?? article.ogDescription?.en ?? article.metaDesc?.[locale] ?? article.excerpt?.[locale] ?? '',
+      ogImageUrl: article.ogImageUrl?.[locale] ?? article.ogImageUrl?.en ?? article.imageUrl ?? '',
       assets: article.imageUrl
         ? [
             {

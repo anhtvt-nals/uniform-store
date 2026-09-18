@@ -86,12 +86,17 @@ export async function generateMetadata({
     };
   }
 
-  const description = truncateDescription(product.description);
+  const seo = product as typeof product & {
+    seoTitle?: string; seoDescription?: string; seoKeywords?: string;
+    ogTitle?: string; ogDescription?: string; ogImageUrl?: string;
+  };
+
+  const description = truncateDescription(seo.seoDescription || product.description);
   const fallbackDescription = t("shopProductAt", {
     name: product.name,
     siteName: SITE_NAME,
   });
-  const ogImage = product.assets?.[0]?.preview;
+  const ogImage = seo.ogImageUrl || product.assets?.[0]?.preview;
   const ogLocale = toOgLocale(locale);
   const productPath = `/product/${product.slug}`;
   const primaryCollection =
@@ -99,9 +104,9 @@ export async function generateMetadata({
     product.collections?.[0];
 
   return {
-    title: product.name,
+    title: seo.seoTitle || product.name,
     description: description || fallbackDescription,
-    keywords: getProductKeywords(product.name, primaryCollection?.name),
+    keywords: seo.seoKeywords ? [seo.seoKeywords] : getProductKeywords(product.name, primaryCollection?.name),
     category: primaryCollection?.name || "Đồng phục doanh nghiệp",
     authors: [{ name: SITE_NAME }],
     creator: SITE_NAME,
@@ -127,8 +132,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: product.name,
-      description: description || fallbackDescription,
+      title: seo.ogTitle || seo.seoTitle || product.name,
+      description: seo.ogDescription || description || fallbackDescription,
       type: "website",
       siteName: SITE_NAME,
       locale: ogLocale,
@@ -137,8 +142,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: product.name,
-      description: description || fallbackDescription,
+      title: seo.ogTitle || seo.seoTitle || product.name,
+      description: seo.ogDescription || description || fallbackDescription,
       images: ogImage ? [ogImage] : undefined,
     },
   };

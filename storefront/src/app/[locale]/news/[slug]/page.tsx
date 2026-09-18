@@ -45,7 +45,7 @@ export async function generateMetadata({
     160,
   );
   const keywords = article.seoKeywords ?? undefined;
-  const imageUrl = getArticleImageUrl(article);
+  const imageUrl = article.ogImageUrl || getArticleImageUrl(article);
 
   return {
     title,
@@ -61,8 +61,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: `${title} | ${SITE_NAME}`,
-      description,
+      title: article.ogTitle || title,
+      description: article.ogDescription || description,
       type: "article",
       locale: ogLocale,
       url: `${SITE_URL}/news/${slug}`,
@@ -72,8 +72,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: article.ogTitle || title,
+      description: article.ogDescription || description,
       images: imageUrl ? [imageUrl] : undefined,
     },
   };

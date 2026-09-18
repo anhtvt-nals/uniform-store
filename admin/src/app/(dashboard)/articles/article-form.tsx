@@ -69,6 +69,12 @@ export function ArticleForm({
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [focusKeyword, setFocusKeyword] = useState("");
+  const [ogTitle, setOgTitle] = useState("");
+  const [ogDescription, setOgDescription] = useState("");
+  const [ogImageUrl, setOgImageUrl] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [assetPickerOpen, setAssetPickerOpen] = useState(false);
@@ -97,6 +103,12 @@ export function ArticleForm({
         .join(", "),
     );
     setImageUrl((source.imageUrl as string) ?? "");
+    setMetaTitle((source.metaTitle as Record<string, string> | undefined)?.vi ?? "");
+    setMetaDesc((source.metaDesc as Record<string, string> | undefined)?.vi ?? "");
+    setFocusKeyword((source.focusKeyword as Record<string, string> | undefined)?.vi ?? "");
+    setOgTitle((source.ogTitle as Record<string, string> | undefined)?.vi ?? "");
+    setOgDescription((source.ogDescription as Record<string, string> | undefined)?.vi ?? "");
+    setOgImageUrl((source.ogImageUrl as Record<string, string> | undefined)?.vi ?? "");
     setIsPublished(Boolean(source.isPublished));
     slugEdited.current = Boolean(source.slug);
   }, [defaultValues]);
@@ -136,6 +148,12 @@ export function ArticleForm({
       ],
       imageUrl,
       isPublished,
+      ...(metaTitle && { metaTitle: { vi: metaTitle } }),
+      ...(metaDesc && { metaDesc: { vi: metaDesc } }),
+      ...(focusKeyword && { focusKeyword: { vi: focusKeyword } }),
+      ...(ogTitle && { ogTitle: { vi: ogTitle } }),
+      ...(ogDescription && { ogDescription: { vi: ogDescription } }),
+      ...(ogImageUrl && { ogImageUrl: { vi: ogImageUrl } }),
     });
   }
 
@@ -195,6 +213,17 @@ export function ArticleForm({
                     Nhập các thẻ, cách nhau bằng dấu phẩy.
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="space-y-3 pt-6">
+                <h3 className="text-sm font-medium">SEO (không bắt buộc)</h3>
+                <Input value={metaTitle} onChange={(event) => setMetaTitle(event.target.value)} placeholder="Tiêu đề SEO" />
+                <Input value={metaDesc} onChange={(event) => setMetaDesc(event.target.value)} placeholder="Mô tả SEO" />
+                <Input value={focusKeyword} onChange={(event) => setFocusKeyword(event.target.value)} placeholder="Từ khóa chính" />
+                <Input value={ogTitle} onChange={(event) => setOgTitle(event.target.value)} placeholder="Tiêu đề Open Graph" />
+                <Input value={ogDescription} onChange={(event) => setOgDescription(event.target.value)} placeholder="Mô tả Open Graph" />
+                <Input value={ogImageUrl} onChange={(event) => setOgImageUrl(event.target.value)} placeholder="URL ảnh Open Graph" />
               </CardContent>
             </Card>
             <Card>

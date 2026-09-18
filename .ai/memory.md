@@ -205,6 +205,11 @@ backend/
 
 ## Recent Changes
 
+### Per-record Content SEO (2026-09-18)
+
+- Articles now persist localized meta title/description, focus keyword, and Open Graph title/description/image fields; products add the missing localized focus keyword and Open Graph fields while retaining their existing meta title/description.
+- The existing admin forms edit those optional values, and the storefront detail mappings use them with title, description/excerpt, and primary-image fallbacks for Next metadata, Open Graph, and Twitter cards.
+
 ### Site-wide SEO Settings (2026-09-10)
 
 - Added migration `045_add_seo_settings.sql` with public settings for website title, homepage SEO title/description, keywords, and an Open Graph share image.
