@@ -572,11 +572,21 @@ export function ProductForm({
                           ],
                           image: {
                             toolbar: [
+                              "toggleImageCaption",
                               "imageTextAlternative",
                               "imageStyle:inline",
                               "imageStyle:block",
                               "imageStyle:side",
                             ],
+                          },
+                          link: {
+                            decorators: {
+                              openInNewTab: {
+                                mode: "manual",
+                                label: "Mở liên kết trong tab mới",
+                                attributes: { target: "_blank", rel: "noopener noreferrer" },
+                              },
+                            },
                           },
                           extraPlugins: [MyCustomUploadAdapterPlugin],
                         }}
