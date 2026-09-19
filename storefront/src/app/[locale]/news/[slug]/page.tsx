@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import {
   SITE_NAME,
   SITE_URL,
+  buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
   buildCanonicalUrl,
+  buildOrganizationJsonLd,
+  serializeJsonLd,
   truncateDescription,
 } from "@/lib/metadata";
 import { getTranslations } from "next-intl/server";
@@ -99,6 +103,13 @@ export default async function NewsDetailPage({
   const shareTitle = encodeURIComponent(article.title);
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
   const xHref = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`;
+  const articleJsonLd = buildArticleJsonLd({ title: article.title, description: article.excerpt, url: articleUrl, publishedAt: article.publishedAt, imageUrl, author: article.author });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: t("home"), url: buildCanonicalUrl(`/${locale}`) },
+    { name: t("relatedNews"), url: buildCanonicalUrl(`/${locale}/news`) },
+    { name: article.title, url: articleUrl },
+  ]);
+  const organizationJsonLd = buildOrganizationJsonLd();
 
   const { items: relatedItems } = await getArticles({ take: 4 }, locale);
   const related = relatedItems
@@ -107,6 +118,9 @@ export default async function NewsDetailPage({
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }} />
       <ReadingProgress />
 
       <main className="min-h-screen">

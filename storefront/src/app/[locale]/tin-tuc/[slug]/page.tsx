@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE_NAME, SITE_URL, buildCanonicalUrl } from "@/lib/metadata";
+import {
+  SITE_NAME,
+  SITE_URL,
+  buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildOrganizationJsonLd,
+  serializeJsonLd,
+} from "@/lib/metadata";
 import { getTranslations } from "next-intl/server";
 import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
@@ -85,9 +93,19 @@ async function NewsDetailInner({
   const shareTitle = encodeURIComponent(item.title);
   const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
   const xHref = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`;
+  const articleJsonLd = buildArticleJsonLd({ title: item.title, description: item.excerpt, url: articleUrl, publishedAt: item.publishedAt, imageUrl, author: item.author });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: t("home"), url: buildCanonicalUrl(`/${locale}`) },
+    { name: t("relatedNews"), url: buildCanonicalUrl(`/${locale}/tin-tuc`) },
+    { name: item.title, url: articleUrl },
+  ]);
+  const organizationJsonLd = buildOrganizationJsonLd();
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }} />
       <article>
         {/* ── Hero ── */}
         <section className="relative w-full h-[55vh] min-h-[420px] max-h-[620px] overflow-hidden bg-muted">
