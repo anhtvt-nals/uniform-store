@@ -674,9 +674,10 @@ export class ShopApiService {
 
     try {
       const product = await this.productsService.findBySlug(slug);
+      const relatedArticles = await this.productsService.findRelatedArticles(slug);
       return {
         data: {
-          product: this.mapProductDetail(product, locale),
+          product: this.mapProductDetail(product, locale, relatedArticles),
         },
       };
     } catch (e: any) {
@@ -721,7 +722,11 @@ export class ShopApiService {
     };
   }
 
-  private mapProductDetail(product: any, locale: string): Record<string, unknown> {
+  private mapProductDetail(
+    product: any,
+    locale: string,
+    relatedArticles: any[] = [],
+  ): Record<string, unknown> {
     const images = (product.images ?? []).map((img: any) => ({
       id: img.id,
       preview: img.url ?? img.preview,
@@ -799,6 +804,7 @@ export class ShopApiService {
       variants,
       optionGroups,
       collections,
+      relatedArticles: relatedArticles.map((article) => this.mapArticleCard(article, locale)),
     };
   }
 

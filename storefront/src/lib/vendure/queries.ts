@@ -392,6 +392,17 @@ export const GetCustomerOrdersQuery = graphql(`
                     }
                 }
             }
+            relatedArticles {
+                id
+                slug
+                title
+                excerpt
+                publishedAt
+                featuredAsset {
+                    id
+                    preview
+                }
+            }
         }
     }
 `);

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ArticleCategoryEntity } from './article-category.entity';
 import { ArticleTagEntity } from './article-tag.entity';
+import { ProductEntity } from './product.entity';
 
 @Entity('articles')
 export class ArticleEntity {
@@ -85,4 +86,7 @@ export class ArticleEntity {
     inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags: ArticleTagEntity[];
+
+  @ManyToMany(() => ProductEntity, (product) => product.relatedArticles)
+  relatedProducts?: ProductEntity[];
 }

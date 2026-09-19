@@ -8,6 +8,7 @@ import {
   ProductVariantEntity,
   DiscountEntity,
   ProductSizeEntity,
+  ArticleEntity,
 } from '@app/database';
 import { NotFoundException } from '@nestjs/common';
 
@@ -27,6 +28,7 @@ const mockImageRepo = { find: jest.fn().mockResolvedValue([]) };
 const mockVariantRepo = { createQueryBuilder: jest.fn() };
 const mockDiscountRepo = { find: jest.fn().mockResolvedValue([]) };
 const mockProductSizeRepo = { find: jest.fn().mockResolvedValue([]) };
+const mockArticleRepo = { find: jest.fn() };
 
 function mockQb(overrides: any = {}) {
   const qb: any = {
@@ -59,6 +61,7 @@ describe('ProductsService (storefront)', () => {
         { provide: getRepositoryToken(ProductVariantEntity), useValue: mockVariantRepo },
         { provide: getRepositoryToken(DiscountEntity), useValue: mockDiscountRepo },
         { provide: getRepositoryToken(ProductSizeEntity), useValue: mockProductSizeRepo },
+        { provide: getRepositoryToken(ArticleEntity), useValue: mockArticleRepo },
       ],
     }).compile();
 
@@ -186,6 +189,22 @@ describe('ProductsService (storefront)', () => {
       await expect(service.findBySlug('nonexistent')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('findRelatedArticles', () => {
+    it('returns only published, non-deleted selected articles', async () => {
+      mockProductRepo.findOne.mockResolvedValue({
+        id: 'p-1',
+        relatedArticles: [{ id: 'a-published' }, { id: 'a-draft' }, { id: 'a-deleted' }],
+      });
+      mockArticleRepo.find.mockResolvedValue([
+        { id: 'a-published', slug: 'published-article', isPublished: true, deletedAt: null },
+      ]);
+
+      await expect(service.findRelatedArticles('uniform-shirt')).resolves.toEqual([
+        expect.objectContaining({ slug: 'published-article' }),
+      ]);
     });
   });
 

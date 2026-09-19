@@ -8,6 +8,7 @@ import {
   ProductVariantEntity,
   DiscountEntity,
   ProductSizeEntity,
+  ArticleEntity,
 } from '@app/database';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { PriceEstimateQueryDto } from './dto/price-estimate-query.dto';
@@ -27,6 +28,8 @@ export class ProductsService {
     private readonly discountRepo: Repository<DiscountEntity>,
     @InjectRepository(ProductSizeEntity)
     private readonly productSizeRepo: Repository<ProductSizeEntity>,
+    @InjectRepository(ArticleEntity)
+    private readonly articleRepo: Repository<ArticleEntity>,
   ) {}
 
   async estimatePrice({ categorySlug, quantity }: PriceEstimateQueryDto) {
@@ -329,6 +332,24 @@ export class ProductsService {
     });
 
     return related;
+  }
+
+  async findRelatedArticles(slug: string) {
+    const product = await this.productRepo.findOne({
+      where: { slug, isActive: true },
+      relations: ['relatedArticles'],
+    });
+    if (!product) {
+      throw new NotFoundException(`Product not found: ${slug}`);
+    }
+
+    const articleIds = product.relatedArticles?.map((article) => article.id) ?? [];
+    if (!articleIds.length) return [];
+
+    return this.articleRepo.find({
+      where: { id: In(articleIds), isPublished: true, deletedAt: IsNull() },
+      order: { publishedAt: 'DESC' },
+    });
   }
 
   async findFeatured(limit = 8) {

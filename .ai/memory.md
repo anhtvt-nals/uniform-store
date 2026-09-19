@@ -770,6 +770,11 @@ git push → main
 
 - Homepage, search and category lists use `sold_count DESC` as their default order, with `display_order` and `created_at` as stable tie-breakers. Manual sort choices still override this default.
 
+### Product Related Articles (2026-09-18)
+
+- Migration `050_add_product_related_articles.sql` adds `product_article_map`, a selection-only many-to-many relation between products and articles. Admin product create/edit uses the existing article list API and a native multi-select; unknown article IDs are rejected.
+- Product detail GraphQL includes only selected articles that are published and not deleted, then renders their cards before related products. There is no ranking, ordering, or automatic recommendation.
+
 ### Product Detail Visual System (2026-09-06)
 
 - Product Detail now uses the standard Inter B2B visual system rather than the decorative category font: a 36–40px product title, compact price hierarchy, muted breadcrumb/body copy, restrained navy/blue/gold palette, and a responsive two-column grid with a 56–64px desktop gap.
