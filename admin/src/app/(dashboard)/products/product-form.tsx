@@ -26,6 +26,7 @@ const DEFAULT_LOCALE = "vi";
 
 type Category = { id: string; name: Record<string, string>; slug: string };
 type Brand = { id: string; name: Record<string, string>; slug: string };
+type Article = { id: string; title: Record<string, string>; slug: string };
 type Image = { id: string; url: string; sortOrder: number };
 type Size = {
   id: string;
@@ -183,6 +184,15 @@ export function ProductForm({
     queryFn: () => apiClient<Size[]>("/sizes", { token }),
     select: (res) => (res.data || []).filter((size) => size.isActive),
   });
+  const { data: articles = [] } = useQuery({
+    queryKey: ["articles", "product-form"],
+    queryFn: () =>
+      apiClient<{ items: Article[] }>("/articles", {
+        params: { limit: 100 },
+        token,
+      }),
+    select: (res) => res.data?.items || [],
+  });
 
   const [name, setName] = useState<Record<string, string>>({});
   const [slug, setSlug] = useState("");
@@ -200,6 +210,7 @@ export function ProductForm({
   const [metaDesc, setMetaDesc] = useState<Record<string, string>>({});
   const [sizeIds, setSizeIds] = useState<string[]>([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
+  const [relatedArticleIds, setRelatedArticleIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [showEditor, setShowEditor] = useState(false);
@@ -252,6 +263,11 @@ export function ProductForm({
         ),
       );
       setSizeGuideImageUrl((defaultValues.sizeGuideImageUrl as string) || "");
+      setRelatedArticleIds(
+        ((defaultValues.relatedArticles as Article[] | undefined) || []).map(
+          (article) => article.id,
+        ),
+      );
     }
   }, [defaultValues]);
 
@@ -337,6 +353,7 @@ export function ProductForm({
       isContactPrice,
       sizeIds,
       sizeGuideImageUrl,
+      relatedArticleIds,
     };
     if (brandId) data.brandId = brandId;
     if (Object.keys(description).length > 0) data.description = description;
@@ -700,6 +717,33 @@ export function ProductForm({
                   />
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div>
+                <h3 className="text-sm font-medium">Tin tức liên quan</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Đã chọn {relatedArticleIds.length} bài viết để hiển thị cùng sản phẩm.
+                </p>
+              </div>
+              <select
+                multiple
+                value={relatedArticleIds}
+                onChange={(event) =>
+                  setRelatedArticleIds(
+                    Array.from(event.currentTarget.selectedOptions, (option) => option.value),
+                  )
+                }
+                className="min-h-40 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                {(articles as Article[]).map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title.vi || article.title.en || article.slug} — {article.slug}
+                  </option>
+                ))}
+              </select>
             </CardContent>
           </Card>
         </div>

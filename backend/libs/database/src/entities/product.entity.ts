@@ -8,12 +8,15 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 import { BrandEntity } from './brand.entity';
 import { ProductVariantEntity } from './product-variant.entity';
 import { ProductImageEntity } from './product-image.entity';
 import { ProductOptionGroupEntity } from './product-option-group.entity';
+import { ArticleEntity } from './article.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -102,4 +105,12 @@ export class ProductEntity {
 
   @OneToMany(() => ProductOptionGroupEntity, (g) => g.product)
   optionGroups?: ProductOptionGroupEntity[];
+
+  @ManyToMany(() => ArticleEntity, (article) => article.relatedProducts)
+  @JoinTable({
+    name: 'product_article_map',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'article_id', referencedColumnName: 'id' },
+  })
+  relatedArticles?: ArticleEntity[];
 }

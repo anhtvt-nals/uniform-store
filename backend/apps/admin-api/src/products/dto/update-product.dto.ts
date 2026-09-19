@@ -96,6 +96,11 @@ export class UpdateProductDto {
   sizeIds?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  relatedArticleIds?: string[];
+
+  @IsOptional()
   @IsString()
   sizeGuideImageUrl?: string;
 }

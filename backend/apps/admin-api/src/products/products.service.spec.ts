@@ -10,6 +10,7 @@ import {
   ProductVariantOptionEntity,
   InventoryEntity,
   ProductSizeEntity,
+  ArticleEntity,
 } from '@app/database';
 import {
   BadRequestException,
@@ -33,6 +34,7 @@ describe('ProductsService (admin)', () => {
   let mockVariantOptionRepo: ReturnType<typeof createMockRepo>;
   let mockInventoryRepo: ReturnType<typeof createMockRepo>;
   let mockProductSizeRepo: ReturnType<typeof createMockRepo>;
+  let mockArticleRepo: ReturnType<typeof createMockRepo>;
 
   beforeEach(async () => {
     mockProductRepo = createMockRepo(['findAndCount', 'findOne', 'create', 'save', 'softRemove', 'restore']);
@@ -43,6 +45,7 @@ describe('ProductsService (admin)', () => {
     mockVariantOptionRepo = createMockRepo(['find', 'findOne', 'create', 'save', 'delete']);
     mockInventoryRepo = createMockRepo(['findOne', 'create', 'save', 'delete']);
     mockProductSizeRepo = createMockRepo(['find', 'create', 'save', 'delete']);
+    mockArticleRepo = createMockRepo(['findBy']);
     mockProductSizeRepo.find.mockResolvedValue([]);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +60,7 @@ describe('ProductsService (admin)', () => {
         { provide: getRepositoryToken(ProductVariantOptionEntity), useValue: mockVariantOptionRepo },
         { provide: getRepositoryToken(InventoryEntity), useValue: mockInventoryRepo },
         { provide: getRepositoryToken(ProductSizeEntity), useValue: mockProductSizeRepo },
+        { provide: getRepositoryToken(ArticleEntity), useValue: mockArticleRepo },
       ],
     }).compile();
 
@@ -105,6 +109,37 @@ describe('ProductsService (admin)', () => {
       });
 
       expect(result.slug).toMatch(/^ao-polo-[a-f0-9]{8}$/);
+    });
+  });
+
+  describe('related articles', () => {
+    it('replaces a product related article selection', async () => {
+      mockProductRepo.findOne.mockResolvedValue({ id: 'p-1', slug: 'uniform-shirt' });
+      mockArticleRepo.findBy.mockResolvedValue([{ id: 'a-1' }, { id: 'a-2' }]);
+      mockProductRepo.save.mockImplementation(async (product) => product);
+
+      const result = await service.update('p-1', {
+        relatedArticleIds: [
+          '11111111-1111-4111-8111-111111111111',
+          '22222222-2222-4222-8222-222222222222',
+        ],
+      });
+
+      expect(result.relatedArticles).toEqual([{ id: 'a-1' }, { id: 'a-2' }]);
+    });
+
+    it('rejects a related article selection containing an unknown ID', async () => {
+      mockProductRepo.findOne.mockResolvedValue({ id: 'p-1', slug: 'uniform-shirt' });
+      mockArticleRepo.findBy.mockResolvedValue([{ id: 'a-1' }]);
+
+      await expect(
+        service.update('p-1', {
+          relatedArticleIds: [
+            '11111111-1111-4111-8111-111111111111',
+            '22222222-2222-4222-8222-222222222222',
+          ],
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

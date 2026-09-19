@@ -17,6 +17,7 @@ import {
   ProductVariantOptionEntity,
   InventoryEntity,
   ProductSizeEntity,
+  ArticleEntity,
 } from '@app/database';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -50,6 +51,8 @@ export class ProductsService {
     private readonly inventoryRepo: Repository<InventoryEntity>,
     @InjectRepository(ProductSizeEntity)
     private readonly productSizeRepo: Repository<ProductSizeEntity>,
+    @InjectRepository(ArticleEntity)
+    private readonly articleRepo: Repository<ArticleEntity>,
   ) {}
 
   async findAll(query: ProductQueryDto) {
@@ -113,6 +116,7 @@ export class ProductsService {
         'images',
         'optionGroups',
         'optionGroups.options',
+        'relatedArticles',
       ],
     });
 
@@ -130,6 +134,7 @@ export class ProductsService {
 
   async create(dto: CreateProductDto) {
     const slug = await this.resolveUniqueSlug(dto.slug);
+    const relatedArticles = await this.getRelatedArticles(dto.relatedArticleIds);
 
     const product = this.productRepo.create({
       name: dto.name,
@@ -151,6 +156,7 @@ export class ProductsService {
       metaTitle: dto.metaTitle ?? {},
       metaDesc: dto.metaDesc ?? {},
       sizeGuideImageUrl: dto.sizeGuideImageUrl ?? '',
+      relatedArticles,
     });
 
     const saved = await this.productRepo.save(product);
@@ -187,6 +193,9 @@ export class ProductsService {
     if (dto.detail !== undefined) product.detail = dto.detail;
     if (dto.metaDesc !== undefined) product.metaDesc = dto.metaDesc;
     if (dto.sizeGuideImageUrl !== undefined) product.sizeGuideImageUrl = dto.sizeGuideImageUrl;
+    if (dto.relatedArticleIds !== undefined) {
+      product.relatedArticles = await this.getRelatedArticles(dto.relatedArticleIds);
+    }
 
     const saved = await this.productRepo.save(product);
     if (dto.sizeIds !== undefined) await this.replaceSizes(saved.id, dto.sizeIds);
@@ -331,6 +340,16 @@ export class ProductsService {
       await this.productSizeRepo.save(
         sizeIds.map((sizeId) => this.productSizeRepo.create({ productId, sizeId })),
       );
+  }
+
+  private async getRelatedArticles(articleIds: string[] | undefined) {
+    if (articleIds === undefined) return undefined;
+    const ids = [...new Set(articleIds)];
+    const articles = ids.length ? await this.articleRepo.findBy({ id: In(ids) }) : [];
+    if (articles.length !== ids.length) {
+      throw new BadRequestException('One or more related article IDs are invalid');
+    }
+    return articles;
   }
 
   private async resolveUniqueSlug(
