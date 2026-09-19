@@ -8,12 +8,15 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 import { BrandEntity } from './brand.entity';
 import { ProductVariantEntity } from './product-variant.entity';
 import { ProductImageEntity } from './product-image.entity';
 import { ProductOptionGroupEntity } from './product-option-group.entity';
+import { ArticleEntity } from './article.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -74,6 +77,18 @@ export class ProductEntity {
   @Column({ name: 'meta_desc', type: 'jsonb', default: {} })
   metaDesc: Record<string, string>;
 
+  @Column({ name: 'focus_keyword', type: 'jsonb', default: {} })
+  focusKeyword: Record<string, string>;
+
+  @Column({ name: 'og_title', type: 'jsonb', default: {} })
+  ogTitle: Record<string, string>;
+
+  @Column({ name: 'og_description', type: 'jsonb', default: {} })
+  ogDescription: Record<string, string>;
+
+  @Column({ name: 'og_image_url', type: 'jsonb', default: {} })
+  ogImageUrl: Record<string, string>;
+
   @Column({ name: 'size_guide_image_url', type: 'text', default: '' })
   sizeGuideImageUrl: string;
 
@@ -102,4 +117,12 @@ export class ProductEntity {
 
   @OneToMany(() => ProductOptionGroupEntity, (g) => g.product)
   optionGroups?: ProductOptionGroupEntity[];
+
+  @ManyToMany(() => ArticleEntity, (article) => article.relatedProducts)
+  @JoinTable({
+    name: 'product_article_map',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'article_id', referencedColumnName: 'id' },
+  })
+  relatedArticles?: ArticleEntity[];
 }

@@ -42,6 +42,9 @@ export type ArticleDetail = ArticleCard & {
     seoTitle: string | null;
     seoDescription: string | null;
     seoKeywords: string | null;
+    ogTitle: string | null;
+    ogDescription: string | null;
+    ogImageUrl: string | null;
     assets: Array<{
         id: string;
         preview: string;

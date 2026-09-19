@@ -125,6 +125,12 @@ export const GetProductDetailQuery = graphql(`
             description
             sortDescription
             detail
+            seoTitle
+            seoDescription
+            seoKeywords
+            ogTitle
+            ogDescription
+            ogImageUrl
             slug
             assets {
                 id
@@ -384,6 +390,17 @@ export const GetCustomerOrdersQuery = graphql(`
                             }
                         }
                     }
+                }
+            }
+            relatedArticles {
+                id
+                slug
+                title
+                excerpt
+                publishedAt
+                featuredAsset {
+                    id
+                    preview
                 }
             }
         }

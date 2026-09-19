@@ -63,6 +63,9 @@ export const ArticleDetailFragment = graphql(`
         seoTitle
         seoDescription
         seoKeywords
+        ogTitle
+        ogDescription
+        ogImageUrl
         featuredAsset {
             id
             preview

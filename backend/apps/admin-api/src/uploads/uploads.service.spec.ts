@@ -3,7 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UploadsService } from './uploads.service';
 import { StorageService } from '@app/shared';
 import {
+  AssetEntity,
   ProductImageEntity,
+  ProductEntity,
   CategoryEntity,
   BrandEntity,
 } from '@app/database';
@@ -24,7 +26,9 @@ function createMockRepo(methods: string[]) {
 describe('UploadsService', () => {
   let service: UploadsService;
   let mockStorageService: Record<string, jest.Mock>;
+  let mockAssetRepo: ReturnType<typeof createMockRepo>;
   let mockProductImageRepo: ReturnType<typeof createMockRepo>;
+  let mockProductRepo: ReturnType<typeof createMockRepo>;
   let mockCategoryRepo: ReturnType<typeof createMockRepo>;
   let mockBrandRepo: ReturnType<typeof createMockRepo>;
 
@@ -34,9 +38,11 @@ describe('UploadsService', () => {
       buildPublicUrl: jest.fn(),
       delete: jest.fn(),
     };
+    mockAssetRepo = createMockRepo(['create', 'save', 'findOne', 'findAndCount', 'softRemove']);
     mockProductImageRepo = createMockRepo([
       'create', 'save', 'findOne', 'softRemove',
     ]);
+    mockProductRepo = createMockRepo([]);
     mockCategoryRepo = createMockRepo(['findOne', 'save']);
     mockBrandRepo = createMockRepo(['findOne', 'save']);
 
@@ -44,13 +50,38 @@ describe('UploadsService', () => {
       providers: [
         UploadsService,
         { provide: StorageService, useValue: mockStorageService },
+        { provide: getRepositoryToken(AssetEntity), useValue: mockAssetRepo },
         { provide: getRepositoryToken(ProductImageEntity), useValue: mockProductImageRepo },
+        { provide: getRepositoryToken(ProductEntity), useValue: mockProductRepo },
         { provide: getRepositoryToken(CategoryEntity), useValue: mockCategoryRepo },
         { provide: getRepositoryToken(BrandEntity), useValue: mockBrandRepo },
       ],
     }).compile();
 
     service = module.get<UploadsService>(UploadsService);
+  });
+
+  describe('updateAsset', () => {
+    it('persists supplied library metadata only', async () => {
+      mockAssetRepo.findOne.mockResolvedValue({ id: 'a1', alt: {} });
+      mockAssetRepo.save.mockImplementation(async (asset) => asset);
+
+      await expect(
+        service.updateAsset('a1', {
+          caption: { vi: 'Chú thích' },
+          linkUrl: '/news/x',
+        }),
+      ).resolves.toMatchObject({
+        caption: { vi: 'Chú thích' },
+        linkUrl: '/news/x',
+      });
+    });
+
+    it('rejects an unknown asset', async () => {
+      mockAssetRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.updateAsset('missing', {})).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe('getSignedUploadUrl', () => {
@@ -130,7 +161,7 @@ describe('UploadsService', () => {
         alt: { en: 'Product image' },
       });
 
-      expect(result.url).toBe('https://cdn.example.com/products/p-1/img.jpg');
+      expect(result.url).toBe('products/p-1/img.jpg');
       expect(mockProductImageRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           productId: 'p-1',
@@ -172,10 +203,10 @@ describe('UploadsService', () => {
         entityId: 'c-1',
       });
 
-      expect(result.url).toBe('https://cdn.example.com/categories/c-1/cat.jpg');
+      expect(result.url).toBe('categories/c-1/cat.jpg');
       expect(mockCategoryRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          imageUrl: 'https://cdn.example.com/categories/c-1/cat.jpg',
+          imageUrl: 'categories/c-1/cat.jpg',
         }),
       );
     });
@@ -196,10 +227,10 @@ describe('UploadsService', () => {
         entityId: 'b-1',
       });
 
-      expect(result.url).toBe('https://cdn.example.com/brands/b-1/logo.png');
+      expect(result.url).toBe('brands/b-1/logo.png');
       expect(mockBrandRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          logoUrl: 'https://cdn.example.com/brands/b-1/logo.png',
+          logoUrl: 'brands/b-1/logo.png',
         }),
       );
     });
@@ -249,7 +280,7 @@ describe('UploadsService', () => {
 
       expect(mockStorageService.delete).toHaveBeenCalledWith('', 'products/p-1/img.jpg');
       expect(mockProductImageRepo.findOne).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { url: 'public-url' } }),
+        expect.objectContaining({ where: { url: 'products/p-1/img.jpg' } }),
       );
       expect(result.message).toContain('deleted');
     });
@@ -259,7 +290,7 @@ describe('UploadsService', () => {
       mockStorageService.buildPublicUrl.mockReturnValue('public-url');
       mockCategoryRepo.findOne.mockResolvedValue({
         id: 'c-1',
-        imageUrl: 'public-url',
+        imageUrl: 'categories/c-1/img.jpg',
       });
       mockCategoryRepo.save.mockResolvedValue({});
 
@@ -280,7 +311,7 @@ describe('UploadsService', () => {
       mockStorageService.buildPublicUrl.mockReturnValue('public-url');
       mockBrandRepo.findOne.mockResolvedValue({
         id: 'b-1',
-        logoUrl: 'public-url',
+        logoUrl: 'brands/b-1/logo.png',
       });
       mockBrandRepo.save.mockResolvedValue({});
 

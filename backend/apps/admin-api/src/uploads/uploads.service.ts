@@ -20,6 +20,7 @@ import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 import { DeleteFileDto } from './dto/delete-file.dto';
 import { ListAssetsDto } from './dto/list-assets.dto';
 import { UploadOptions } from './dto/upload-options.dto';
+import { UpdateAssetDto } from './dto/update-asset.dto';
 import {
   AbortMultipartUploadDto,
   CompleteMultipartUploadDto,
@@ -236,6 +237,9 @@ export class UploadsService {
       url: asset.url,
       key: asset.key,
       alt: asset.alt,
+      caption: asset.caption,
+      title: asset.title,
+      linkUrl: asset.linkUrl,
       filename: asset.filename,
       mimeType: asset.mimeType,
       size: asset.size,
@@ -255,6 +259,9 @@ export class UploadsService {
       url: asset.url,
       key: asset.key,
       alt: asset.alt,
+      caption: asset.caption,
+      title: asset.title,
+      linkUrl: asset.linkUrl,
       filename: asset.filename,
       mimeType: asset.mimeType,
       size: asset.size,
@@ -273,6 +280,17 @@ export class UploadsService {
       size: file.buffer.length,
       ...options,
     });
+  }
+
+  async updateAsset(id: string, dto: UpdateAssetDto) {
+    const asset = await this.assetRepo.findOne({ where: { id } });
+    if (!asset) throw new NotFoundException('Asset not found');
+
+    if (dto.alt !== undefined) asset.alt = dto.alt;
+    if (dto.caption !== undefined) asset.caption = dto.caption;
+    if (dto.title !== undefined) asset.title = dto.title;
+    if (dto.linkUrl !== undefined) asset.linkUrl = dto.linkUrl;
+    return this.assetRepo.save(asset);
   }
 
   private validateImage(filename: string, contentType: string) {
@@ -305,6 +323,9 @@ export class UploadsService {
       mimeType: mimetype,
       size,
       alt: alt ?? {},
+      caption: {},
+      title: {},
+      linkUrl: '',
     });
     await this.assetRepo.save(asset);
 

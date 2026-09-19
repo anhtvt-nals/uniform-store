@@ -205,6 +205,16 @@ backend/
 
 ## Recent Changes
 
+### Asset Library Metadata (2026-09-19)
+
+- Assets now store localized alt text, caption, and title plus an optional link URL; Admin can edit these values in the existing uploads library.
+- AssetPicker returns metadata to article/product editors, which snapshot it into inserted HTML so subsequent library edits never rewrite saved content.
+
+### Per-record Content SEO (2026-09-18)
+
+- Articles now persist localized meta title/description, focus keyword, and Open Graph title/description/image fields; products add the missing localized focus keyword and Open Graph fields while retaining their existing meta title/description.
+- The existing admin forms edit those optional values, and the storefront detail mappings use them with title, description/excerpt, and primary-image fallbacks for Next metadata, Open Graph, and Twitter cards.
+
 ### Site-wide SEO Settings (2026-09-10)
 
 - Added migration `045_add_seo_settings.sql` with public settings for website title, homepage SEO title/description, keywords, and an Open Graph share image.
@@ -759,6 +769,11 @@ git push → main
 ### Storefront Product Listing Priority (2026-09-06)
 
 - Homepage, search and category lists use `sold_count DESC` as their default order, with `display_order` and `created_at` as stable tie-breakers. Manual sort choices still override this default.
+
+### Product Related Articles (2026-09-18)
+
+- Migration `050_add_product_related_articles.sql` adds `product_article_map`, a selection-only many-to-many relation between products and articles. Admin product create/edit uses the existing article list API and a native multi-select; unknown article IDs are rejected.
+- Product detail GraphQL includes only selected articles that are published and not deleted, then renders their cards before related products. There is no ranking, ordering, or automatic recommendation.
 
 ### Product Detail Visual System (2026-09-06)
 

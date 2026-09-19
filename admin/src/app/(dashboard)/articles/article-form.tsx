@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { AssetPicker } from "@/components/shared/asset-picker";
+import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 
 const CKEditor = dynamic(
@@ -41,6 +41,17 @@ function MyCustomUploadAdapterPlugin(editor: any) {
   });
 }
 
+function snapshotAsset(asset: Asset) {
+  const escape = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!);
+  const alt = asset.alt?.vi ?? "";
+  const title = asset.title?.vi ?? "";
+  const caption = asset.caption?.vi ?? "";
+  const image = `<img src="${escape(asset.url)}" alt="${escape(alt)}"${title ? ` title="${escape(title)}"` : ""}>`;
+  const figure = caption ? `<figure>${image}<figcaption>${escape(caption)}</figcaption></figure>` : image;
+  const link = asset.linkUrl?.trim() ?? "";
+  return /^(javascript|data):/i.test(link) ? figure : link ? `<a href="${escape(link)}">${figure}</a>` : figure;
+}
+
 function slugify(value: string): string {
   return value
     .normalize("NFD")
@@ -62,6 +73,7 @@ export function ArticleForm({
 }: ArticleFormProps) {
   const slugEdited = useRef(false);
   const editorRef = useRef<any>(null);
+  const contentEditorRef = useRef<any>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -69,9 +81,16 @@ export function ArticleForm({
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [focusKeyword, setFocusKeyword] = useState("");
+  const [ogTitle, setOgTitle] = useState("");
+  const [ogDescription, setOgDescription] = useState("");
+  const [ogImageUrl, setOgImageUrl] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [assetPickerOpen, setAssetPickerOpen] = useState(false);
+  const [contentAssetPickerOpen, setContentAssetPickerOpen] = useState(false);
 
   useEffect(() => {
     import("@ckeditor/ckeditor5-build-classic").then((mod) => {
@@ -97,6 +116,12 @@ export function ArticleForm({
         .join(", "),
     );
     setImageUrl((source.imageUrl as string) ?? "");
+    setMetaTitle((source.metaTitle as Record<string, string> | undefined)?.vi ?? "");
+    setMetaDesc((source.metaDesc as Record<string, string> | undefined)?.vi ?? "");
+    setFocusKeyword((source.focusKeyword as Record<string, string> | undefined)?.vi ?? "");
+    setOgTitle((source.ogTitle as Record<string, string> | undefined)?.vi ?? "");
+    setOgDescription((source.ogDescription as Record<string, string> | undefined)?.vi ?? "");
+    setOgImageUrl((source.ogImageUrl as Record<string, string> | undefined)?.vi ?? "");
     setIsPublished(Boolean(source.isPublished));
     slugEdited.current = Boolean(source.slug);
   }, [defaultValues]);
@@ -136,6 +161,12 @@ export function ArticleForm({
       ],
       imageUrl,
       isPublished,
+      ...(metaTitle && { metaTitle: { vi: metaTitle } }),
+      ...(metaDesc && { metaDesc: { vi: metaDesc } }),
+      ...(focusKeyword && { focusKeyword: { vi: focusKeyword } }),
+      ...(ogTitle && { ogTitle: { vi: ogTitle } }),
+      ...(ogDescription && { ogDescription: { vi: ogDescription } }),
+      ...(ogImageUrl && { ogImageUrl: { vi: ogImageUrl } }),
     });
   }
 
@@ -198,6 +229,17 @@ export function ArticleForm({
               </CardContent>
             </Card>
             <Card>
+              <CardContent className="space-y-3 pt-6">
+                <h3 className="text-sm font-medium">SEO (không bắt buộc)</h3>
+                <Input value={metaTitle} onChange={(event) => setMetaTitle(event.target.value)} placeholder="Tiêu đề SEO" />
+                <Input value={metaDesc} onChange={(event) => setMetaDesc(event.target.value)} placeholder="Mô tả SEO" />
+                <Input value={focusKeyword} onChange={(event) => setFocusKeyword(event.target.value)} placeholder="Từ khóa chính" />
+                <Input value={ogTitle} onChange={(event) => setOgTitle(event.target.value)} placeholder="Tiêu đề Open Graph" />
+                <Input value={ogDescription} onChange={(event) => setOgDescription(event.target.value)} placeholder="Mô tả Open Graph" />
+                <Input value={ogImageUrl} onChange={(event) => setOgImageUrl(event.target.value)} placeholder="URL ảnh Open Graph" />
+              </CardContent>
+            </Card>
+            <Card>
               <CardContent className="space-y-2 pt-6">
                 <h3 className="text-sm font-medium">Mô tả ngắn</h3>
                 <textarea
@@ -217,6 +259,7 @@ export function ArticleForm({
                     <CKEditor
                       editor={editorRef.current}
                       data={content}
+                      onReady={(editor: any) => { contentEditorRef.current = editor; }}
                       onChange={(
                         _event: unknown,
                         editor: { getData: () => string },
@@ -240,11 +283,21 @@ export function ArticleForm({
                         ],
                         image: {
                           toolbar: [
+                            "toggleImageCaption",
                             "imageTextAlternative",
                             "imageStyle:inline",
                             "imageStyle:block",
                             "imageStyle:side",
                           ],
+                        },
+                        link: {
+                          decorators: {
+                            openInNewTab: {
+                              mode: "manual",
+                              label: "Mở liên kết trong tab mới",
+                              attributes: { target: "_blank", rel: "noopener noreferrer" },
+                            },
+                          },
                         },
                         extraPlugins: [MyCustomUploadAdapterPlugin],
                       }}
@@ -253,6 +306,18 @@ export function ArticleForm({
                     <Skeleton className="h-72 w-full" />
                   )}
                 </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => setContentAssetPickerOpen(true)}>
+                  <ImageIcon className="h-4 w-4" /> Chèn từ tài nguyên
+                </Button>
+                <AssetPicker
+                  open={contentAssetPickerOpen}
+                  onOpenChange={setContentAssetPickerOpen}
+                  onSelect={(asset) => {
+                    const editor = contentEditorRef.current;
+                    if (editor) editor.model.change(() => editor.model.insertContent(editor.data.toModel(editor.data.processor.toView(snapshotAsset(asset))), editor.model.document.selection));
+                    setContentAssetPickerOpen(false);
+                  }}
+                />
               </CardContent>
             </Card>
           </div>
@@ -303,8 +368,8 @@ export function ArticleForm({
                 <AssetPicker
                   open={assetPickerOpen}
                   onOpenChange={setAssetPickerOpen}
-                  onSelect={(url) => {
-                    setImageUrl(url);
+                  onSelect={(asset) => {
+                    setImageUrl(asset.url);
                     setAssetPickerOpen(false);
                   }}
                 />

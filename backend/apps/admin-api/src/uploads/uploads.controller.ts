@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Delete,
+  Patch,
   Body,
   Query,
   UseGuards,
@@ -21,6 +22,7 @@ import { SignedUrlDto } from './dto/signed-url.dto';
 import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 import { DeleteFileDto } from './dto/delete-file.dto';
 import { ListAssetsDto } from './dto/list-assets.dto';
+import { UpdateAssetDto } from './dto/update-asset.dto';
 import {AbortMultipartUploadDto, CompleteMultipartUploadDto, StartMultipartUploadDto} from './dto/multipart-upload.dto';
 import { AdminAuthGuard, RolesGuard, Roles } from '@app/common';
 
@@ -78,6 +80,13 @@ export class UploadsController {
   @ApiOperation({ summary: 'Get asset detail' })
   getAsset(@Param('id') id: string) {
     return this.uploadsService.getAsset(id);
+  }
+
+  @Patch(':id')
+  @Roles('super_admin', 'admin', 'editor')
+  @ApiOperation({ summary: 'Update asset library metadata' })
+  updateAsset(@Param('id') id: string, @Body() dto: UpdateAssetDto) {
+    return this.uploadsService.updateAsset(id, dto);
   }
 
   @Post('upload')

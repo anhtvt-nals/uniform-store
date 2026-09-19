@@ -86,12 +86,17 @@ export async function generateMetadata({
     };
   }
 
-  const description = truncateDescription(product.description);
+  const seo = product as typeof product & {
+    seoTitle?: string; seoDescription?: string; seoKeywords?: string;
+    ogTitle?: string; ogDescription?: string; ogImageUrl?: string;
+  };
+
+  const description = truncateDescription(seo.seoDescription || product.description);
   const fallbackDescription = t("shopProductAt", {
     name: product.name,
     siteName: SITE_NAME,
   });
-  const ogImage = product.assets?.[0]?.preview;
+  const ogImage = seo.ogImageUrl || product.assets?.[0]?.preview;
   const ogLocale = toOgLocale(locale);
   const productPath = `/product/${product.slug}`;
   const primaryCollection =
@@ -99,9 +104,9 @@ export async function generateMetadata({
     product.collections?.[0];
 
   return {
-    title: product.name,
+    title: seo.seoTitle || product.name,
     description: description || fallbackDescription,
-    keywords: getProductKeywords(product.name, primaryCollection?.name),
+    keywords: seo.seoKeywords ? [seo.seoKeywords] : getProductKeywords(product.name, primaryCollection?.name),
     category: primaryCollection?.name || "Đồng phục doanh nghiệp",
     authors: [{ name: SITE_NAME }],
     creator: SITE_NAME,
@@ -127,8 +132,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: product.name,
-      description: description || fallbackDescription,
+      title: seo.ogTitle || seo.seoTitle || product.name,
+      description: seo.ogDescription || description || fallbackDescription,
       type: "website",
       siteName: SITE_NAME,
       locale: ogLocale,
@@ -137,8 +142,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: product.name,
-      description: description || fallbackDescription,
+      title: seo.ogTitle || seo.seoTitle || product.name,
+      description: seo.ogDescription || description || fallbackDescription,
       images: ogImage ? [ogImage] : undefined,
     },
   };
@@ -159,6 +164,18 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound();
   }
+
+  const relatedArticles = (
+    product as typeof product & {
+      relatedArticles?: Array<{
+        id: string;
+        slug: string;
+        title: string;
+        excerpt?: string | null;
+        featuredAsset?: { preview: string } | null;
+      }>;
+    }
+  ).relatedArticles ?? [];
 
   // Get the primary collection (prefer deepest nested / most specific)
   const primaryCollection =
@@ -354,6 +371,39 @@ export default async function ProductDetailPage({
           </Accordion>
         </div>
       </section>
+
+      {relatedArticles.length ? (
+        <section className="bg-[#F8FAFC] py-12 md:py-16">
+          <div className="container mx-auto max-w-[1400px] px-4 md:px-6 lg:px-8">
+            <h2 className="mb-6 text-[22px] font-bold tracking-[-0.01em] text-[#173B6C] md:text-2xl">
+              {t("relatedArticles")}
+            </h2>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {relatedArticles.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/news/${article.slug}`}
+                  className="group overflow-hidden rounded-xl border border-[#E2E8F0] bg-white transition-shadow hover:shadow-md"
+                >
+                  {article.featuredAsset?.preview ? (
+                    <img
+                      src={article.featuredAsset.preview}
+                      alt=""
+                      className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : null}
+                  <div className="p-5">
+                    <h3 className="font-semibold text-[#173B6C]">{article.title}</h3>
+                    {article.excerpt ? (
+                      <p className="mt-2 line-clamp-2 text-sm text-[#64748B]">{article.excerpt}</p>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {primaryCollection && (
         <RelatedProducts

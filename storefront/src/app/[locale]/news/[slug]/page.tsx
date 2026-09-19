@@ -45,7 +45,7 @@ export async function generateMetadata({
     160,
   );
   const keywords = article.seoKeywords ?? undefined;
-  const imageUrl = getArticleImageUrl(article);
+  const imageUrl = article.ogImageUrl || getArticleImageUrl(article);
 
   return {
     title,
@@ -61,8 +61,8 @@ export async function generateMetadata({
       ),
     },
     openGraph: {
-      title: `${title} | ${SITE_NAME}`,
-      description,
+      title: article.ogTitle || title,
+      description: article.ogDescription || description,
       type: "article",
       locale: ogLocale,
       url: `${SITE_URL}/news/${slug}`,
@@ -72,8 +72,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: article.ogTitle || title,
+      description: article.ogDescription || description,
       images: imageUrl ? [imageUrl] : undefined,
     },
   };
@@ -94,6 +94,11 @@ export default async function NewsDetailPage({
 
   const imageUrl = getArticleImageUrl(article);
   const readingTime = calculateReadingTime(article.content);
+  const articleUrl = buildCanonicalUrl(`/${locale}/news/${article.slug}`);
+  const shareUrl = encodeURIComponent(articleUrl);
+  const shareTitle = encodeURIComponent(article.title);
+  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+  const xHref = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`;
 
   const { items: relatedItems } = await getArticles({ take: 4 }, locale);
   const related = relatedItems
@@ -167,6 +172,12 @@ export default async function NewsDetailPage({
                 ))}
               </div>
             )}
+
+            <div className="mb-8 flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground">Chia sẻ:</span>
+              <a href={facebookHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên Facebook" className="text-primary hover:underline">Facebook</a>
+              <a href={xHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên X" className="text-primary hover:underline">X</a>
+            </div>
 
             {/* Divider after tags */}
             <div className="h-px bg-border/60 mb-10" />

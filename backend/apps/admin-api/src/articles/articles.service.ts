@@ -56,6 +56,12 @@ export class ArticlesService {
       excerpt: dto.excerpt ?? {},
       content: dto.content ?? {},
       imageUrl: dto.imageUrl ?? '',
+      metaTitle: dto.metaTitle ?? {},
+      metaDesc: dto.metaDesc ?? {},
+      focusKeyword: dto.focusKeyword ?? {},
+      ogTitle: dto.ogTitle ?? {},
+      ogDescription: dto.ogDescription ?? {},
+      ogImageUrl: dto.ogImageUrl ?? {},
       isPublished: dto.isPublished ?? false,
       publishedAt: dto.isPublished ? new Date() : undefined,
       tags: await this.resolveTags(dto.tagNames),
@@ -85,6 +91,12 @@ export class ArticlesService {
     if (dto.excerpt !== undefined) article.excerpt = dto.excerpt;
     if (dto.content !== undefined) article.content = dto.content;
     if (dto.imageUrl !== undefined) article.imageUrl = dto.imageUrl;
+    if (dto.metaTitle !== undefined) article.metaTitle = dto.metaTitle;
+    if (dto.metaDesc !== undefined) article.metaDesc = dto.metaDesc;
+    if (dto.focusKeyword !== undefined) article.focusKeyword = dto.focusKeyword;
+    if (dto.ogTitle !== undefined) article.ogTitle = dto.ogTitle;
+    if (dto.ogDescription !== undefined) article.ogDescription = dto.ogDescription;
+    if (dto.ogImageUrl !== undefined) article.ogImageUrl = dto.ogImageUrl;
     if (dto.isPublished !== undefined) {
       article.isPublished = dto.isPublished;
       if (dto.isPublished && !article.publishedAt) {

@@ -4,6 +4,7 @@ import { DashboardService } from './dashboard.service';
 import {
   OrderEntity,
   OrderItemEntity,
+  ProductEntity,
   UserEntity,
 } from '@app/database';
 
@@ -36,6 +37,7 @@ describe('DashboardService', () => {
   let mockOrderRepo: ReturnType<typeof createMockRepo>;
   let mockOrderItemRepo: ReturnType<typeof createMockRepo>;
   let mockUserRepo: ReturnType<typeof createMockRepo>;
+  let mockProductRepo: ReturnType<typeof createMockRepo>;
 
   beforeEach(async () => {
     mockOrderRepo = createMockRepo([
@@ -47,12 +49,14 @@ describe('DashboardService', () => {
     mockUserRepo = createMockRepo([
       'count', 'createQueryBuilder',
     ]);
+    mockProductRepo = createMockRepo(['count']);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DashboardService,
         { provide: getRepositoryToken(OrderEntity), useValue: mockOrderRepo },
         { provide: getRepositoryToken(OrderItemEntity), useValue: mockOrderItemRepo },
+        { provide: getRepositoryToken(ProductEntity), useValue: mockProductRepo },
         { provide: getRepositoryToken(UserEntity), useValue: mockUserRepo },
       ],
     }).compile();

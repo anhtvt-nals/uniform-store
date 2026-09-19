@@ -20,6 +20,30 @@ export class CreateArticleDto {
   imageUrl?: string;
 
   @IsOptional()
+  @IsObject()
+  metaTitle?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  metaDesc?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  focusKeyword?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogTitle?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogDescription?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  ogImageUrl?: Record<string, string>;
+
+  @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
 

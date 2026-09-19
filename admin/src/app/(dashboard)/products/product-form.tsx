@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { AssetPicker } from "@/components/shared/asset-picker";
+import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ const DEFAULT_LOCALE = "vi";
 
 type Category = { id: string; name: Record<string, string>; slug: string };
 type Brand = { id: string; name: Record<string, string>; slug: string };
+type Article = { id: string; title: Record<string, string>; slug: string };
 type Image = { id: string; url: string; sortOrder: number };
 type Size = {
   id: string;
@@ -55,6 +56,17 @@ function MyCustomUploadAdapterPlugin(editor: any) {
       },
     };
   };
+}
+
+function snapshotAsset(asset: Asset) {
+  const escape = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!);
+  const alt = asset.alt?.vi ?? "";
+  const title = asset.title?.vi ?? "";
+  const caption = asset.caption?.vi ?? "";
+  const image = `<img src="${escape(asset.url)}" alt="${escape(alt)}"${title ? ` title="${escape(title)}"` : ""}>`;
+  const figure = caption ? `<figure>${image}<figcaption>${escape(caption)}</figcaption></figure>` : image;
+  const link = asset.linkUrl?.trim() ?? "";
+  return /^(javascript|data):/i.test(link) ? figure : link ? `<a href="${escape(link)}">${figure}</a>` : figure;
 }
 
 function slugify(text: string): string {
@@ -151,6 +163,7 @@ export function ProductForm({
   const queryClient = useQueryClient();
   const slugEdited = useRef(false);
   const editorRef = useRef<any>(null);
+  const contentEditorRefs = useRef<Record<string, any>>({});
 
   useEffect(() => {
     import("@ckeditor/ckeditor5-build-classic").then((mod) => {
@@ -183,6 +196,15 @@ export function ProductForm({
     queryFn: () => apiClient<Size[]>("/sizes", { token }),
     select: (res) => (res.data || []).filter((size) => size.isActive),
   });
+  const { data: articles = [] } = useQuery({
+    queryKey: ["articles", "product-form"],
+    queryFn: () =>
+      apiClient<{ items: Article[] }>("/articles", {
+        params: { limit: 100 },
+        token,
+      }),
+    select: (res) => res.data?.items || [],
+  });
 
   const [name, setName] = useState<Record<string, string>>({});
   const [slug, setSlug] = useState("");
@@ -198,13 +220,19 @@ export function ProductForm({
   const [displayOrder, setDisplayOrder] = useState(0);
   const [metaTitle, setMetaTitle] = useState<Record<string, string>>({});
   const [metaDesc, setMetaDesc] = useState<Record<string, string>>({});
+  const [focusKeyword, setFocusKeyword] = useState<Record<string, string>>({});
+  const [ogTitle, setOgTitle] = useState<Record<string, string>>({});
+  const [ogDescription, setOgDescription] = useState<Record<string, string>>({});
+  const [ogImageUrl, setOgImageUrl] = useState<Record<string, string>>({});
   const [sizeIds, setSizeIds] = useState<string[]>([]);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState("");
+  const [relatedArticleIds, setRelatedArticleIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [showEditor, setShowEditor] = useState(false);
   const [thumbAssetPickerOpen, setThumbAssetPickerOpen] = useState(false);
   const [galleryPickerOpen, setGalleryPickerOpen] = useState(false);
+  const [contentAssetPickerLocale, setContentAssetPickerLocale] = useState<string | null>(null);
   const [sizeGuidePickerOpen, setSizeGuidePickerOpen] = useState(false);
 
   useEffect(() => {
@@ -246,12 +274,21 @@ export function ProductForm({
       setDisplayOrder(Number(defaultValues.displayOrder ?? 0));
       setMetaTitle((defaultValues.metaTitle as Record<string, string>) || {});
       setMetaDesc((defaultValues.metaDesc as Record<string, string>) || {});
+      setFocusKeyword((defaultValues.focusKeyword as Record<string, string>) || {});
+      setOgTitle((defaultValues.ogTitle as Record<string, string>) || {});
+      setOgDescription((defaultValues.ogDescription as Record<string, string>) || {});
+      setOgImageUrl((defaultValues.ogImageUrl as Record<string, string>) || {});
       setSizeIds(
         ((defaultValues.sizes as Size[] | undefined) || []).map(
           (size) => size.id,
         ),
       );
       setSizeGuideImageUrl((defaultValues.sizeGuideImageUrl as string) || "");
+      setRelatedArticleIds(
+        ((defaultValues.relatedArticles as Article[] | undefined) || []).map(
+          (article) => article.id,
+        ),
+      );
     }
   }, [defaultValues]);
 
@@ -266,6 +303,10 @@ export function ProductForm({
         detail: setDetail,
         metaTitle: setMetaTitle,
         metaDesc: setMetaDesc,
+        focusKeyword: setFocusKeyword,
+        ogTitle: setOgTitle,
+        ogDescription: setOgDescription,
+        ogImageUrl: setOgImageUrl,
       };
       setter[field]?.((prev) => ({ ...prev, [locale]: value }));
     },
@@ -280,10 +321,14 @@ export function ProductForm({
         detail,
         metaTitle,
         metaDesc,
+        focusKeyword,
+        ogTitle,
+        ogDescription,
+        ogImageUrl,
       };
       return source[field]?.[locale] || "";
     },
-    [name, description, detail, metaTitle, metaDesc],
+    [name, description, detail, metaTitle, metaDesc, focusKeyword, ogTitle, ogDescription, ogImageUrl],
   );
 
   function handleNameChange(value: string) {
@@ -337,12 +382,17 @@ export function ProductForm({
       isContactPrice,
       sizeIds,
       sizeGuideImageUrl,
+      relatedArticleIds,
     };
     if (brandId) data.brandId = brandId;
     if (Object.keys(description).length > 0) data.description = description;
     if (Object.keys(description).length > 0) data.sortDescription = description;
     if (Object.keys(metaTitle).length > 0) data.metaTitle = metaTitle;
     if (Object.keys(metaDesc).length > 0) data.metaDesc = metaDesc;
+    if (Object.keys(focusKeyword).length > 0) data.focusKeyword = focusKeyword;
+    if (Object.keys(ogTitle).length > 0) data.ogTitle = ogTitle;
+    if (Object.keys(ogDescription).length > 0) data.ogDescription = ogDescription;
+    if (Object.keys(ogImageUrl).length > 0) data.ogImageUrl = ogImageUrl;
 
     onSubmit(data);
   }
@@ -500,8 +550,8 @@ export function ProductForm({
                 <AssetPicker
                   open={sizeGuidePickerOpen}
                   onOpenChange={setSizeGuidePickerOpen}
-                  onSelect={(url) => {
-                    setSizeGuideImageUrl(url);
+                  onSelect={(asset) => {
+                    setSizeGuideImageUrl(asset.url);
                     setSizeGuidePickerOpen(false);
                   }}
                 />
@@ -530,6 +580,7 @@ export function ProductForm({
                         key={`ck-${l}`}
                         editor={editorRef.current}
                         data={getField("detail", l)}
+                        onReady={(editor: any) => { contentEditorRefs.current[l] = editor; }}
                         onChange={(_event: any, editor: any) => {
                           setField("detail", l, editor.getData());
                         }}
@@ -552,11 +603,21 @@ export function ProductForm({
                           ],
                           image: {
                             toolbar: [
+                              "toggleImageCaption",
                               "imageTextAlternative",
                               "imageStyle:inline",
                               "imageStyle:block",
                               "imageStyle:side",
                             ],
+                          },
+                          link: {
+                            decorators: {
+                              openInNewTab: {
+                                mode: "manual",
+                                label: "Mở liên kết trong tab mới",
+                                attributes: { target: "_blank", rel: "noopener noreferrer" },
+                              },
+                            },
                           },
                           extraPlugins: [MyCustomUploadAdapterPlugin],
                         }}
@@ -564,9 +625,22 @@ export function ProductForm({
                     ) : (
                       <Skeleton className="h-72 w-full" />
                     )}
+                    <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => setContentAssetPickerLocale(l)}>
+                      <ImageIcon className="h-4 w-4" /> Chèn từ tài nguyên
+                    </Button>
                   </div>
                 ))}
               </div>
+              <AssetPicker
+                open={contentAssetPickerLocale !== null}
+                onOpenChange={(open) => !open && setContentAssetPickerLocale(null)}
+                onSelect={(asset) => {
+                  const locale = contentAssetPickerLocale;
+                  const editor = locale ? contentEditorRefs.current[locale] : null;
+                  if (editor) editor.model.change(() => editor.model.insertContent(editor.data.toModel(editor.data.processor.toView(snapshotAsset(asset))), editor.model.document.selection));
+                  setContentAssetPickerLocale(null);
+                }}
+              />
             </CardContent>
           </Card>
 
@@ -698,8 +772,39 @@ export function ProductForm({
                     onChange={(e) => setField("metaDesc", l, e.target.value)}
                     placeholder="Mô tả SEO"
                   />
+                  <Input value={getField("focusKeyword", l)} onChange={(e) => setField("focusKeyword", l, e.target.value)} placeholder="Từ khóa chính" />
+                  <Input value={getField("ogTitle", l)} onChange={(e) => setField("ogTitle", l, e.target.value)} placeholder="Tiêu đề Open Graph" />
+                  <Input value={getField("ogDescription", l)} onChange={(e) => setField("ogDescription", l, e.target.value)} placeholder="Mô tả Open Graph" />
+                  <Input value={getField("ogImageUrl", l)} onChange={(e) => setField("ogImageUrl", l, e.target.value)} placeholder="URL ảnh Open Graph" />
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div>
+                <h3 className="text-sm font-medium">Tin tức liên quan</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Đã chọn {relatedArticleIds.length} bài viết để hiển thị cùng sản phẩm.
+                </p>
+              </div>
+              <select
+                multiple
+                value={relatedArticleIds}
+                onChange={(event) =>
+                  setRelatedArticleIds(
+                    Array.from(event.currentTarget.selectedOptions, (option) => option.value),
+                  )
+                }
+                className="min-h-40 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                {(articles as Article[]).map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title.vi || article.title.en || article.slug} — {article.slug}
+                  </option>
+                ))}
+              </select>
             </CardContent>
           </Card>
         </div>
@@ -758,8 +863,8 @@ export function ProductForm({
                 <AssetPicker
                   open={thumbAssetPickerOpen}
                   onOpenChange={setThumbAssetPickerOpen}
-                  onSelect={(url) => {
-                    onAddImage?.(url);
+                  onSelect={(asset) => {
+                    onAddImage?.(asset.url);
                     setThumbAssetPickerOpen(false);
                   }}
                 />
@@ -796,8 +901,8 @@ export function ProductForm({
               <AssetPicker
                 open={galleryPickerOpen}
                 onOpenChange={setGalleryPickerOpen}
-                onSelect={(url) => {
-                  onAddImage?.(url);
+                onSelect={(asset) => {
+                  onAddImage?.(asset.url);
                   setGalleryPickerOpen(false);
                 }}
               />
