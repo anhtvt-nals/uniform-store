@@ -12,7 +12,10 @@ import {
   OrderDiscountEntity,
   OrderStatusHistoryEntity,
   InventoryEntity,
+  ProductVariantEntity,
+  UserEntity,
 } from '@app/database';
+import { MailService } from '@app/shared';
 
 function createMockQueryRunner() {
   return {
@@ -25,6 +28,7 @@ function createMockQueryRunner() {
       create: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       findOne: jest.fn(),
     },
   };
@@ -69,6 +73,9 @@ describe('OrdersService (storefront)', () => {
         { provide: getRepositoryToken(OrderDiscountEntity), useValue: createMockRepo(['create', 'save']) },
         { provide: getRepositoryToken(OrderStatusHistoryEntity), useValue: createMockRepo(['create', 'save']) },
         { provide: getRepositoryToken(InventoryEntity), useValue: createMockRepo(['findOne']) },
+        { provide: getRepositoryToken(ProductVariantEntity), useValue: createMockRepo(['findOne']) },
+        { provide: getRepositoryToken(UserEntity), useValue: createMockRepo(['findOne', 'save']) },
+        { provide: MailService, useValue: { sendOrderNotification: jest.fn() } },
         { provide: getDataSourceToken(), useValue: mockDataSource },
       ],
     }).compile();

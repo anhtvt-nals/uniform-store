@@ -161,7 +161,7 @@ describe('UploadsService', () => {
         alt: { en: 'Product image' },
       });
 
-      expect(result.url).toBe('https://cdn.example.com/products/p-1/img.jpg');
+      expect(result.url).toBe('products/p-1/img.jpg');
       expect(mockProductImageRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           productId: 'p-1',
@@ -203,10 +203,10 @@ describe('UploadsService', () => {
         entityId: 'c-1',
       });
 
-      expect(result.url).toBe('https://cdn.example.com/categories/c-1/cat.jpg');
+      expect(result.url).toBe('categories/c-1/cat.jpg');
       expect(mockCategoryRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          imageUrl: 'https://cdn.example.com/categories/c-1/cat.jpg',
+          imageUrl: 'categories/c-1/cat.jpg',
         }),
       );
     });
@@ -227,10 +227,10 @@ describe('UploadsService', () => {
         entityId: 'b-1',
       });
 
-      expect(result.url).toBe('https://cdn.example.com/brands/b-1/logo.png');
+      expect(result.url).toBe('brands/b-1/logo.png');
       expect(mockBrandRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          logoUrl: 'https://cdn.example.com/brands/b-1/logo.png',
+          logoUrl: 'brands/b-1/logo.png',
         }),
       );
     });
@@ -280,7 +280,7 @@ describe('UploadsService', () => {
 
       expect(mockStorageService.delete).toHaveBeenCalledWith('', 'products/p-1/img.jpg');
       expect(mockProductImageRepo.findOne).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { url: 'public-url' } }),
+        expect.objectContaining({ where: { url: 'products/p-1/img.jpg' } }),
       );
       expect(result.message).toContain('deleted');
     });
@@ -290,7 +290,7 @@ describe('UploadsService', () => {
       mockStorageService.buildPublicUrl.mockReturnValue('public-url');
       mockCategoryRepo.findOne.mockResolvedValue({
         id: 'c-1',
-        imageUrl: 'public-url',
+        imageUrl: 'categories/c-1/img.jpg',
       });
       mockCategoryRepo.save.mockResolvedValue({});
 
@@ -311,7 +311,7 @@ describe('UploadsService', () => {
       mockStorageService.buildPublicUrl.mockReturnValue('public-url');
       mockBrandRepo.findOne.mockResolvedValue({
         id: 'b-1',
-        logoUrl: 'public-url',
+        logoUrl: 'brands/b-1/logo.png',
       });
       mockBrandRepo.save.mockResolvedValue({});
 
