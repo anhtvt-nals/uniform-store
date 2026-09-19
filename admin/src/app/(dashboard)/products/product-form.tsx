@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { AssetPicker } from "@/components/shared/asset-picker";
+import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +55,17 @@ function MyCustomUploadAdapterPlugin(editor: any) {
       },
     };
   };
+}
+
+function snapshotAsset(asset: Asset) {
+  const escape = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!);
+  const alt = asset.alt?.vi ?? "";
+  const title = asset.title?.vi ?? "";
+  const caption = asset.caption?.vi ?? "";
+  const image = `<img src="${escape(asset.url)}" alt="${escape(alt)}"${title ? ` title="${escape(title)}"` : ""}>`;
+  const figure = caption ? `<figure>${image}<figcaption>${escape(caption)}</figcaption></figure>` : image;
+  const link = asset.linkUrl?.trim() ?? "";
+  return /^(javascript|data):/i.test(link) ? figure : link ? `<a href="${escape(link)}">${figure}</a>` : figure;
 }
 
 function slugify(text: string): string {
@@ -151,6 +162,7 @@ export function ProductForm({
   const queryClient = useQueryClient();
   const slugEdited = useRef(false);
   const editorRef = useRef<any>(null);
+  const contentEditorRefs = useRef<Record<string, any>>({});
 
   useEffect(() => {
     import("@ckeditor/ckeditor5-build-classic").then((mod) => {
@@ -209,6 +221,7 @@ export function ProductForm({
   const [showEditor, setShowEditor] = useState(false);
   const [thumbAssetPickerOpen, setThumbAssetPickerOpen] = useState(false);
   const [galleryPickerOpen, setGalleryPickerOpen] = useState(false);
+  const [contentAssetPickerLocale, setContentAssetPickerLocale] = useState<string | null>(null);
   const [sizeGuidePickerOpen, setSizeGuidePickerOpen] = useState(false);
 
   useEffect(() => {
@@ -520,8 +533,8 @@ export function ProductForm({
                 <AssetPicker
                   open={sizeGuidePickerOpen}
                   onOpenChange={setSizeGuidePickerOpen}
-                  onSelect={(url) => {
-                    setSizeGuideImageUrl(url);
+                  onSelect={(asset) => {
+                    setSizeGuideImageUrl(asset.url);
                     setSizeGuidePickerOpen(false);
                   }}
                 />
@@ -550,6 +563,7 @@ export function ProductForm({
                         key={`ck-${l}`}
                         editor={editorRef.current}
                         data={getField("detail", l)}
+                        onReady={(editor: any) => { contentEditorRefs.current[l] = editor; }}
                         onChange={(_event: any, editor: any) => {
                           setField("detail", l, editor.getData());
                         }}
@@ -594,9 +608,22 @@ export function ProductForm({
                     ) : (
                       <Skeleton className="h-72 w-full" />
                     )}
+                    <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => setContentAssetPickerLocale(l)}>
+                      <ImageIcon className="h-4 w-4" /> Chèn từ tài nguyên
+                    </Button>
                   </div>
                 ))}
               </div>
+              <AssetPicker
+                open={contentAssetPickerLocale !== null}
+                onOpenChange={(open) => !open && setContentAssetPickerLocale(null)}
+                onSelect={(asset) => {
+                  const locale = contentAssetPickerLocale;
+                  const editor = locale ? contentEditorRefs.current[locale] : null;
+                  if (editor) editor.model.change(() => editor.model.insertContent(editor.data.toModel(editor.data.processor.toView(snapshotAsset(asset))), editor.model.document.selection));
+                  setContentAssetPickerLocale(null);
+                }}
+              />
             </CardContent>
           </Card>
 
@@ -792,8 +819,8 @@ export function ProductForm({
                 <AssetPicker
                   open={thumbAssetPickerOpen}
                   onOpenChange={setThumbAssetPickerOpen}
-                  onSelect={(url) => {
-                    onAddImage?.(url);
+                  onSelect={(asset) => {
+                    onAddImage?.(asset.url);
                     setThumbAssetPickerOpen(false);
                   }}
                 />
@@ -830,8 +857,8 @@ export function ProductForm({
               <AssetPicker
                 open={galleryPickerOpen}
                 onOpenChange={setGalleryPickerOpen}
-                onSelect={(url) => {
-                  onAddImage?.(url);
+                onSelect={(asset) => {
+                  onAddImage?.(asset.url);
                   setGalleryPickerOpen(false);
                 }}
               />

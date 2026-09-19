@@ -205,6 +205,11 @@ backend/
 
 ## Recent Changes
 
+### Asset Library Metadata (2026-09-19)
+
+- Assets now store localized alt text, caption, and title plus an optional link URL; Admin can edit these values in the existing uploads library.
+- AssetPicker returns metadata to article/product editors, which snapshot it into inserted HTML so subsequent library edits never rewrite saved content.
+
 ### Per-record Content SEO (2026-09-18)
 
 - Articles now persist localized meta title/description, focus keyword, and Open Graph title/description/image fields; products add the missing localized focus keyword and Open Graph fields while retaining their existing meta title/description.

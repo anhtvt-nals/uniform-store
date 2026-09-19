@@ -95,7 +95,7 @@ function SlideEditor({
           <AssetPicker
             open={assetPickerOpen}
             onOpenChange={setAssetPickerOpen}
-            onSelect={(imageUrl) => setValue({ ...value, imageUrl })}
+            onSelect={(asset) => setValue({ ...value, imageUrl: asset.url })}
           />
           {value.imageUrl && (
             <img

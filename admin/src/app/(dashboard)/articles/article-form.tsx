@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { AssetPicker } from "@/components/shared/asset-picker";
+import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 
 const CKEditor = dynamic(
@@ -41,6 +41,17 @@ function MyCustomUploadAdapterPlugin(editor: any) {
   });
 }
 
+function snapshotAsset(asset: Asset) {
+  const escape = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!);
+  const alt = asset.alt?.vi ?? "";
+  const title = asset.title?.vi ?? "";
+  const caption = asset.caption?.vi ?? "";
+  const image = `<img src="${escape(asset.url)}" alt="${escape(alt)}"${title ? ` title="${escape(title)}"` : ""}>`;
+  const figure = caption ? `<figure>${image}<figcaption>${escape(caption)}</figcaption></figure>` : image;
+  const link = asset.linkUrl?.trim() ?? "";
+  return /^(javascript|data):/i.test(link) ? figure : link ? `<a href="${escape(link)}">${figure}</a>` : figure;
+}
+
 function slugify(value: string): string {
   return value
     .normalize("NFD")
@@ -62,6 +73,7 @@ export function ArticleForm({
 }: ArticleFormProps) {
   const slugEdited = useRef(false);
   const editorRef = useRef<any>(null);
+  const contentEditorRef = useRef<any>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -78,6 +90,7 @@ export function ArticleForm({
   const [isPublished, setIsPublished] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [assetPickerOpen, setAssetPickerOpen] = useState(false);
+  const [contentAssetPickerOpen, setContentAssetPickerOpen] = useState(false);
 
   useEffect(() => {
     import("@ckeditor/ckeditor5-build-classic").then((mod) => {
@@ -246,6 +259,7 @@ export function ArticleForm({
                     <CKEditor
                       editor={editorRef.current}
                       data={content}
+                      onReady={(editor: any) => { contentEditorRef.current = editor; }}
                       onChange={(
                         _event: unknown,
                         editor: { getData: () => string },
@@ -292,6 +306,18 @@ export function ArticleForm({
                     <Skeleton className="h-72 w-full" />
                   )}
                 </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => setContentAssetPickerOpen(true)}>
+                  <ImageIcon className="h-4 w-4" /> Chèn từ tài nguyên
+                </Button>
+                <AssetPicker
+                  open={contentAssetPickerOpen}
+                  onOpenChange={setContentAssetPickerOpen}
+                  onSelect={(asset) => {
+                    const editor = contentEditorRef.current;
+                    if (editor) editor.model.change(() => editor.model.insertContent(editor.data.toModel(editor.data.processor.toView(snapshotAsset(asset))), editor.model.document.selection));
+                    setContentAssetPickerOpen(false);
+                  }}
+                />
               </CardContent>
             </Card>
           </div>
@@ -342,8 +368,8 @@ export function ArticleForm({
                 <AssetPicker
                   open={assetPickerOpen}
                   onOpenChange={setAssetPickerOpen}
-                  onSelect={(url) => {
-                    setImageUrl(url);
+                  onSelect={(asset) => {
+                    setImageUrl(asset.url);
                     setAssetPickerOpen(false);
                   }}
                 />

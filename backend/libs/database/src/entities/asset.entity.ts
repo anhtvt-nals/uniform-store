@@ -29,6 +29,15 @@ export class AssetEntity {
   @Column({ type: 'jsonb', default: {} })
   alt: Record<string, string>;
 
+  @Column({ type: 'jsonb', default: {} })
+  caption: Record<string, string>;
+
+  @Column({ type: 'jsonb', default: {} })
+  title: Record<string, string>;
+
+  @Column({ name: 'link_url', type: 'text', default: '' })
+  linkUrl: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

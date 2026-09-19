@@ -10,17 +10,20 @@ import { Button } from "@/components/ui/button"
 import { Loader2, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type Asset = {
+export type Asset = {
   id: string
   url: string
   alt?: Record<string, string>
+  caption?: Record<string, string>
+  title?: Record<string, string>
+  linkUrl?: string
   product?: { id: string; slug: string } | null
 }
 
 type AssetPickerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (url: string) => void
+  onSelect: (asset: Asset) => void
 }
 
 export function AssetPicker({ open, onOpenChange, onSelect }: AssetPickerProps) {
@@ -66,7 +69,7 @@ export function AssetPicker({ open, onOpenChange, onSelect }: AssetPickerProps) 
               <button
                 key={asset.id}
                 onClick={() => {
-                  onSelect(asset.url)
+                  onSelect(asset)
                   onOpenChange(false)
                 }}
                 className="group relative aspect-square rounded-md border overflow-hidden hover:ring-2 hover:ring-primary transition-all"

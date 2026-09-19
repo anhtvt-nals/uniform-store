@@ -449,10 +449,10 @@ export default function ContractsPage() {
       <AssetPicker
         open={pickerTarget !== null}
         onOpenChange={() => setPickerTarget(null)}
-        onSelect={(url) => {
+        onSelect={(asset) => {
           setForm((p) => ({
             ...p,
-            [pickerTarget === "logo" ? "logoUrl" : "contractImageUrl"]: url,
+            [pickerTarget === "logo" ? "logoUrl" : "contractImageUrl"]: asset.url,
           }));
           setPickerTarget(null);
         }}
