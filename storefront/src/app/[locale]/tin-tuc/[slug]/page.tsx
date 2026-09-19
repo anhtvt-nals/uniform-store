@@ -80,6 +80,11 @@ async function NewsDetailInner({
 
   const imageUrl = getArticleImageUrl(item);
   const readingTime = calculateReadingTime(item.content ?? null);
+  const articleUrl = buildCanonicalUrl(`/${locale}/tin-tuc/${item.slug}`);
+  const shareUrl = encodeURIComponent(articleUrl);
+  const shareTitle = encodeURIComponent(item.title);
+  const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+  const xHref = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`;
 
   return (
     <>
@@ -145,6 +150,12 @@ async function NewsDetailInner({
               ))}
             </div>
           )}
+
+          <div className="mb-8 flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Chia sẻ:</span>
+            <a href={facebookHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên Facebook" className="text-primary hover:underline">Facebook</a>
+            <a href={xHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên X" className="text-primary hover:underline">X</a>
+          </div>
 
           <div className="h-px bg-border/60 mb-10" />
 
