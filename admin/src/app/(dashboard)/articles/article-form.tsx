@@ -253,7 +253,7 @@ export function ArticleForm({
                   description={metaDesc || excerpt}
                   socialTitle={ogTitle}
                   socialDescription={ogDescription}
-                  url={slug ? `/vi/tin-tuc/${slug}` : ""}
+                  url={slug ? `/tin-tuc/${slug}` : ""}
                   imageUrl={ogImageUrl || imageUrl}
                 />
               </CardContent>

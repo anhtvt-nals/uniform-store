@@ -26,7 +26,8 @@ function normalize(value: string) {
 function stripHtml(value: string) {
   return value
     .replace(/<(?:address|article|aside|blockquote|br|div|dl|fieldset|footer|form|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|table|tr|ul)[^>]*>/gi, " ")
-    .replace(/<\/[^>]+>/g, " ")
+    .replace(/<\/(?:address|article|aside|blockquote|br|div|dl|fieldset|footer|form|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|table|tr|ul)>/gi, " ")
+    .replace(/<\/[^>]+>/g, "")
     .replace(/<[^>]*>/g, "")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")

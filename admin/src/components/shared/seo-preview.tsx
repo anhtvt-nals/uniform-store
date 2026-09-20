@@ -49,16 +49,14 @@ export function SeoPreview({
           {description || "Mô tả trang sẽ hiển thị ở đây."}
         </p>
       </div>
-      {imageUrl || socialTitle || socialDescription ? (
-        <div className="flex gap-3 rounded-md bg-muted p-2">
-          {imageUrl ? <img src={imageUrl} alt="" className="h-14 w-14 rounded object-cover" /> : null}
-          <div className="min-w-0">
-            <p className="text-xs font-medium">Xem trước chia sẻ mạng xã hội</p>
-            <p className="truncate text-xs text-muted-foreground">{socialTitle || title || "Tiêu đề trang"}</p>
-            {socialDescription ? <p className="truncate text-xs text-muted-foreground">{socialDescription}</p> : null}
-          </div>
+      <div className="flex gap-3 rounded-md bg-muted p-2">
+        {imageUrl ? <img src={imageUrl} alt="" className="h-14 w-14 rounded object-cover" /> : null}
+        <div className="min-w-0">
+          <p className="text-xs font-medium">Xem trước chia sẻ mạng xã hội</p>
+          <p className="truncate text-xs text-muted-foreground">{socialTitle || title || "Tiêu đề trang"}</p>
+          <p className="truncate text-xs text-muted-foreground">{socialDescription || description || "Mô tả trang sẽ hiển thị ở đây."}</p>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

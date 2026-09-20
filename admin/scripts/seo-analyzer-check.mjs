@@ -47,6 +47,8 @@ const richTextKeyword = analyzeSeo({
   content: "<p>đồng&nbsp;phục</p><p>đồ<strong>ng</strong> phục</p>",
 });
 assert.ok(richTextKeyword.checks.some((check) => check.key === "keywordInContent" && check.passed));
+const inlineKeyword = analyzeSeo({ title: "Tiêu đề", description: "Mô tả", focusKeyword: "đồng phục", slug: "x", content: "<p>đồ<strong>ng</strong> phục</p>" });
+assert.ok(inlineKeyword.checks.some((check) => check.key === "keywordInContent" && check.passed));
 
 const boundaryChecks = analyzeSeo({ title: "ngắn", description: "ngắn", focusKeyword: "từ khóa", slug: "", content: "" });
 assert.ok(boundaryChecks.checks.some((check) => check.key === "titleLength" && !check.passed));

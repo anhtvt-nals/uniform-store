@@ -792,7 +792,7 @@ export function ProductForm({
                     description={getField("metaDesc", l) || getField("description", l)}
                     socialTitle={getField("ogTitle", l)}
                     socialDescription={getField("ogDescription", l)}
-                    url={slug ? `/vi/product/${slug}` : ""}
+                    url={slug ? `/product/${slug}` : ""}
                     imageUrl={getField("ogImageUrl", l) || thumbnailUrl}
                   />
                 </div>
