@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select as SelectNative } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/shared/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Localized = Record<string, string> | null | undefined;
@@ -22,6 +23,8 @@ const text = (value: Localized) => value?.vi || value?.en || Object.values(value
 export default function SeoDashboardPage() {
   const token = getToken();
   const [threshold, setThreshold] = useState("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const { data, isLoading, isError } = useQuery({
     queryKey: ["seo-dashboard"],
     queryFn: async () => {
@@ -49,6 +52,8 @@ export default function SeoDashboardPage() {
     if (!data) return [];
     return data.items.filter((item) => threshold === "all" || (threshold === "low" ? item.analysis.score < 50 : threshold === "medium" ? item.analysis.score < 80 : item.analysis.score >= 80));
   }, [data, threshold]);
+  const pageItems = filteredItems.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
 
   return (
     <div className="space-y-6">
@@ -64,8 +69,8 @@ export default function SeoDashboardPage() {
             <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Điểm SEO trung bình</CardTitle></CardHeader><CardContent className="text-3xl font-bold">{data.averageScore}<span className="ml-1 text-sm font-normal text-muted-foreground">/100</span></CardContent></Card>
           </div>
           <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0"><CardTitle>Nội dung cần cải thiện</CardTitle><SelectNative className="w-44" value={threshold} onChange={(event) => setThreshold(event.target.value)} options={[{ value: "all", label: "Tất cả điểm" }, { value: "low", label: "Dưới 50" }, { value: "medium", label: "50–79" }, { value: "high", label: "Từ 80" }]} /></CardHeader>
-            <CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Nội dung</TableHead><TableHead>Loại</TableHead><TableHead>Điểm</TableHead><TableHead>Thiếu</TableHead><TableHead /></TableRow></TableHeader><TableBody>{filteredItems.map((item) => { const missing = [!item.metaTitle && "meta title", !item.metaDesc && "meta description", !item.focusKeyword && "focus keyword"].filter(Boolean); return <TableRow key={`${item.type}-${item.id}`}><TableCell className="font-medium">{item.title || item.slug}</TableCell><TableCell>{item.type === "article" ? "Bài viết" : "Sản phẩm"}</TableCell><TableCell><Badge variant={item.analysis.score >= 80 ? "success" : item.analysis.score >= 50 ? "warning" : "destructive"}>{item.analysis.score}</Badge></TableCell><TableCell className="text-xs text-muted-foreground">{missing.length ? missing.join(", ") : "Đủ trường"}</TableCell><TableCell><Link className="text-sm text-primary hover:underline" href={`/${item.type === "article" ? "articles" : "products"}/${item.id}`}>Mở</Link></TableCell></TableRow>; })}</TableBody></Table>{!filteredItems.length ? <p className="p-6 text-sm text-muted-foreground">Không có nội dung phù hợp.</p> : null}</CardContent>
+            <CardHeader className="flex-row items-center justify-between space-y-0"><CardTitle>Nội dung cần cải thiện</CardTitle><SelectNative className="w-44" value={threshold} onChange={(event) => { setThreshold(event.target.value); setPage(1); }} options={[{ value: "all", label: "Tất cả điểm" }, { value: "low", label: "Dưới 50" }, { value: "medium", label: "50–79" }, { value: "high", label: "Từ 80" }]} /></CardHeader>
+            <CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Nội dung</TableHead><TableHead>Loại</TableHead><TableHead>Điểm</TableHead><TableHead>Thiếu</TableHead><TableHead /></TableRow></TableHeader><TableBody>{pageItems.map((item) => { const missing = [!item.metaTitle && "meta title", !item.metaDesc && "meta description", !item.focusKeyword && "focus keyword"].filter(Boolean); return <TableRow key={`${item.type}-${item.id}`}><TableCell className="font-medium">{item.title || item.slug}</TableCell><TableCell>{item.type === "article" ? "Bài viết" : "Sản phẩm"}</TableCell><TableCell><Badge variant={item.analysis.score >= 80 ? "success" : item.analysis.score >= 50 ? "warning" : "destructive"}>{item.analysis.score}</Badge></TableCell><TableCell className="text-xs text-muted-foreground">{missing.length ? missing.join(", ") : "Đủ trường"}</TableCell><TableCell><Link className="text-sm text-primary hover:underline" href={`/${item.type === "article" ? "articles" : "products"}/${item.id}`}>Mở</Link></TableCell></TableRow>; })}</TableBody></Table>{!filteredItems.length ? <p className="p-6 text-sm text-muted-foreground">Không có nội dung phù hợp.</p> : <div className="px-6 pb-6"><Pagination page={page} totalPages={totalPages} totalItems={filteredItems.length} onPageChange={setPage} /></div>}</CardContent>
           </Card>
         </>
       )}
