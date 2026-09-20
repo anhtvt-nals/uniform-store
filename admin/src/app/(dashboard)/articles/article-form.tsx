@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
+import { SeoPreview, SeoScore } from "@/components/shared/seo-preview";
+import { analyzeSeo } from "@/lib/seo/analyzer";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 
 const CKEditor = dynamic(
@@ -170,6 +172,14 @@ export function ArticleForm({
     });
   }
 
+  const seoAnalysis = analyzeSeo({
+    title: metaTitle || title,
+    description: metaDesc || excerpt,
+    focusKeyword,
+    slug,
+    content,
+  });
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -237,6 +247,15 @@ export function ArticleForm({
                 <Input value={ogTitle} onChange={(event) => setOgTitle(event.target.value)} placeholder="Tiêu đề Open Graph" />
                 <Input value={ogDescription} onChange={(event) => setOgDescription(event.target.value)} placeholder="Mô tả Open Graph" />
                 <Input value={ogImageUrl} onChange={(event) => setOgImageUrl(event.target.value)} placeholder="URL ảnh Open Graph" />
+                <SeoScore analysis={seoAnalysis} />
+                <SeoPreview
+                  title={metaTitle || title}
+                  description={metaDesc || excerpt}
+                  socialTitle={ogTitle}
+                  socialDescription={ogDescription}
+                  url={slug ? `/tin-tuc/${slug}` : ""}
+                  imageUrl={ogImageUrl || imageUrl}
+                />
               </CardContent>
             </Card>
             <Card>

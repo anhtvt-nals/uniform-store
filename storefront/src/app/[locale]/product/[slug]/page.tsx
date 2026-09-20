@@ -26,8 +26,11 @@ import { routing } from "@/i18n/routing";
 import {
   SITE_NAME,
   truncateDescription,
+  buildBreadcrumbJsonLd,
   buildCanonicalUrl,
   buildOgImages,
+  buildOrganizationJsonLd,
+  serializeJsonLd,
 } from "@/lib/metadata";
 import { getTranslations } from "next-intl/server";
 import { toOgLocale } from "@/i18n/locale-utils";
@@ -63,10 +66,6 @@ function getProductKeywords(
       ].filter((keyword): keyword is string => Boolean(keyword)),
     ),
   );
-}
-
-function serializeJsonLd(data: unknown): string {
-  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
 export async function generateMetadata({
@@ -221,36 +220,14 @@ export default async function ProductDetailPage({
           }
         : undefined,
   };
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: t("home"),
-        item: buildCanonicalUrl(`/${locale}`),
-      },
-      ...(primaryCollection
-        ? [
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: primaryCollection.name,
-              item: buildCanonicalUrl(
-                `/${locale}/collection/${primaryCollection.slug}`,
-              ),
-            },
-          ]
-        : []),
-      {
-        "@type": "ListItem",
-        position: primaryCollection ? 3 : 2,
-        name: product.name,
-        item: productUrl,
-      },
-    ],
-  };
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: t("home"), url: buildCanonicalUrl(`/${locale}`) },
+    ...(primaryCollection
+      ? [{ name: primaryCollection.name, url: buildCanonicalUrl(`/${locale}/collection/${primaryCollection.slug}`) }]
+      : []),
+    { name: product.name, url: productUrl },
+  ]);
+  const organizationJsonLd = buildOrganizationJsonLd();
 
   // Hide options that belong to a shared option group but have no variant on
   // this product (Vendure 3.6 shared/global option groups).
@@ -268,6 +245,10 @@ export default async function ProductDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
       />
       <div className="bg-[#F8FAFC]">
       <div className="container mx-auto max-w-[1400px] px-4 py-4 md:px-6 md:py-6 lg:px-8">

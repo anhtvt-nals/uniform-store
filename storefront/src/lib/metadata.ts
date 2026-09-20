@@ -1,5 +1,46 @@
 import type { Metadata } from 'next';
 
+export type BreadcrumbItem = { name: string; url: string };
+
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export function buildArticleJsonLd(input: {
+  title: string;
+  description?: string | null;
+  url: string;
+  publishedAt?: string | null;
+  imageUrl?: string | null;
+  author?: string | null;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.title,
+    description: input.description || undefined,
+    url: input.url,
+    datePublished: input.publishedAt || undefined,
+    image: input.imageUrl || undefined,
+    author: { '@type': 'Organization', name: input.author || SITE_NAME },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+  };
+}
+
+export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem', position: index + 1, name: item.name, item: item.url,
+    })),
+  };
+}
+
+export function buildOrganizationJsonLd() {
+  return { '@context': 'https://schema.org', '@type': 'Organization', name: SITE_NAME, url: SITE_URL };
+}
+
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Minh An Uniform';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://minhanuniform.com';
 

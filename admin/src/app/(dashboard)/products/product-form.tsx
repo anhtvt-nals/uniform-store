@@ -12,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
+import { SeoPreview, SeoScore } from "@/components/shared/seo-preview";
+import { analyzeSeo } from "@/lib/seo/analyzer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -344,6 +346,14 @@ export function ProductForm({
   }
 
   const activeLocales = [DEFAULT_LOCALE];
+  const activeLocale = activeLocales[0];
+  const seoAnalysis = analyzeSeo({
+    title: getField("metaTitle", activeLocale) || getField("name", activeLocale),
+    description: getField("metaDesc", activeLocale) || getField("description", activeLocale),
+    focusKeyword: getField("focusKeyword", activeLocale),
+    slug,
+    content: getField("detail", activeLocale),
+  });
   const thumbnailUrl =
     images?.find((img) => img.sortOrder === 0)?.url || images?.[0]?.url;
 
@@ -776,6 +786,15 @@ export function ProductForm({
                   <Input value={getField("ogTitle", l)} onChange={(e) => setField("ogTitle", l, e.target.value)} placeholder="Tiêu đề Open Graph" />
                   <Input value={getField("ogDescription", l)} onChange={(e) => setField("ogDescription", l, e.target.value)} placeholder="Mô tả Open Graph" />
                   <Input value={getField("ogImageUrl", l)} onChange={(e) => setField("ogImageUrl", l, e.target.value)} placeholder="URL ảnh Open Graph" />
+                  <SeoScore analysis={seoAnalysis} />
+                  <SeoPreview
+                    title={getField("metaTitle", l) || getField("name", l)}
+                    description={getField("metaDesc", l) || getField("description", l)}
+                    socialTitle={getField("ogTitle", l)}
+                    socialDescription={getField("ogDescription", l)}
+                    url={slug ? `/product/${slug}` : ""}
+                    imageUrl={getField("ogImageUrl", l) || thumbnailUrl}
+                  />
                 </div>
               ))}
             </CardContent>
