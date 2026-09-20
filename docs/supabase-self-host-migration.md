@@ -31,7 +31,7 @@ Script không tự khởi động service nếu không có `--start`. Sau khi ch
 
 ```bash
 cd /opt/supabase
-sudo docker compose up -d --wait
+sudo docker compose up -d --wait db meta studio
 sudo docker compose ps
 ```
 
@@ -52,6 +52,66 @@ Nếu cần toàn bộ Supabase (Auth, REST, Realtime, Storage, Studio...), dùn
 ```bash
 sudo INSTALL_DIR=/opt/supabase scripts/install-supabase-self-host.sh --apply --start --full
 ```
+
+## 3.1 Expose Studio với Basic Auth
+
+Studio mặc định không publish port ra host. Tạo file `/opt/supabase/docker-compose.override.yml`:
+
+```yaml
+services:
+  studio:
+    ports:
+      - "127.0.0.1:3001:3000"
+```
+
+Khởi động lại:
+
+```bash
+cd /opt/supabase
+sudo docker compose up -d db meta studio
+```
+
+Cài Nginx và công cụ tạo password:
+
+```bash
+sudo apt-get install -y nginx apache2-utils
+sudo htpasswd -c /etc/nginx/.supabase-studio.htpasswd admin
+```
+
+Tạo server block `/etc/nginx/sites-available/supabase-studio`:
+
+```nginx
+server {
+    listen 7000 default_server;
+    server_name _;
+
+    location / {
+        auth_basic "Supabase Studio";
+        auth_basic_user_file /etc/nginx/.supabase-studio.htpasswd;
+        proxy_pass http://127.0.0.1:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Kích hoạt cấu hình:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/supabase-studio /etc/nginx/sites-enabled/supabase-studio
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Mở port `7000` trên firewall và truy cập bằng:
+
+```text
+http://YOUR_VPS_IP:7000
+```
+
+Không mở port `3001` ra Internet; chỉ Nginx được truy cập Studio. Cấu hình này không dùng domain hoặc HTTPS, phù hợp cho truy cập nội bộ/VPN. Nếu public Internet, nên bổ sung HTTPS và giới hạn IP truy cập.
 
 ## 3. Kiểm tra database đích
 

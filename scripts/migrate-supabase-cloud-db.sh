@@ -68,8 +68,9 @@ write_passfile "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASSWORD" "$target_passfile
 
 printf 'Exporting schema/data to a temporary backup outside the repository...\n'
 PGPASSFILE="$source_passfile" pg_dump --host="$source_host" --port="$source_port" --username="$source_user" \
-  --dbname="$source_name" --format=custom --no-owner --no-acl --file="$dump"
+  --dbname="$source_name" --format=custom --no-owner --no-acl \
+  --exclude-schema=extensions --file="$dump"
 printf 'Restoring into target %s/%s; this is destructive.\n' "$DB_HOST" "$DB_NAME"
-PGPASSFILE="$target_passfile" pg_restore --clean --if-exists --no-owner --no-acl \
+PGPASSFILE="$target_passfile" pg_restore --exit-on-error --clean --if-exists --no-owner --no-acl \
   --host="$DB_HOST" --port="$DB_PORT" --username="$DB_USER" --dbname="$DB_NAME" "$dump"
 printf 'Migration complete. Run application smoke tests before switching DATABASE_URL.\n'
