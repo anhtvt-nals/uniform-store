@@ -251,6 +251,8 @@ export function ArticleForm({
                 <SeoPreview
                   title={metaTitle || title}
                   description={metaDesc || excerpt}
+                  socialTitle={ogTitle}
+                  socialDescription={ogDescription}
                   url={slug ? `/vi/tin-tuc/${slug}` : ""}
                   imageUrl={ogImageUrl || imageUrl}
                 />

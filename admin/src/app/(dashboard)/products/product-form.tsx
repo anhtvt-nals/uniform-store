@@ -788,8 +788,10 @@ export function ProductForm({
                   <Input value={getField("ogImageUrl", l)} onChange={(e) => setField("ogImageUrl", l, e.target.value)} placeholder="URL ảnh Open Graph" />
                   <SeoScore analysis={seoAnalysis} />
                   <SeoPreview
-                    title={getField("ogTitle", l) || getField("metaTitle", l) || getField("name", l)}
-                    description={getField("ogDescription", l) || getField("metaDesc", l) || getField("description", l)}
+                    title={getField("metaTitle", l) || getField("name", l)}
+                    description={getField("metaDesc", l) || getField("description", l)}
+                    socialTitle={getField("ogTitle", l)}
+                    socialDescription={getField("ogDescription", l)}
                     url={slug ? `/vi/product/${slug}` : ""}
                     imageUrl={getField("ogImageUrl", l) || thumbnailUrl}
                   />

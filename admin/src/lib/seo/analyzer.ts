@@ -20,11 +20,23 @@ export type SeoAnalysis = {
 };
 
 function normalize(value: string) {
-  return value.toLocaleLowerCase().replace(/\s+/g, " ").trim();
+  return value.normalize("NFC").toLocaleLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function stripHtml(value: string) {
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/<(?:address|article|aside|blockquote|br|div|dl|fieldset|footer|form|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|table|tr|ul)[^>]*>/gi, " ")
+    .replace(/<\/[^>]+>/g, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+    .normalize("NFC");
 }
 
 function within(value: string, min: number, max: number) {

@@ -39,4 +39,18 @@ assert.ok(result.checks.some((check) => check.key === "keywordInContent" && chec
 const missingKeyword = analyzeSeo({ title: "Tiêu đề", description: "Mô tả", focusKeyword: "", slug: "tieu-de", content: "" });
 assert.ok(missingKeyword.checks.some((check) => check.key === "focusKeyword" && !check.passed));
 
+const richTextKeyword = analyzeSeo({
+  title: "Tiêu đề đồng phục doanh nghiệp chất lượng cao",
+  description: "Mô tả đồng phục doanh nghiệp chất lượng cao dành cho các công ty hiện đại và chuyên nghiệp.",
+  focusKeyword: "đồng phục",
+  slug: "dong-phuc",
+  content: "<p>đồng&nbsp;phục</p><p>đồ<strong>ng</strong> phục</p>",
+});
+assert.ok(richTextKeyword.checks.some((check) => check.key === "keywordInContent" && check.passed));
+
+const boundaryChecks = analyzeSeo({ title: "ngắn", description: "ngắn", focusKeyword: "từ khóa", slug: "", content: "" });
+assert.ok(boundaryChecks.checks.some((check) => check.key === "titleLength" && !check.passed));
+assert.ok(boundaryChecks.checks.some((check) => check.key === "descriptionLength" && !check.passed));
+assert.ok(boundaryChecks.checks.some((check) => check.key === "keywordInTitle" && !check.passed));
+
 console.log("seo analyzer checks passed");

@@ -95,16 +95,6 @@ export const SearchProductsQuery = graphql(`
     }
 `, [ProductCardFragment]);
 
-export const GetSitemapProductsQuery = graphql(`
-    query GetSitemapProducts($input: SearchInput!) {
-        search(input: $input) {
-            items {
-                ...ProductCard
-            }
-        }
-    }
-`, [ProductCardFragment]);
-
 export const HomepageCategoryProductsQuery = graphql(`
     query HomepageCategoryProducts($input: SearchInput!) {
         search(input: $input) {
