@@ -6,6 +6,7 @@ ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 bash -n \
   "$ROOT_DIR/scripts/install-supabase-self-host.sh" \
   "$ROOT_DIR/scripts/migrate-supabase-cloud-db.sh"
+grep -F 'containerd.io is installed' "$ROOT_DIR/scripts/install-supabase-self-host.sh" >/dev/null
 
 output=$(INSTALL_DIR=/tmp/supabase-self-host-check \
   "$ROOT_DIR/scripts/install-supabase-self-host.sh")

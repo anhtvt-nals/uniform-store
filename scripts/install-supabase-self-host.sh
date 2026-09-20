@@ -32,7 +32,13 @@ fi
 [[ "$EUID" -eq 0 ]] || die 'run --apply with sudo/root'
 command -v apt-get >/dev/null || die 'Ubuntu/Debian apt-get is required'
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git docker.io
+DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git
+if ! command -v docker >/dev/null; then
+  if dpkg-query -W -f='${Status}' containerd.io 2>/dev/null | grep -q 'install ok installed'; then
+    die 'containerd.io is installed but Docker is missing; install Docker CE/Engine for this host, then rerun (do not install docker.io alongside containerd.io)'
+  fi
+  DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io
+fi
 if ! docker compose version >/dev/null 2>&1; then
   DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose-plugin || die 'Docker Compose v2 is required'
 fi
