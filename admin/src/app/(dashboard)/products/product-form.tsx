@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { AssetPicker, type Asset } from "@/components/shared/asset-picker";
@@ -808,22 +809,43 @@ export function ProductForm({
                   Đã chọn {relatedArticleIds.length} bài viết để hiển thị cùng sản phẩm.
                 </p>
               </div>
-              <select
-                multiple
-                value={relatedArticleIds}
-                onChange={(event) =>
-                  setRelatedArticleIds(
-                    Array.from(event.currentTarget.selectedOptions, (option) => option.value),
-                  )
-                }
-                className="min-h-40 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                {(articles as Article[]).map((article) => (
-                  <option key={article.id} value={article.id}>
-                    {article.title.vi || article.title.en || article.slug} — {article.slug}
-                  </option>
-                ))}
-              </select>
+              <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border border-input p-3">
+                {(articles as Article[]).length ? (
+                  (articles as Article[]).map((article) => {
+                    const checked = relatedArticleIds.includes(article.id);
+                    const title = article.title.vi || article.title.en || article.slug;
+                    return (
+                      <div
+                        key={article.id}
+                        className="flex items-start gap-3 rounded-md p-2 text-sm hover:bg-muted"
+                      >
+                        <Checkbox
+                          id={`related-article-${article.id}`}
+                          checked={checked}
+                          onCheckedChange={(value) =>
+                            setRelatedArticleIds((current) =>
+                              value
+                                ? [...current, article.id].filter(
+                                    (id, index, ids) => ids.indexOf(id) === index,
+                                  )
+                                : current.filter((id) => id !== article.id),
+                            )
+                          }
+                          aria-label={`Chọn bài viết ${title}`}
+                        />
+                        <label
+                          htmlFor={`related-article-${article.id}`}
+                          className="min-w-0 cursor-pointer"
+                        >
+                          <span className="block font-medium">{title}</span>
+                        </label>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">Chưa có bài viết.</p>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

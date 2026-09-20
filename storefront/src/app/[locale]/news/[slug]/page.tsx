@@ -15,6 +15,7 @@ import { toOgLocale } from "@/i18n/locale-utils";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { ReadingProgress } from "@/components/shared/reading-progress";
+import { ArticleShareLinks } from "@/components/shared/article-share-links";
 import { ArrowLeft, ArrowRight, Calendar, User, Clock } from "lucide-react";
 import {
   getArticleBySlug,
@@ -187,11 +188,7 @@ export default async function NewsDetailPage({
               </div>
             )}
 
-            <div className="mb-8 flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground">Chia sẻ:</span>
-              <a href={facebookHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên Facebook" className="text-primary hover:underline">Facebook</a>
-              <a href={xHref} target="_blank" rel="noopener noreferrer" aria-label="Chia sẻ bài viết trên X" className="text-primary hover:underline">X</a>
-            </div>
+            <ArticleShareLinks facebookHref={facebookHref} xHref={xHref} />
 
             {/* Divider after tags */}
             <div className="h-px bg-border/60 mb-10" />
