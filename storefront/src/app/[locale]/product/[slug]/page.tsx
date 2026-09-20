@@ -300,7 +300,7 @@ export default async function ProductDetailPage({
       </div>
 
       {relatedArticles.length ? (
-        <section className="bg-[#F8FAFC] py-12 md:py-16">
+        <section className="border-t border-[#E2E8F0] bg-[#F8FAFC] py-12 md:py-16">
           <div className="container mx-auto max-w-[1400px] px-4 md:px-6 lg:px-8">
             <h2 className="mb-6 text-[22px] font-bold tracking-[-0.01em] text-[#173B6C] md:text-2xl">
               {t("relatedArticles")}
