@@ -806,7 +806,7 @@ export function ProductForm({
               <div>
                 <h3 className="text-sm font-medium">Tin tức liên quan</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Đã chọn {relatedArticleIds.length} bài viết để hiển thị cùng sản phẩm.
+                  Chọn tối đa 1 bài viết để hiển thị cùng sản phẩm.
                 </p>
               </div>
               <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border border-input p-3">
@@ -817,25 +817,20 @@ export function ProductForm({
                     return (
                       <div
                         key={article.id}
-                        className="flex items-start gap-3 rounded-md p-2 text-sm hover:bg-muted"
+                        className="flex items-center gap-3 rounded-md p-2 text-sm hover:bg-muted"
                       >
-                        <Checkbox
+                        <input
+                          type="radio"
+                          name="related-article"
                           id={`related-article-${article.id}`}
+                          className="h-4 w-4 shrink-0"
                           checked={checked}
-                          onCheckedChange={(value) =>
-                            setRelatedArticleIds((current) =>
-                              value
-                                ? [...current, article.id].filter(
-                                    (id, index, ids) => ids.indexOf(id) === index,
-                                  )
-                                : current.filter((id) => id !== article.id),
-                            )
-                          }
+                          onChange={() => setRelatedArticleIds([article.id])}
                           aria-label={`Chọn bài viết ${title}`}
                         />
                         <label
                           htmlFor={`related-article-${article.id}`}
-                          className="min-w-0 cursor-pointer"
+                          className="min-w-0 cursor-pointer leading-5"
                         >
                           <span className="block font-medium">{title}</span>
                         </label>

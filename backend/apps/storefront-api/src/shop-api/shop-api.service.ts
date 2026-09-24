@@ -804,7 +804,7 @@ export class ShopApiService {
       variants,
       optionGroups,
       collections,
-      relatedArticles: relatedArticles.map((article) => this.mapArticleCard(article, locale)),
+      relatedArticles: relatedArticles.map((article) => this.mapArticleDetail(article, locale)),
     };
   }
 

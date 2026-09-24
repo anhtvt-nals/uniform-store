@@ -131,17 +131,14 @@ describe('ProductsService (admin)', () => {
   describe('related articles', () => {
     it('replaces a product related article selection', async () => {
       mockProductRepo.findOne.mockResolvedValue({ id: 'p-1', slug: 'uniform-shirt' });
-      mockArticleRepo.findBy.mockResolvedValue([{ id: 'a-1' }, { id: 'a-2' }]);
+      mockArticleRepo.findBy.mockResolvedValue([{ id: 'a-1' }]);
       mockProductRepo.save.mockImplementation(async (product) => product);
 
       const result = await service.update('p-1', {
-        relatedArticleIds: [
-          '11111111-1111-4111-8111-111111111111',
-          '22222222-2222-4222-8222-222222222222',
-        ],
+        relatedArticleIds: ['11111111-1111-4111-8111-111111111111'],
       });
 
-      expect(result.relatedArticles).toEqual([{ id: 'a-1' }, { id: 'a-2' }]);
+      expect(result.relatedArticles).toEqual([{ id: 'a-1' }]);
     });
 
     it('rejects a related article selection containing an unknown ID', async () => {

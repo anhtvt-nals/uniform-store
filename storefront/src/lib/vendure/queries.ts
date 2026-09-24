@@ -397,6 +397,7 @@ export const GetCustomerOrdersQuery = graphql(`
                 slug
                 title
                 excerpt
+                content
                 publishedAt
                 featuredAsset {
                     id

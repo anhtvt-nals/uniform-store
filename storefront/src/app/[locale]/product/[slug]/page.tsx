@@ -171,6 +171,7 @@ export default async function ProductDetailPage({
         slug: string;
         title: string;
         excerpt?: string | null;
+        content?: string | null;
         featuredAsset?: { preview: string } | null;
       }>;
     }
@@ -305,29 +306,15 @@ export default async function ProductDetailPage({
             <h2 className="mb-6 text-[22px] font-bold tracking-[-0.01em] text-[#173B6C] md:text-2xl">
               {t("relatedArticles")}
             </h2>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {relatedArticles.map((article) => (
-                <Link
-                  key={article.id}
-                  href={`/news/${article.slug}`}
-                  className="group overflow-hidden rounded-xl border border-[#E2E8F0] bg-white transition-shadow hover:shadow-md"
-                >
-                  {article.featuredAsset?.preview ? (
-                    <img
-                      src={article.featuredAsset.preview}
-                      alt=""
-                      className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : null}
-                  <div className="p-5">
-                    <h3 className="font-semibold text-[#173B6C]">{article.title}</h3>
-                    {article.excerpt ? (
-                      <p className="mt-2 line-clamp-2 text-sm text-[#64748B]">{article.excerpt}</p>
-                    ) : null}
-                  </div>
+            {relatedArticles.map((article) => (
+              <article key={article.id} className="rounded-xl border border-[#E2E8F0] bg-white p-6 md:p-8">
+                <Link href={`/news/${article.slug}`} className="text-xl font-bold text-[#173B6C] hover:underline">
+                  {article.title}
                 </Link>
-              ))}
-            </div>
+                {article.excerpt ? <p className="mt-3 text-[#64748B]">{article.excerpt}</p> : null}
+                {article.content ? <div className="article-content mt-6" dangerouslySetInnerHTML={{ __html: article.content }} /> : null}
+              </article>
+            ))}
           </div>
         </section>
       ) : null}

@@ -357,6 +357,9 @@ export class ProductsService {
   private async getRelatedArticles(articleIds: string[] | undefined) {
     if (articleIds === undefined) return undefined;
     const ids = [...new Set(articleIds)];
+    if (ids.length > 1) {
+      throw new BadRequestException('A product can have only one related article');
+    }
     const articles = ids.length ? await this.articleRepo.findBy({ id: In(ids) }) : [];
     if (articles.length !== ids.length) {
       throw new BadRequestException('One or more related article IDs are invalid');

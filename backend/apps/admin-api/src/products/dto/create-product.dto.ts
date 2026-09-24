@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsArray,
   IsUUID,
+  ArrayMaxSize,
 } from 'class-validator';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -105,6 +106,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(1)
   @IsUUID('4', { each: true })
   sizeIds?: string[];
 
